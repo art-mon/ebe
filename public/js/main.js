@@ -12,6 +12,8 @@ import { Visuals } from './visuals.js';
 import { Tracks } from './tracks.js';
 import { UI } from './ui.js';
 import { Lights } from './lights.js';
+import { INSTRUMENTS } from './config.js';
+import { deviceForPort } from './devices.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -111,6 +113,26 @@ bus.on('ableton', ({ live }) => {
 });
 // A Reverb just got linked in Live: time it to the current tempo straight away.
 bus.on('abletonReverb', () => engine.resyncReverb());
+// When you play and nothing can be heard, say why — once in a while, not on every note.
+const lastHint = new Map();
+function hint(key, text, every = 8000) {
+  const now = performance.now();
+  if (now - (lastHint.get(key) ?? -Infinity) < every) return;
+  lastHint.set(key, now);
+  ui.toast(text, 5000);
+}
+bus.on('voice', (v) => {
+  if (!v.on) return;
+  if (ctx.state !== 'running' && state.engine === 'builtin') {
+    ctx.resume(); // works if you've clicked the page before; otherwise the browser needs a click
+    gate.classList.remove('hidden');
+    hint('audio', '🔈 The browser has paused sound — click “Start playing” (or anywhere) to turn it on. Pads and keys can’t do it for you.');
+  } else if (state.engine === 'ableton' && (!midi.output || midi.feedbackRisk)) {
+    hint('iac', 'Sound is set to “Ableton Live”, but the IAC Driver is off, so nothing is being sent. Switch to “Built-in sound” (top left) or turn on the IAC Driver.');
+  } else if (state.mutes[v.inst]) {
+    hint(`mute${v.inst}`, `The ${INSTRUMENTS[v.inst].name} track is muted — unmute it in Tracks (M) or with its button under the APC grid.`);
+  }
+});
 bus.on('voice', (v) => {
   visuals.onVoice(v);
   if (v.on) feed.onNote(v.note, v.vel);
@@ -153,6 +175,30 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// Diagnostics: open Lumen as http://localhost:5173/?debug and it reports its MIDI
+// ports and every message it receives through the local server (as OSC on the
+// AbletonOSC port), so they can be watched from a terminal.
+if (new URLSearchParams(location.search).has('debug')) {
+  const report = (kind, data) => ableton.send('/lumen/debug', [JSON.stringify({ kind, t: Math.round(performance.now()), ...data })]);
+  const snapshot = () => report('snapshot', {
+    inputs: midi.allInputs.map((p) => ({
+      name: p.name, state: p.state, connection: p.connection, attached: midi.inputs.includes(p),
+      cls: deviceForPort(p.name)?.portClass(p.name) ?? 'main',
+    })),
+    outputs: midi.allOutputs.map((p) => `${p.name} (${p.connection})`),
+    lightOutputs: midi.lightOutputs.map((p) => p.name),
+    inputChoice: midi.inputChoice, midiError: midi.error, engine: state.engine, gridMode: state.gridMode,
+    audio: ctx.state, learning: !!controller.learnTarget, mutes: state.mutes, ua: navigator.userAgent,
+  });
+  setTimeout(snapshot, 1500);
+  setInterval(snapshot, 10000);
+  bus.on('midiPorts', () => setTimeout(snapshot, 200));
+  bus.on('midi', (m) => report('midi', m));
+  bus.on('pad', (e) => report('pad', e));
+  bus.on('keys', (e) => report('keys', { note: e.note, on: e.on }));
+  ui.toast('Debug mode: reporting MIDI to the Lumen server', 3000);
+}
 
 // Handy for poking around in the console.
 window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, controller, feed, visuals, lights, state };

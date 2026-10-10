@@ -78,9 +78,24 @@ Loop pads change colour with their state:
 |---|---|
 | **8 knobs** | FX 1–8 (Filter … Space). On the mk2 the knobs are endless; hold **Shift** for fine steps. |
 | **Scene buttons** (right, top→bottom) | Random vibe · Layer on/off · Record next loop · Next scale (*Shift*: next key) · Tap tempo (flashes on the beat) |
-| **Buttons under the grid** | Mute Keys / Pad / Bass / Lead / Drums (lit = muted) · Octave − · Octave + · All notes off |
+| **Buttons under the grid** | Mute Keys / Pad / Bass / Lead / Drums (lit = muted) · Octave − · Octave + · **Grid: controls ⇄ drums** (*Shift*: all notes off) |
 | **Play/Pause** · **Record** · **Stop All Clips** | Play/stop · record next loop · stop all loops (*Shift*: clear all loops) |
 | **Sustain** | Sustain pedal |
+
+**Drums mode.** Press the last button under the grid (it lights up) and all 40 pads become drum pads:
+
+| | Kick | Snare | Clap | Hat | Open Hat | Tom | Rim | Crash |
+|---|---|---|---|---|---|---|---|---|
+| **Row 5** (top) | loud | loud | loud | loud | loud | loud | loud | loud |
+| **Rows 4–2** | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ |
+| **Row 1** (bottom) | soft | soft | soft | soft | soft | soft | soft | soft |
+
+- Each column is one drum, in its own colour.
+- Each row is a loudness level, from soft at the bottom to loud at the top. The APC's pads always hit at full force, so the rows give it dynamics.
+- On the mk2, the pads get brighter toward the top, and the pad you hit flashes white.
+- In Ableton it plays the same notes as any 16-pad Drum Rack kit, just at different velocities, so no new kit is needed.
+- The scene buttons, Record, Play and Stop All keep working, so you can record drum loops.
+- Press the button again to get the controls back. Shift + that button is all notes off.
 
 The mk2 shows Lumen's exact colours using its 128-colour palette. The mk1 does green, red and amber.
 
@@ -229,6 +244,10 @@ Changing code? Run `npm test` to check the scale/chord logic and the OSC codec.
 - **Nothing reaches Live:** Lumen must be in **Ableton Live** mode, the **IAC out** chip must be green, the track's MIDI From must be IAC with the right channel, and Monitor must be **In**.
 - **A knob does nothing:** open the MIDI monitor, move the knob, and re-learn it in Settings → Controller mapping.
 - **"Live (OSC off)":** that's fine unless you want meters and tempo sync (step 3e).
+- **Pads or knobs do nothing, but the keys work:** Lumen may be listening to only part of the controller.
+  - Open Settings → MIDI. Choose **Auto**, or the controller's **"all ports"** entry.
+  - Check that Live hasn't grabbed the controller as a Control Surface (see step 2).
+- **Still stuck?** Open **http://localhost:5173/?debug**. Lumen then reports its MIDI ports and every message it receives through its server, which helps pinpoint where input gets lost.
 
 ## Project layout
 

@@ -66,3 +66,55 @@ test('endless knob steps decode both ways, absolute values are rejected', async 
   assert.equal(relativeDelta(40), null); // looks like an absolute knob
   assert.equal(relativeDelta(100), null);
 });
+
+test('drums mode: columns are drums, rows are loudness (bottom soft → top loud)', async () => {
+  const { APC_DRUM_GRID, apcGrid, APC_GRID } = await import('../public/js/devices.js');
+  assert.deepEqual(APC_DRUM_GRID[4][0], { kind: 'pad', index: 0, vel: 0.3, note: 0 }); // bottom-left: softest kick
+  assert.deepEqual(APC_DRUM_GRID[0][7], { kind: 'pad', index: 7, vel: 1, note: 39 }); // top-right: loud crash
+  assert.equal(apcGrid('drums'), APC_DRUM_GRID);
+  assert.equal(apcGrid('controls'), APC_GRID);
+  // brightness follows loudness on the mk2
+  assert.equal(mk2Bytes(0, { color: '#ff0000', level: 'solid', bright: 0.3 })[0], 0x91); // 25 %
+  assert.equal(mk2Bytes(0, { color: '#ff0000', level: 'solid', bright: 0.66 })[0], 0x93); // 65 %
+  assert.equal(mk2Bytes(0, { color: '#ff0000', level: 'solid', bright: 1 })[0], 0x96); // 100 %
+});
+
+test('a grid press plays a drum in drums mode and a control in controls mode', async () => {
+  const { Bus, state, set } = await import('../public/js/state.js');
+  const { Controller } = await import('../public/js/controller.js');
+  const bus = new Bus();
+  const played = [];
+  const engine = { noteOn: (inst, note, vel) => played.push([inst, note, vel]), noteOff() {}, fx() {} };
+  const controller = new Controller({ engine, looper: { input() {} }, clock: {}, bus });
+  controller.selectVibe = (i) => played.push(['vibe', i]);
+  const press = (note) => {
+    bus.emit('midi', { port: 'apc2', type: 'noteon', channel: 1, note, velocity: 127 });
+    bus.emit('midi', { port: 'apc2', type: 'noteoff', channel: 1, note, velocity: 0 });
+  };
+  set({ gridMode: 'drums' });
+  press(36); // top row, 5th pad → open hat, loud
+  press(8); // second row from the bottom, 1st pad → kick, soft
+  set({ gridMode: 'controls' });
+  press(36); // top row in controls mode → vibe 5
+  assert.deepEqual(played, [[4, 46, 1], [4, 36, 0.48], ['vibe', 4]]);
+  assert.equal(state.gridMode, 'controls');
+});
+
+test('choosing one port of a controller listens to all of its ports', async () => {
+  const { pickInputs, AUTO } = await import('../public/js/midi.js');
+  const ports = [
+    { id: 'k', name: 'APC Key 25 mk2 Keys' },
+    { id: 'c', name: 'APC Key 25 mk2 Control' },
+    { id: 'o', name: 'Oxygen Pro Mini USB MIDI' },
+    { id: 'od', name: 'Oxygen Pro Mini Mackie/HUI' },
+    { id: 'iac', name: 'IAC Driver Bus 1' },
+    { id: 'x', name: 'Some Synth' },
+  ];
+  const ids = (list) => list.map((p) => p.id);
+  assert.deepEqual(ids(pickInputs(ports, 'k')), ['k', 'c']); // the bug: only 'k' was attached
+  assert.deepEqual(ids(pickInputs(ports, 'od')), ['o', 'od']);
+  assert.deepEqual(ids(pickInputs(ports, 'x')), ['x']);
+  assert.deepEqual(ids(pickInputs(ports, AUTO)), ['k', 'c', 'o', 'od']); // never IAC, not unknown gear
+  assert.deepEqual(ids(pickInputs(ports, '')), []);
+  assert.deepEqual(ids(pickInputs(ports, 'gone')), []);
+});

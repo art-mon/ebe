@@ -5,7 +5,7 @@ import {
   INSTRUMENTS, MELODIC, DRUM_VOICES, VIBES, FX_MACROS, FX_CHANNEL, FX_CC_BASE, SCALES, NOTE_NAMES,
   KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, CONTROLLER, reverbDivision,
 } from './config.js';
-import { WIZARD_STEPS, OXYGEN, APC, APC_GRID, APC_SCENES, APC_TRACKS } from './devices.js';
+import { WIZARD_STEPS, OXYGEN, APC, APC_SCENES, APC_TRACKS, apcGrid, deviceForPort } from './devices.js';
 import { gridLook, buttonLook, describeTarget } from './lights.js';
 import { isKeyInScale, chordName } from './transform.js';
 import { describe, AUTO } from './midi.js';
@@ -503,32 +503,46 @@ export class UI {
   #grid() {
     const root = $('#apc');
     this.gridEls = [];
-    const button = (t, cls, src) => {
-      const [label, tag] = describeTarget(t);
-      const b = h('button', { type: 'button', class: cls, title: label }, tag);
+    // `get` returns the button's current target — grid pads change with the controls/drums mode.
+    const button = (get, cls, src) => {
+      const b = h('button', { type: 'button', class: cls });
+      let pressed = null;
       b.addEventListener('pointerdown', (e) => {
         b.setPointerCapture(e.pointerId);
-        this.controller.press(t, 0.85, src);
+        pressed = get();
+        this.controller.press(pressed, 0.85, src);
       });
-      const up = () => this.controller.release(t, src);
+      const up = () => {
+        if (pressed) this.controller.release(pressed, src);
+        pressed = null;
+      };
       b.addEventListener('pointerup', up);
       b.addEventListener('pointercancel', up);
-      this.gridEls.push({ el: b, t, single: cls !== 'cell' });
+      this.gridEls.push({ el: b, get, single: cls !== 'cell' });
       return b;
     };
+    const modeSeg = h('div', { class: 'seg small apc-mode' },
+      h('button', { type: 'button', 'data-mode': 'controls', onclick: () => set({ gridMode: 'controls' }) }, 'Controls'),
+      h('button', { type: 'button', 'data-mode': 'drums', onclick: () => set({ gridMode: 'drums' }) }, 'Drums'));
     const grid = h('div', { class: 'apc-grid' });
-    APC_GRID.forEach((cells, row) => {
-      cells.forEach((t, col) => grid.append(button(t, 'cell', `grid:${row}:${col}`)));
-      grid.append(button(APC_SCENES[row], 'scene', `scene:${row}`));
-    });
-    APC_TRACKS.forEach((t, i) => grid.append(button(t, 'trackbtn', `track:${i}`)));
-    root.append(grid, h('p', { class: 'apc-hint' },
-      'Knobs = FX 1–8 · Shift + instrument = layer · hold a loop (or Shift) = clear · Shift + Stop All = clear all'));
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 8; col++) grid.append(button(() => apcGrid(state.gridMode)[row][col], 'cell', `grid:${row}:${col}`));
+      grid.append(button(() => APC_SCENES[row], 'scene', `scene:${row}`));
+    }
+    APC_TRACKS.forEach((t, i) => grid.append(button(() => t, 'trackbtn', `track:${i}`)));
+    this.gridHint = h('p', { class: 'apc-hint' });
+    root.append(modeSeg, grid, this.gridHint);
   }
 
   #renderGrid(ctx) {
     if (!this.gridEls || this.bank !== 'grid') return;
-    for (const { el, t, single } of this.gridEls) {
+    for (const { el, get, single } of this.gridEls) {
+      const t = get();
+      const [label, tag] = describeTarget(t);
+      if (el.title !== label) {
+        el.title = label;
+        el.textContent = tag;
+      }
       if (single) {
         const v = buttonLook(t, ctx);
         el.classList.toggle('on', v === 1);
@@ -537,8 +551,14 @@ export class UI {
         const look = gridLook(t, ctx);
         el.style.setProperty('--c', look.color);
         el.dataset.level = look.level;
+        el.style.setProperty('--b', look.level === 'solid' ? look.bright : 1);
       }
     }
+    const drums = state.gridMode === 'drums';
+    for (const b of $('#apc .apc-mode').children) b.classList.toggle('on', b.dataset.mode === state.gridMode);
+    this.gridHint.textContent = drums
+      ? 'Drums: columns = Kick, Snare, Clap, Hat, Open Hat, Tom, Rim, Crash · rows = soft (bottom) → loud (top) · last button under the grid switches back'
+      : 'Knobs = FX 1–8 · Shift + instrument = layer · hold a loop (or Shift) = clear · Shift + Stop All = clear all · last button under the grid = drums';
   }
 
   #renderPads() {
@@ -668,11 +688,22 @@ export class UI {
     const sections = [];
 
     // MIDI ports
+    // One entry per controller (all its ports), plus any other MIDI inputs on their own.
     const inSel = h('select', { onchange: (e) => this.onMidiInput?.(e.target.value) });
-    inSel.append(h('option', { value: AUTO }, 'Auto — every Oxygen port'));
-    midi.allInputs.forEach((p) => inSel.append(h('option', { value: p.id }, p.name)));
+    inSel.append(h('option', { value: AUTO }, 'Auto — every connected controller'));
+    const firstPortOf = new Map();
+    for (const p of midi.allInputs) {
+      const d = deviceForPort(p.name);
+      if (!d) inSel.append(h('option', { value: p.id }, p.name));
+      else if (!firstPortOf.has(d)) {
+        firstPortOf.set(d, p.id);
+        const n = midi.allInputs.filter((q) => deviceForPort(q.name) === d).length;
+        inSel.append(h('option', { value: p.id }, n > 1 ? `${d.name} — all ${n} ports` : d.name));
+      }
+    }
     inSel.append(h('option', { value: '' }, 'None (computer keyboard only)'));
-    inSel.value = midi.inputChoice ?? '';
+    const chosen = midi.allInputs.find((p) => p.id === midi.inputChoice);
+    inSel.value = chosen && deviceForPort(chosen.name) ? firstPortOf.get(deviceForPort(chosen.name)) : midi.inputChoice ?? '';
     const outSel = h('select', { onchange: (e) => this.onMidiOutput?.(e.target.value || null) });
     outSel.append(h('option', { value: '' }, 'Auto — IAC Driver'));
     midi.allOutputs.forEach((p) => outSel.append(h('option', { value: p.id }, p.name)));

@@ -6,7 +6,7 @@ import {
   INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, CONTROL_PADS, CONTROLLER,
   LOOP_BAR_OPTIONS, SCALES, NOTE_NAMES,
 } from './config.js';
-import { DEFAULT_MAPPINGS } from './devices.js';
+import { DEFAULT_MAPPINGS, APC_DRUM_GRID } from './devices.js';
 import { transform } from './transform.js';
 
 const mod = (n, m) => ((n % m) + m) % m;
@@ -71,6 +71,10 @@ export class Controller {
   #lookup(msg) {
     const kind = msg.type === 'cc' ? 'cc' : 'note';
     const num = kind === 'cc' ? msg.cc : msg.note;
+    // APC grid in drums mode: every pad is a drum (column) at a loudness (row).
+    if (kind === 'note' && (msg.port === 'apc1' || msg.port === 'apc2') && msg.channel === 1 && num < 40 && state.gridMode === 'drums') {
+      return APC_DRUM_GRID[4 - Math.floor(num / 8)][num % 8];
+    }
     const keys = [`${msg.port}|${kind}:${msg.channel}:${num}`, `${msg.port}|${kind}:*:${num}`];
     for (const table of [state.mappings ?? {}, DEFAULT_MAPPINGS]) {
       for (const k of keys) if (k in table) return table[k]; // null = deliberately unmapped
@@ -156,7 +160,7 @@ export class Controller {
 
   // ── buttons (from MIDI notes, CC buttons or the on-screen grid) ──
   press(t, vel = 1, src = 'ui') {
-    if (t.kind === 'pad') return this.padDown(t.index, vel);
+    if (t.kind === 'pad') return this.padDown(t.index, t.vel ?? vel, t.note);
     if (t.kind !== 'action') return undefined;
     this.bus.emit('button', { target: t, on: true });
     if (t.name === 'shift') {
@@ -174,7 +178,7 @@ export class Controller {
   }
 
   release(t, src = 'ui') {
-    if (t.kind === 'pad') return this.padUp(t.index);
+    if (t.kind === 'pad') return this.padUp(t.index, t.note);
     if (t.kind !== 'action') return undefined;
     this.bus.emit('button', { target: t, on: false });
     if (t.name === 'shift') {
@@ -236,8 +240,9 @@ export class Controller {
   }
 
   // ── pads: bank A (0-7) drums, bank B (8-15) controls ──
-  padDown(index, vel) {
-    this.bus.emit('pad', { index, on: true, vel });
+  /** `cell` = the APC grid note that was hit, so exactly that pad can flash. */
+  padDown(index, vel, cell) {
+    this.bus.emit('pad', { index, on: true, vel, cell });
     if (index < 8) {
       const { note } = DRUM_VOICES[index];
       this.engine.noteOn(DRUMS_INDEX, note, vel);
@@ -250,8 +255,8 @@ export class Controller {
     else this.action(cp.action, cp.arg);
   }
 
-  padUp(index) {
-    this.bus.emit('pad', { index, on: false });
+  padUp(index, cell) {
+    this.bus.emit('pad', { index, on: false, cell });
     if (index < 8) {
       this.engine.noteOff(DRUMS_INDEX, DRUM_VOICES[index].note);
       return;
@@ -355,6 +360,11 @@ export class Controller {
         this.bus.emit('toast', `Key · ${NOTE_NAMES[state.root]} ${SCALES[state.scale].name}`);
         break;
       }
+      case 'gridMode':
+        if (this.shift) return this.action('panic');
+        set({ gridMode: state.gridMode === 'drums' ? 'controls' : 'drums' });
+        this.bus.emit('toast', state.gridMode === 'drums' ? 'APC grid · drums (soft → loud, bottom → top)' : 'APC grid · controls');
+        break;
       case 'panic':
         this.releaseAll('');
         this.refs.clear();

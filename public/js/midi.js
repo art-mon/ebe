@@ -48,18 +48,8 @@ export class Midi {
     return this.access ? [...this.access.outputs.values()] : [];
   }
 
-  /** Ports Lumen would listen to in auto mode: the controller, never the IAC bus (feedback). */
-  #autoInputs() {
-    const ins = this.allInputs.filter((p) => !CONTROLLER.outputMatch.test(p.name));
-    const ctrl = ins.filter((p) => ANY_DEVICE.test(p.name));
-    return ctrl.length ? ctrl : ins;
-  }
-
   #refresh() {
-    let wanted;
-    if (this.inputChoice === AUTO) wanted = this.#autoInputs();
-    else if (this.inputChoice) wanted = this.allInputs.filter((p) => p.id === this.inputChoice);
-    else wanted = [];
+    const wanted = pickInputs(this.allInputs, this.inputChoice);
     for (const p of this.inputs) if (!wanted.includes(p)) p.onmidimessage = null;
     for (const p of wanted) p.onmidimessage = (e) => this.#onMessage(e, p);
     this.inputs = wanted;
@@ -127,6 +117,27 @@ export class Midi {
     msg.port = deviceForPort(port.name)?.portClass(port.name) ?? 'main';
     this.bus.emit('midi', msg);
   }
+}
+
+/**
+ * Which input ports to listen to.
+ *   AUTO     → every port of every known controller (or, if none, every non-IAC port)
+ *   a port   → that port — and, for a known controller, all of its sibling ports:
+ *              the APC mk2 sends keys and pads on separate ports, the Oxygen sends
+ *              DAW-mode controls on its Mackie/HUI port, so one port alone is half a device.
+ *   null/''  → nothing (computer keyboard only)
+ * Never the IAC bus Lumen sends to (that would loop).
+ */
+export function pickInputs(all, choice) {
+  const usable = all.filter((p) => !CONTROLLER.outputMatch.test(p.name));
+  if (choice === AUTO) {
+    const ctrl = usable.filter((p) => ANY_DEVICE.test(p.name));
+    return ctrl.length ? ctrl : usable;
+  }
+  const chosen = all.find((p) => p.id === choice);
+  if (!chosen) return [];
+  const device = deviceForPort(chosen.name);
+  return device ? usable.filter((p) => deviceForPort(p.name) === device) : [chosen];
 }
 
 /** Raw bytes → { type, channel (1-16), ... } */

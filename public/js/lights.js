@@ -2,7 +2,7 @@
 // drives the on-screen grid, so the screen and the hardware always agree.
 import { state } from './state.js';
 import { VIBES, INSTRUMENTS, DRUM_VOICES, NOTE_NAMES, SCALES } from './config.js';
-import { APC, APC_GRID, APC_SCENES, APC_TRACKS, apcNote } from './devices.js';
+import { APC, APC_SCENES, APC_TRACKS, apcNote, apcGrid } from './devices.js';
 import { every } from './ticker.js';
 
 // Ableton's standard 128-colour palette: on the APC Key 25 mk2 the note
@@ -26,8 +26,13 @@ export const PALETTE = [
   '#a00000', '#350000', '#1ad000', '#074200', '#b9b000', '#3f3100', '#b35f00', '#4b1502',
 ];
 
-// mk2 pads: the MIDI channel picks brightness/animation (from Live's APC_Key_25_mk2 script).
+// mk2 pads: the MIDI channel picks brightness/animation (Live's APC_Key_25_mk2 script
+// + Akai's protocol: channels 0-6 = 10/25/50/65/75/90/100 %, 10 = pulse, 14 = blink).
 const MK2_CHANNEL = { dim: 1, full: 6, pulse: 10, blink: 14 };
+const MK2_BRIGHTNESS = [0.1, 0.25, 0.5, 0.65, 0.75, 0.9, 1];
+// Drums mode: one colour per drum column.
+export const DRUM_COLORS = ['#ff4c4c', '#ff7f00', '#ffe126', '#4cc3ff', '#4c88ff', '#874cff', '#4cff88', '#ff4cff'];
+const LOUDNESS = { 1: 'loud', 0.85: 'strong', 0.66: 'medium', 0.48: 'soft', 0.3: 'softest' };
 // mk1 pads only do green / red / amber; +1 = blinking.
 export const MK1 = { green: 1, red: 3, amber: 5 };
 
@@ -82,6 +87,11 @@ export const targetKey = (t) => `${t.kind}:${t.name ?? ''}:${t.index ?? ''}:${t.
  * `mk1` forces a value on the 3-colour mk1; `keep` keeps it lit (amber) there when dim.
  */
 export function gridLook(t, ctx) {
+  if (t.kind === 'pad' && t.note !== undefined) {
+    // Drums mode: colour = drum, brightness = loudness row; the pad you hit flashes white.
+    if (ctx.cellHits.has(t.note)) return { color: '#ffffff', level: 'full', mk1: MK1.green };
+    return { color: DRUM_COLORS[t.index], level: 'solid', bright: t.vel, mk1: t.vel >= 0.85 ? MK1.red : MK1.amber };
+  }
   if (t.kind === 'pad') {
     return { color: VIBES[state.vibe].palette[t.index % 3], level: ctx.hits.has(t.index) ? 'full' : 'dim', keep: true };
   }
@@ -110,6 +120,7 @@ export function gridLook(t, ctx) {
 export function buttonLook(t, ctx) {
   const held = ctx.held.has(targetKey(t)) ? 1 : 0;
   switch (t.name) {
+    case 'gridMode': return state.gridMode === 'drums' ? 1 : 0;
     case 'layer': return state.layerOn ? 1 : 0;
     case 'record': return ctx.looper.loops.some((_, i) => ['armed', 'recording', 'overdub'].includes(ctx.looper.status(i))) ? 2 : held;
     case 'tap': return ctx.beat || held ? 1 : 0;
@@ -122,7 +133,9 @@ export function buttonLook(t, ctx) {
 
 /** Label + short tag for the on-screen grid. */
 export function describeTarget(t) {
-  if (t.kind === 'pad') return [DRUM_VOICES[t.index].name, ['K', 'S', 'C', 'H', 'OH', 'T', 'R', 'Cr'][t.index]];
+  const tag = ['K', 'S', 'C', 'H', 'OH', 'T', 'R', 'Cr'][t.index];
+  if (t.kind === 'pad' && t.vel !== undefined) return [`${DRUM_VOICES[t.index].name} · ${LOUDNESS[t.vel] ?? ''}`, tag];
+  if (t.kind === 'pad') return [DRUM_VOICES[t.index].name, tag];
   const a = t.arg;
   switch (t.name) {
     case 'vibe': return [`Vibe · ${VIBES[a].name}`, VIBES[a].name.slice(0, 3)];
@@ -145,11 +158,12 @@ export function describeTarget(t) {
     case 'octDown': return ['Octave down', '−'];
     case 'octUp': return ['Octave up', '+'];
     case 'panic': return ['All notes off', '!'];
+    case 'gridMode': return ['Grid: controls ⇄ drums (Shift: all notes off)', 'Drm'];
     default: return [t.name, t.name.slice(0, 3)];
   }
 }
 
-const GRID_NOTES = APC_GRID.flatMap((cells, row) => cells.map((_, col) => apcNote(row, col)));
+const GRID_NOTES = Array.from({ length: 40 }, (_, n) => n);
 const BUTTON_NOTES = [...APC_SCENES.map((_, i) => 82 + i), ...APC_TRACKS.map((_, i) => 64 + i)];
 
 export class Lights {
@@ -159,7 +173,8 @@ export class Lights {
     this.bus = bus;
     this.sent = new Map(); // port id → Map(note → last bytes)
     this.held = new Set();
-    this.hits = new Set();
+    this.hits = new Set(); // drum voices currently hit (controls-mode drum row)
+    this.cellHits = new Set(); // grid notes currently hit (drums mode)
     this.beat = false;
     this.stage = false;
     this.pending = false;
@@ -171,11 +186,14 @@ export class Lights {
       for (const id of this.sent.keys()) if (!ids.has(id)) this.sent.delete(id);
       this.schedule();
     });
-    bus.on('pad', ({ index, on }) => {
-      if (on) this.hits.add(index);
-      else {
+    bus.on('pad', ({ index, on, cell }) => {
+      if (on) {
+        this.hits.add(index);
+        if (cell !== undefined) this.cellHits.add(cell);
+      } else {
         setTimeout(() => {
           this.hits.delete(index);
+          this.cellHits.delete(cell);
           this.schedule();
         }, 60);
       }
@@ -222,7 +240,7 @@ export class Lights {
   }
 
   get ctx() {
-    return { looper: this.looper, held: this.held, hits: this.hits, beat: this.beat, stage: this.stage };
+    return { looper: this.looper, held: this.held, hits: this.hits, cellHits: this.cellHits, beat: this.beat, stage: this.stage };
   }
 
   /** Coalesce a burst of changes into one update (a microtask isn't throttled in background tabs). */
@@ -247,7 +265,7 @@ export class Lights {
         sent.set(note, key);
         this.midi.sendTo(port, bytes);
       };
-      APC_GRID.forEach((cells, row) => cells.forEach((t, col) => {
+      apcGrid(state.gridMode).forEach((cells, row) => cells.forEach((t, col) => {
         const note = apcNote(row, col);
         put(note, mk2 ? mk2Bytes(note, gridLook(t, ctx)) : [0x90, note, mk1Value(gridLook(t, ctx))]);
       }));
@@ -267,6 +285,14 @@ export class Lights {
 
 export function mk2Bytes(note, look) {
   if (look.level === 'off') return [0x90, note, 0];
+  if (look.level === 'solid') {
+    // Pick the closest of the seven brightness channels.
+    let ch = 0;
+    MK2_BRIGHTNESS.forEach((b, i) => {
+      if (Math.abs(b - look.bright) < Math.abs(MK2_BRIGHTNESS[ch] - look.bright)) ch = i;
+    });
+    return [0x90 | ch, note, paletteIndex(look.color)];
+  }
   return [0x90 | MK2_CHANNEL[look.level], note, paletteIndex(look.color)];
 }
 

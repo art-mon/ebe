@@ -181,6 +181,7 @@ export const ACTIONS = {
   tap: 'Tap tempo',
   nextScale: 'Next scale (Shift: next key)',
   panic: 'All notes off',
+  gridMode: 'APC grid: controls ⇄ drums',
 };
 
 export const LOOP_COUNT = 4;

@@ -45,6 +45,7 @@ const DEFAULTS = {
   midiOutputId: null,
   mappings: null, // null → the device defaults in devices.js
   mutes: INSTRUMENTS.map(() => false),
+  gridMode: 'controls', // APC Key 25 grid: 'controls' | 'drums'
   padBase: null,
   padChannel: null,
 };

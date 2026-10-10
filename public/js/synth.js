@@ -389,7 +389,7 @@ export class Synth {
   drum(note, vel, t = this.ctx.currentTime) {
     const { ctx } = this;
     const out = this.buses[DRUMS_INDEX].gain;
-    const v = 0.35 + vel * 0.65;
+    const v = 0.12 + vel * 0.88; // wide range, so soft hits (and the APC's soft rows) really are soft
     const filt = (type, freq, q = 0.7) => {
       const f = ctx.createBiquadFilter();
       f.type = type;

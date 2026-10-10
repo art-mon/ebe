@@ -53,11 +53,22 @@ export const APC_GRID = [
   DRUM_VOICES.map((_, i) => pad(i)),
 ];
 export const APC_SCENES = [action('randomVibe'), action('layer'), action('record'), action('nextScale'), action('tap')];
-export const APC_TRACKS = [...INSTRUMENTS.map((_, i) => action('mute', i)), action('octDown'), action('octUp'), action('panic')];
+// The last button under the grid flips the grid between controls and drums (Shift: all notes off).
+export const APC_TRACKS = [...INSTRUMENTS.map((_, i) => action('mute', i)), action('octDown'), action('octUp'), action('gridMode')];
 export const APC_BUTTONS = { 81: action('stopLoops'), 91: action('transport'), 93: action('record'), 98: action('shift') };
 
 /** Grid row (0 = top) and column → note number. */
 export const apcNote = (row, col) => (APC_GRID.length - 1 - row) * 8 + col;
+
+// Drums mode: the whole grid plays drums. Each column is one drum, each row a
+// loudness level (bottom = soft, top = loud) — the APC's pads always hit at full
+// velocity, so the rows give it dynamics.
+export const DRUM_ROW_VELOCITY = [1, 0.85, 0.66, 0.48, 0.3]; // top row → bottom row
+export const APC_DRUM_GRID = APC_GRID.map((_, row) =>
+  DRUM_VOICES.map((__, col) => ({ kind: 'pad', index: col, vel: DRUM_ROW_VELOCITY[row], note: apcNote(row, col) })));
+
+/** The grid's targets for a mode: 'controls' or 'drums'. */
+export const apcGrid = (mode) => (mode === 'drums' ? APC_DRUM_GRID : APC_GRID);
 
 function apcMappings(cls, relativeKnobs) {
   const m = {};
