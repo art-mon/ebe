@@ -5,6 +5,10 @@
 // Pitch picks the position (low → left) and the colour (along the vibe palette);
 // velocity picks the size. Drums kick, flash and sparkle.
 import { DRUMS_INDEX } from './config.js';
+import { OilScene, StardustScene } from './scenes.js';
+
+// Slow "ambience" modes live in scenes.js; no screen shake or flashes there.
+const AMBIENT = { oil: OilScene, stardust: StardustScene };
 
 const TAU = Math.PI * 2;
 const SWATCHES = 24;
@@ -50,6 +54,7 @@ export class Visuals {
     this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.g.fillStyle = rgba(this.bg, 1);
     this.g.fillRect(0, 0, this.w, this.h);
+    for (const scene of Object.values(this.scenes ?? {})) scene.resize();
   }
 
   setMode(mode) {
@@ -57,11 +62,19 @@ export class Visuals {
     this.mode = mode;
     this.rings.length = 0;
     this.beams.length = 0;
+    if (AMBIENT[mode] && !this.scenes[mode]) this.scenes[mode] = new AMBIENT[mode](this);
+  }
+
+  /** The active ambient scene, if any. */
+  get scene() {
+    return AMBIENT[this.mode] ? this.scenes[this.mode] : null;
   }
 
   setPalette(colors, bg) {
     this.palette = colors.map(hexToRgb);
     this.bg = hexToRgb(bg);
+    this.scenes ??= {};
+    queueMicrotask(() => Object.values(this.scenes).forEach((sc) => sc.setPalette()));
     // Pre-render a glow sprite per swatch: drawImage is far cheaper than gradients per particle.
     this.swatches = [];
     this.sprites = [];
@@ -97,6 +110,15 @@ export class Visuals {
     return (0.06 + 0.88 * clamp01((note - 28) / 72)) * this.w;
   }
 
+  // Shared with the ambient scenes.
+  swatch(note) {
+    return this.#swatch(note);
+  }
+
+  noteX(note) {
+    return this.#noteX(note);
+  }
+
   // ── events ──
   onVoice({ inst, note, vel, on }) {
     const key = inst * 128 + note;
@@ -105,10 +127,15 @@ export class Visuals {
       return;
     }
     if (inst === DRUMS_INDEX) {
-      this.#drum(note, vel);
+      if (this.scene) this.scene.onDrum(note, vel);
+      else this.#drum(note, vel);
       return;
     }
     this.held.set(key, { note, vel, inst });
+    if (this.scene) {
+      this.scene.onVoice({ inst, note, vel });
+      return;
+    }
     const s = this.#swatch(note);
     const x = this.#noteX(note);
     if (this.mode === 'nebula') {
@@ -189,6 +216,10 @@ export class Visuals {
     this.kick *= Math.exp(-dt * 7);
     this.flash *= Math.exp(-dt * 9);
     const g = this.g;
+    if (this.scene) {
+      this.scene.frame(dt);
+      return;
+    }
     g.save();
     if (this.kick > 0.05) {
       const k = this.kick * 4;

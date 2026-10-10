@@ -32,12 +32,14 @@ const visuals = new Visuals($('#visuals'), feed, () => (clock.running ? clock.be
 // ── restore state ──
 clock.bpm = state.tempo;
 clock.metronome = state.metronome;
-clock.onClick = (time, accent) => synth.click(time, accent);
-looper.bars = state.loopBars;
+clock.onClick = (time, accent) => synth.click(time, accent, state.clickSound);
+looper.loops.forEach((l, i) => (l.bars = state.loopBars[i] ?? 2));
 looper.quantize = state.quantize;
+const applyStyles = () => INSTRUMENTS.forEach((inst, i) => !inst.isDrums && engine.style(i, state.styles[inst.id]));
 engine.setMode(state.engine);
 engine.tempo(state.tempo);
 engine.pushAllFx(state.fx);
+applyStyles();
 feed.useAnalyser(state.engine === 'builtin' ? synth.analyser : null);
 
 const lights = new Lights({ midi, looper, bus });
@@ -48,6 +50,11 @@ tracks.updateLabels();
 
 // ── UI callbacks ──
 ui.onEngine = (mode) => set({ engine: mode });
+ui.onPreviewClick = (sound) => {
+  ctx.resume();
+  synth.click(ctx.currentTime + 0.02, true, sound);
+  synth.click(ctx.currentTime + 0.02 + 60 / state.tempo, false, sound);
+};
 ui.onTempo = (bpm) => {
   if (!Number.isFinite(bpm)) return;
   set({ tempo: clock.setBpm(bpm) });
@@ -88,6 +95,8 @@ bus.on('state', (patch) => {
     feed.useAnalyser(state.engine === 'builtin' ? synth.analyser : null);
     if (state.engine === 'ableton') {
       engine.pushAllFx(state.fx);
+      applyStyles();
+applyStyles();
       if (!midi.output) ui.toast('No IAC Driver found — see Settings → MIDI to enable it.', 4000);
       else ui.toast(`Sending to Ableton via ${midi.output.name}`);
     }
@@ -99,6 +108,7 @@ bus.on('state', (patch) => {
   }
   if ('metronome' in patch) clock.metronome = state.metronome;
   if ('mutes' in patch) state.mutes.forEach((m, i) => engine.mute(i, m));
+  if ('styles' in patch) applyStyles();
   if ('quantize' in patch) looper.quantize = state.quantize;
 });
 

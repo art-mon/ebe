@@ -64,48 +64,57 @@ export function reverbDivision(space01) {
 }
 
 // ── Vibes ───────────────────────────────────────────────────────────────────
-// One tap = instrument (+ optional layer) + all eight FX + colours + visuals.
+// One tap = instrument (+ optional layer) + all eight FX + colours + visuals,
+// plus (optionally) a sound style for some instruments.
 // fx order: filter, reso, drive, crush, echo, repeats, reverb, space
 export const VIBES = [
   {
     id: 'dreamy', name: 'Dreamy', instrument: 'pad', layer: 'keys',
     fx: [0.72, 0.1, 0, 0, 0.35, 0.45, 0.7, 0.85],
     palette: ['#8ec5ff', '#b18cff', '#ff9ad5'], bg: '#0b0a1f', visual: 'nebula',
+    styles: { pad: 'shimmer', keys: 'glass' },
   },
   {
     id: 'lofi', name: 'Lo-Fi', instrument: 'keys',
     fx: [0.42, 0.22, 0.25, 0.4, 0.22, 0.3, 0.35, 0.4],
-    palette: ['#ffcf8b', '#ff8f6b', '#6bd6c4'], bg: '#140d0a', visual: 'rings',
+    palette: ['#ffcf8b', '#ff8f6b', '#6bd6c4'], bg: '#140d0a', visual: 'oil',
+    styles: { keys: 'felt' },
   },
   {
     id: 'club', name: 'Club', instrument: 'bass',
     fx: [0.85, 0.45, 0.45, 0, 0.1, 0.2, 0.12, 0.3],
     palette: ['#ff2fd0', '#2ff3ff', '#fff36b'], bg: '#07020f', visual: 'horizon',
+    styles: { bass: 'acid' },
   },
   {
     id: 'cosmic', name: 'Cosmic', instrument: 'lead',
     fx: [0.9, 0.3, 0.12, 0, 0.5, 0.65, 0.55, 0.92],
-    palette: ['#4f6bff', '#b04fff', '#ffd36b'], bg: '#03041a', visual: 'nebula',
+    palette: ['#4f6bff', '#b04fff', '#ffd36b'], bg: '#03041a', visual: 'stardust',
+    styles: { lead: 'super' },
   },
   {
     id: 'sunset', name: 'Sunset', instrument: 'keys', layer: 'pad',
     fx: [0.65, 0.18, 0.1, 0, 0.3, 0.4, 0.5, 0.6],
     palette: ['#ff9a3c', '#ff4f8b', '#8a4fff'], bg: '#160716', visual: 'horizon',
+    styles: { keys: 'epiano', pad: 'strings' },
   },
   {
     id: 'glitch', name: 'Glitch', instrument: 'lead',
     fx: [0.75, 0.5, 0.35, 0.72, 0.3, 0.55, 0.15, 0.25],
     palette: ['#7dff6b', '#e8ff3c', '#3cffd2'], bg: '#020a04', visual: 'rings',
+    styles: { lead: 'chip' },
   },
   {
     id: 'deep', name: 'Deep Sea', instrument: 'pad', layer: 'bass',
     fx: [0.3, 0.5, 0.05, 0, 0.25, 0.5, 0.8, 0.95],
-    palette: ['#1fd1c1', '#2b7bff', '#a6fff2'], bg: '#020d14', visual: 'nebula',
+    palette: ['#1fd1c1', '#2b7bff', '#a6fff2'], bg: '#020d14', visual: 'oil',
+    styles: { pad: 'drone', bass: 'sub' },
   },
   {
     id: 'raw', name: 'Raw', instrument: 'bass',
     fx: [1, 0.1, 0.2, 0, 0, 0.2, 0.05, 0.2],
     palette: ['#ffffff', '#ff3b3b', '#ffb4b4'], bg: '#0d0607', visual: 'rings',
+    styles: { bass: 'reese' },
   },
 ];
 
@@ -177,12 +186,24 @@ export const ACTIONS = {
   randomVibe: 'Random vibe',
   layer: 'Layer on/off',
   quantize: 'Snap loops on/off',
-  loopBars: 'Cycle loop length',
+  stylePrev: 'Previous instrument style',
+  styleNext: 'Next instrument style',
+  visualNext: 'Next visuals (Shift: previous)',
   tap: 'Tap tempo',
   nextScale: 'Next scale (Shift: next key)',
   panic: 'All notes off',
   gridMode: 'APC grid: controls ⇄ drums',
 };
 
-export const LOOP_COUNT = 4;
+export const LOOP_COUNT = 8;
 export const LOOP_BAR_OPTIONS = [1, 2, 4, 8];
+
+export const VISUALS = { nebula: 'Nebula', rings: 'Rings', horizon: 'Horizon', oil: 'Oil', stardust: 'Stardust' };
+
+// Metronome sounds (built-in synth). "soft" is the default — a gentle knock, not a beep.
+export const CLICK_SOUNDS = { soft: 'Soft knock', wood: 'Woodblock', shaker: 'Shaker', cowbell: 'Cowbell', beep: 'Beep' };
+
+// Instrument styles in Ableton mode: Lumen sends this CC on the instrument's channel,
+// with a value in the middle of the style's fifth of 0-127. MIDI-map it to an
+// Instrument Rack's Chain Selector (5 chains, "Distribute Ranges Equally").
+export const STYLE_CC = 3;

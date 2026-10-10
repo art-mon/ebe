@@ -2,7 +2,8 @@
 //   'builtin' → the Web Audio synth in this page
 //   'ableton' → MIDI out (IAC Driver) on each instrument's channel
 // and tells the visuals about every note, at the moment it is heard.
-import { INSTRUMENTS, FX_CHANNEL, FX_CC_BASE, FX_MACROS, reverbDivision } from './config.js';
+import { INSTRUMENTS, FX_CHANNEL, FX_CC_BASE, FX_MACROS, STYLE_CC, reverbDivision } from './config.js';
+import { STYLES } from './styles.js';
 
 const SPACE = FX_MACROS.findIndex((m) => m.id === 'space');
 
@@ -134,6 +135,24 @@ export class Engine {
     this.bpm = bpm;
     this.synth.setTempo(bpm);
     this.resyncReverb();
+  }
+
+  /**
+   * Switch an instrument's sound style. Built-in: swap the synth patch (new notes use it).
+   * Ableton: send STYLE_CC on the instrument's channel — the middle of the style's fifth
+   * of 0-127, so a 5-chain Instrument Rack with evenly split zones picks the right chain.
+   */
+  style(inst, styleId) {
+    this.synth.setStyle(inst, styleId);
+    if (this.toAbleton) this.sendStyle(inst, styleId);
+  }
+
+  /** Send the style CC (also used by the MIDI-mapping helper in Settings). */
+  sendStyle(inst, styleId) {
+    const list = STYLES[INSTRUMENTS[inst].id];
+    if (!list) return;
+    const i = Math.max(0, list.findIndex((st) => st.id === styleId));
+    this.#cc(INSTRUMENTS[inst].channel, STYLE_CC, Math.min(1, ((i + 0.5) * 128) / list.length / 127));
   }
 
   /** Re-time Live's Reverb (no-op unless in Ableton mode with the reverb linked). */

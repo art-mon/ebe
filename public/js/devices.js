@@ -8,20 +8,21 @@ const pad = (index) => ({ kind: 'pad', index });
 const action = (name, arg) => (arg === undefined ? { kind: 'action', name } : { kind: 'action', name, arg });
 
 // ── M-Audio Oxygen Pro Mini ─────────────────────────────────────────────────
-// 4 knobs + 4 faders, 8 pads × 2 banks. Factory Preset-mode CCs aren't
-// documented, so besides these defaults there's a setup wizard.
+// 4 faders + 4 knobs, 8 pads × 2 banks. Faders (left on screen) play FX 1-4 —
+// Filter, Reso, Drive, Crush; knobs (right) play FX 5-8 — Echo … Space.
+// Factory Preset-mode CCs aren't documented, so there's also a setup wizard.
 export const OXYGEN = {
   id: 'oxygen',
   name: 'Oxygen Pro Mini',
   match: /oxygen/i,
   // Keys + Preset mode arrive on the main port; DAW-mode controls on the Mackie/HUI port.
   portClass: (name) => (/mackie|hui|daw/i.test(name) ? 'daw' : 'main'),
-  fxHw: ['Knob 1', 'Knob 2', 'Knob 3', 'Knob 4', 'Fader 1', 'Fader 2', 'Fader 3', 'Fader 4'],
+  fxHw: ['Fader 1', 'Fader 2', 'Fader 3', 'Fader 4', 'Knob 1', 'Knob 2', 'Knob 3', 'Knob 4'],
   mappings: (() => {
     const m = {};
     // DAW mode (Ableton map) — numbers from Live's own Oxygen_Pro script
-    [22, 23, 24, 25].forEach((cc, i) => (m[`daw|cc:1:${cc}`] = fx(i))); // knobs
-    [12, 13, 14, 15].forEach((cc, i) => (m[`daw|cc:1:${cc}`] = fx(4 + i))); // faders
+    [12, 13, 14, 15].forEach((cc, i) => (m[`daw|cc:1:${cc}`] = fx(i))); // faders → FX 1-4
+    [22, 23, 24, 25].forEach((cc, i) => (m[`daw|cc:1:${cc}`] = fx(4 + i))); // knobs → FX 5-8
     [40, 41, 42, 43, 48, 49, 50, 51].forEach((n, i) => (m[`daw|note:1:${n}`] = pad(i)));
     m['daw|cc:1:114'] = action('stopLoops'); // Loop
     m['daw|cc:1:115'] = action('vibePrev'); // <<
@@ -29,8 +30,8 @@ export const OXYGEN = {
     m['daw|cc:1:117'] = action('stop'); // Stop
     m['daw|cc:1:118'] = action('transport'); // Play
     m['daw|cc:1:119'] = action('record'); // Record
-    // Preset mode, factory preset 12 knobs (banks 1 & 2)
-    [120, 121, 122, 123, 124, 125, 126, 127].forEach((cc, i) => (m[`main|cc:*:${cc}`] = fx(i)));
+    // Preset mode, factory preset 12 knobs: bank 1 → FX 5-8, bank 2 → FX 1-4
+    [120, 121, 122, 123, 124, 125, 126, 127].forEach((cc, i) => (m[`main|cc:*:${cc}`] = fx((i + 4) % 8)));
     return m;
   })(),
 };
@@ -46,8 +47,8 @@ const apcVariant = (name) => (/mk ?ii|mk ?2/i.test(name) ? 'mk2' : 'mk1');
 // The grid, top row first. Each cell is a target; lights.js decides its colour.
 export const APC_GRID = [
   VIBES.map((_, i) => action('vibe', i)),
-  [...MELODIC.map((i) => action('inst', i)), action('visual', 'nebula'), action('visual', 'rings'), action('visual', 'horizon'), action('stage')],
-  [0, 1, 2, 3].map((i) => action('loop', i)).concat([action('stopLoops'), action('quantize'), action('loopBars'), action('metronome')]),
+  [...MELODIC.map((i) => action('inst', i)), action('stylePrev'), action('styleNext'), action('visualNext'), action('stage')],
+  Array.from({ length: 8 }, (_, i) => action('loop', i)),
   [action('keyMode', 'off'), action('keyMode', 'snap'), action('keyMode', 'white'),
     action('chord', 'off'), action('chord', 'triad'), action('chord', 'seventh'), action('chord', 'power'), action('chord', 'octave')],
   DRUM_VOICES.map((_, i) => pad(i)),
@@ -105,4 +106,8 @@ export const WIZARD_STEPS = [
   { target: action('transport'), prompt: 'Press Play', detail: 'Play / Stop' },
   { target: action('stop'), prompt: 'Press Stop', detail: 'Stop' },
   { target: action('record'), prompt: 'Press Record', detail: 'Record next loop' },
+  // The Oxygen's own Octave buttons transpose inside the keyboard and send no MIDI,
+  // so Lumen can't follow them. Give Lumen's octave two buttons of its own instead.
+  { target: action('octDown'), prompt: 'Press a button for Octave −', detail: 'e.g. a button under the faders (Skip to keep using the keyboard’s own)' },
+  { target: action('octUp'), prompt: 'Press a button for Octave +', detail: 'e.g. the button next to it' },
 ];

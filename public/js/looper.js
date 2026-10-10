@@ -1,7 +1,8 @@
 // A MIDI looper: records the notes you play (after scale/chord processing)
 // and replays them through the current sound engine, phase-locked to the
-// transport. All loops share one length so they always line up.
-import { LOOP_COUNT, DRUMS_INDEX } from './config.js';
+// transport. Each loop has its own length (1, 2, 4 or 8 bars); since every
+// length divides 8 bars, loops of different lengths always line up.
+import { LOOP_COUNT, LOOP_BAR_OPTIONS, DRUMS_INDEX } from './config.js';
 
 const mod = (n, m) => ((n % m) + m) % m;
 const EARLY_GRACE = 0.25; // beats: notes this early still land on the downbeat
@@ -11,10 +12,10 @@ export class Looper {
     this.clock = clock;
     this.engine = engine;
     this.bus = bus;
-    this.bars = 2;
     this.quantize = true;
     this.loops = Array.from({ length: LOOP_COUNT }, (_, index) => ({
       index,
+      bars: 2,
       events: [], // { pos, dur, inst, note, vel, recordedAt }
       playing: false,
       playFrom: 0,
@@ -32,19 +33,27 @@ export class Looper {
     });
   }
 
-  get length() {
-    return this.bars * 4;
+  /** Loop length in beats. */
+  lengthOf(loop) {
+    return loop.bars * 4;
   }
 
-  get hasContent() {
-    return this.loops.some((l) => l.events.length || l.rec);
+  /** A loop's length can change only while it's empty (and not about to record). */
+  canResize(i) {
+    const l = this.loops[i];
+    return !l.events.length && !l.rec;
   }
 
-  setBars(bars) {
-    if (this.hasContent) return false;
-    this.bars = bars;
+  setLoopBars(i, bars) {
+    if (!this.canResize(i) || !LOOP_BAR_OPTIONS.includes(bars)) return false;
+    this.loops[i].bars = bars;
     this.#changed();
     return true;
+  }
+
+  cycleLoopBars(i) {
+    const next = LOOP_BAR_OPTIONS[(LOOP_BAR_OPTIONS.indexOf(this.loops[i].bars) + 1) % LOOP_BAR_OPTIONS.length];
+    return this.setLoopBars(i, next) ? next : null;
   }
 
   /** 'empty' | 'armed' | 'recording' | 'overdub' | 'playing' | 'stopped' */
@@ -58,9 +67,10 @@ export class Looper {
     return l.playing ? 'playing' : 'stopped';
   }
 
-  /** 0..1 position inside the loop cycle, for progress rings. */
-  phase() {
-    return this.clock.running ? mod(this.clock.beat, this.length) / this.length : 0;
+  /** 0..1 position inside a loop's cycle, for progress rings. */
+  phase(i) {
+    const L = this.lengthOf(this.loops[i]);
+    return this.clock.running ? mod(this.clock.beat, L) / L : 0;
   }
 
   /** The one-button looper gesture used by pads. */
@@ -90,7 +100,7 @@ export class Looper {
       else start = Math.ceil(b / 4) * 4;
     }
     const first = !loop.events.length;
-    loop.rec = { start, end: start + this.length, overdub: !first };
+    loop.rec = { start, end: start + this.lengthOf(loop), overdub: !first };
     if (first) {
       loop.playing = true;
       loop.playFrom = loop.rec.end;
@@ -103,10 +113,10 @@ export class Looper {
     if (!loop.events.length || loop.rec) return;
     if (!this.clock.running) {
       this.clock.start(4);
-      loop.rec = { start: 0, end: this.length, overdub: true };
+      loop.rec = { start: 0, end: this.lengthOf(loop), overdub: true };
     } else {
       const b = Math.max(0, this.clock.beat);
-      loop.rec = { start: b, end: b + this.length, overdub: true };
+      loop.rec = { start: b, end: b + this.lengthOf(loop), overdub: true };
     }
     if (!loop.playing) {
       loop.playing = true;
@@ -181,7 +191,7 @@ export class Looper {
   }
 
   #commit(loop, p, dur) {
-    const L = this.length;
+    const L = this.lengthOf(loop);
     let pos = p.beat;
     if (this.quantize) pos = Math.round(pos * 4) / 4; // to the nearest 16th
     loop.events.push({
@@ -216,11 +226,11 @@ export class Looper {
   }
 
   #schedule(from, to) {
-    const L = this.length;
     const now = this.clock.ctx.currentTime;
     for (const loop of this.loops) {
       loop.handles = loop.handles.filter((h) => h.end > now);
       if (!loop.playing || !loop.events.length) continue;
+      const L = this.lengthOf(loop);
       for (const ev of loop.events) {
         for (let abs = Math.ceil((from - ev.pos) / L) * L + ev.pos; abs < to; abs += L) {
           // Skip the pass where this note was just played live (avoids a double hit).

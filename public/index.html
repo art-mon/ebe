@@ -45,7 +45,8 @@
         <span class="unit">BPM</span>
       </div>
       <button type="button" class="pill" id="btn-tap" title="Tap tempo">Tap</button>
-      <button type="button" class="pill toggle" id="btn-metro" title="Metronome">Click</button>
+      <button type="button" class="pill toggle" id="btn-metro" title="Metronome on/off">Click</button>
+      <select id="click-sound" class="click-sound" title="Metronome sound" aria-label="Metronome sound"></select>
     </div>
 
     <div class="top-actions">
@@ -110,14 +111,17 @@
           <div class="hud-chord" id="hud-chord"></div>
           <div class="hud-bottom">
             <div class="seg glass" id="visual-seg"></div>
-            <button type="button" class="icon-btn glass" id="btn-stage" title="Stage mode (`)" aria-label="Stage mode">
-              <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </button>
+            <div class="row">
+              <button type="button" class="pill toggle glass" id="btn-chords" title="Show chord names on the stage">Chords</button>
+              <button type="button" class="icon-btn glass" id="btn-stage" title="Stage mode (`)" aria-label="Stage mode">
+                <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
       <section class="panel fx-panel">
-        <h2>FX <span class="hint" id="fx-hint">knobs = tone · faders = space</span></h2>
+        <h2>FX <span class="hint" id="fx-hint">faders = tone · knobs = space</span></h2>
         <div class="fx" id="fx"></div>
       </section>
       <section class="panel tracks-panel">
@@ -131,7 +135,6 @@
       <section class="panel">
         <h2>Looper
           <span class="loop-opts">
-            <select id="loop-bars" aria-label="Loop length"></select>
             <button type="button" class="pill toggle small" id="btn-quant" title="Snap recorded notes to 16ths">Snap</button>
           </span>
         </h2>

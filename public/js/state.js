@@ -1,5 +1,6 @@
 // Tiny event bus + app state with best-effort persistence.
-import { FX_MACROS, VIBES, INSTRUMENTS } from './config.js';
+import { FX_MACROS, VIBES, INSTRUMENTS, LOOP_COUNT } from './config.js';
+import { DEFAULT_STYLES } from './styles.js';
 
 export class Bus {
   #handlers = new Map();
@@ -37,8 +38,11 @@ const DEFAULTS = {
   chord: 'off',
   tempo: 100,
   metronome: true,
-  loopBars: 2,
+  clickSound: 'soft',
+  loopBars: Array(LOOP_COUNT).fill(2), // bars per loop
   quantize: true,
+  showChords: true, // big chord name on the stage
+  styles: { ...DEFAULT_STYLES }, // sound style per instrument
   visual: 'nebula',
   syncTempo: true,
   midiInputId: null,
@@ -48,16 +52,35 @@ const DEFAULTS = {
   gridMode: 'controls', // APC Key 25 grid: 'controls' | 'drums'
   padBase: null,
   padChannel: null,
+  version: 2,
 };
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...DEFAULTS, ...vibeDefaults(0) };
     // Mutes start fresh each session: a silent instrument after a reload is confusing.
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw), mutes: DEFAULTS.mutes } : { ...DEFAULTS, ...vibeDefaults(0) };
+    return migrate({ ...DEFAULTS, ...JSON.parse(raw), mutes: DEFAULTS.mutes });
   } catch {
     return { ...DEFAULTS, ...vibeDefaults(0) };
   }
+}
+
+/** Bring settings saved by older versions up to date. */
+export function migrate(s) {
+  // v1 had one loop length for every loop (a number) and four loops.
+  if (!Array.isArray(s.loopBars)) s.loopBars = Array(LOOP_COUNT).fill(Number(s.loopBars) || 2);
+  while (s.loopBars.length < LOOP_COUNT) s.loopBars.push(s.loopBars.at(-1) ?? 2);
+  s.styles = { ...DEFAULT_STYLES, ...s.styles };
+  // v2 swapped the Oxygen's roles: faders now drive FX 1-4 and knobs FX 5-8. Controls
+  // learned with the wizard keep their hardware role, so move their FX by four.
+  if ((s.version ?? 1) < 2 && s.mappings) {
+    for (const [key, t] of Object.entries(s.mappings)) {
+      if (t?.kind === 'fx' && /^(main|daw)\|/.test(key)) s.mappings[key] = { ...t, index: (t.index + 4) % 8 };
+    }
+  }
+  s.version = 2;
+  return s;
 }
 
 function vibeDefaults(i) {

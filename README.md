@@ -3,18 +3,28 @@
 A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai APC Key 25** (mk1 and mk2), with **Ableton Live 12 Lite**.
 
 - **Vibes:** one tap changes the instrument (or a layered pair), all eight effects, the colours and the visuals.
-- **Eight FX macros** on the Oxygen's 4 knobs and 4 faders, or the APC's 8 knobs: Filter, Reso, Drive and Crush; Echo, Repeats, Reverb and Space. Switching vibes glides the effects smoothly instead of jumping.
+- **Eight FX macros:** on the Oxygen, the 4 faders control Filter, Reso, Drive and Crush and the 4 knobs control Echo, Repeats, Reverb and Space. On the APC, the 8 knobs control all eight. Switching vibes glides the effects smoothly instead of jumping.
 - **Effects that follow the tempo.** The echo is a dotted 1/8. **Space** picks how long the reverb lasts as a note length (1/8, 1/4, 1/2, 1 bar, 2 bars, 4 bars), so the tail dies away on the beat. The reverb's pre-delay is a 1/64 note. All of it re-times when you change the BPM, including on Live's Reverb when AbletonOSC is installed.
 - **Play helpers** so wrong notes are hard to hit:
   - *Snap to scale*.
   - *Easy mode*: the white keys play the scale, and middle C is the key's root.
   - One-finger *chords* (triads, 7ths, power chords, octaves).
   - Octave shift.
-- **4-track looper:** one bar of count-in, records on the bar, snaps to 16ths if you want, overdubs, and keeps every loop in sync. You can drive it from the pads.
+- **5 sound styles per instrument:**
+  - *Keys*: E-Piano, Felt Piano, Organ, Glass Bells, Clav.
+  - *Pad*: Warm, Strings, Choir, Shimmer, Dark Drone.
+  - *Bass*: Sub, Acid, Reese, Pluck, Wobble.
+  - *Lead*: Saw, Square, Supersaw, Soft Flute, Chiptune.
+  - Pick one from the menu on each instrument card. Some vibes pick styles for you.
+- **8-track looper:** each loop has its own length (1, 2, 4 or 8 bars), and they all stay in sync. One bar of count-in, records on the bar, snaps to 16ths if you want, overdubs. You can drive it from the pads.
+- **Metronome sounds:** Soft knock (the default), Woodblock, Shaker, Cowbell or Beep, chosen next to the **Click** button.
 - **Visuals:**
   - *Nebula*: particles.
   - *Rings*: a radial spectrum.
   - *Horizon*: a synthwave grid that rolls on the beat.
+  - *Oil*: a slow painted night sky that swirls around the moon, reflected in rippling water.
+  - *Stardust*: a glittering cosmic iris in drifting nebula clouds. It slowly turns between "eye" and "galaxy", and notes send ripples through it.
+  - The **Chords** button on the stage turns the big chord names on or off.
   - Pitch sets where a note appears and its colour. Velocity sets its size. Drums kick and sparkle.
 - **Track view:** a live, scrolling level trace and note marks for every instrument.
 - **The APC Key 25's grid lights up as Lumen's control surface:** vibes, instruments, loops, play helpers and drums, each in its own colour, with the same layout mirrored on screen.
@@ -61,13 +71,13 @@ Plug it in. Lumen maps every control and lights up the grid. The **Pads** panel 
 | Grid row | The 8 pads |
 |---|---|
 | **5** (top) | The 8 **vibes**, in each vibe's colour. The active one is bright. |
-| **4** | **Keys, Pad, Bass, Lead** (*Shift + pad* layers it) · visuals **Nebula, Rings, Horizon** · **Stage** mode |
-| **3** | **Loops 1–4**: tap to record, play or stop; *hold* (or *Shift + tap*) to clear. Then **Stop loops** · **Snap** · **Loop length** (green 1, yellow 2, orange 4, red 8 bars) · **Metronome** |
+| **4** | **Keys, Pad, Bass, Lead** (*Shift + pad* layers it) · **Style ◀ / ▶** (changes the current instrument's style) · **Visuals ▶** (*Shift*: ◀) · **Stage** mode |
+| **3** | **Loops 1–8**: tap to record, play or stop; *hold* to clear; *Shift + tap* to change the length of an empty loop |
 | **2** | Notes: **Free, Snap, Easy** · Chords: **Off, Triad, 7th, Power, Octave** |
 | **1** (bottom) | **Drums**: Kick, Snare, Clap, Hat, Open Hat, Tom, Rim, Crash |
 
 Loop pads change colour with their state:
-- dim white: empty
+- dim, showing the length when empty: green = 1 bar, yellow = 2, orange = 4, purple = 8
 - blinking red: waiting for the bar
 - red: recording
 - pulsing red: overdubbing
@@ -77,7 +87,7 @@ Loop pads change colour with their state:
 | Other controls | Do |
 |---|---|
 | **8 knobs** | FX 1–8 (Filter … Space). On the mk2 the knobs are endless; hold **Shift** for fine steps. |
-| **Scene buttons** (right, top→bottom) | Random vibe · Layer on/off · Record next loop · Next scale (*Shift*: next key) · Tap tempo (flashes on the beat) |
+| **Scene buttons** (right, top→bottom) | Random vibe · Layer on/off · Record next loop (*Shift*: Snap on/off) · Next scale (*Shift*: next key) · Tap tempo, flashing on the beat (*Shift*: metronome on/off) |
 | **Buttons under the grid** | Mute Keys / Pad / Bass / Lead / Drums (lit = muted) · Octave − · Octave + · **Grid: controls ⇄ drums** (*Shift*: all notes off) |
 | **Play/Pause** · **Record** · **Stop All Clips** | Play/stop · record next loop · stop all loops (*Shift*: clear all loops) |
 | **Sustain** | Sustain pedal |
@@ -109,11 +119,15 @@ Good to know:
 
 ### M-Audio Oxygen Pro Mini (2 minutes, once)
 
-Click **Controller setup** in the top bar, then touch each control when asked: 4 knobs, 4 faders, the pads in both banks, Play, Stop and Record. Press **Skip** for anything you don't want mapped.
+Click **Controller setup** in the top bar, then touch each control when asked: the 4 faders, the 4 knobs, the pads in both banks, Play, Stop and Record. At the end it asks for two buttons to use as Lumen's **Octave − / +**. Press **Skip** for anything you don't want mapped.
+
+On screen, the faders sit on the left (Filter, Reso, Drive, Crush) and the knobs on the right (Echo, Repeats, Reverb, Space), like on the keyboard.
+
+> **About the Oxygen's own Octave buttons:** they transpose inside the keyboard and send nothing over MIDI, so Lumen can't follow them, and Lumen can't move them either. For one shared octave, give Lumen's Octave − / + to two Oxygen buttons, either in the wizard or with Settings → Controller mapping → *Learn*, and leave the keyboard's own octave at 0.
 
 M-Audio doesn't publish the factory MIDI numbers for Preset mode, so the wizard is the reliable route. Lumen also ships defaults for:
 
-- **DAW mode with the Ableton map:** knobs CC 22–25, faders CC 12–15, pads notes 40–43 and 48–51, transport CC 114–119. These numbers come from Live's own Oxygen Pro script.
+- **DAW mode with the Ableton map:** faders CC 12–15, knobs CC 22–25, pads notes 40–43 and 48–51, transport CC 114–119. These numbers come from Live's own Oxygen Pro script.
 - **Preset mode:** pads are notes on channel 10 starting at note 36, and factory preset 12's knobs are CC 120–127.
 
 Lumen listens to **all** of the Oxygen's ports at once, so either mode works. **Settings → MIDI monitor** shows exactly what the controller sends. Any single control can be re-learned in **Settings → Controller mapping**.
@@ -187,6 +201,12 @@ Then map Lumen's FX to them, once:
 | Reverb | 26 | Reverb → Dry/Wet |
 | Space | 27 | Reverb → Decay Time. Skip this one if you install AbletonOSC: Lumen then sets the decay itself, in time with the tempo. |
 
+**Optional: instrument styles in Live.** Lumen's style menu can switch Live's sounds too:
+1. On an instrument's track, put an **Instrument Rack** with **5 chains**, one sound per style, in the same order as Lumen's menu.
+2. Right-click the chains and choose **Distribute Ranges Equally**.
+3. Press ⌘M and click the **Chain Selector**.
+4. In Lumen, open Settings → Ableton Live and press **Send** next to that instrument. Lumen sends CC 3 on the instrument's channel.
+
 Save the set (for example, as `Lumen.als`). The mappings are stored in it.
 
 ### e) Optional: AbletonOSC for track meters and tempo sync
@@ -219,7 +239,9 @@ The Lumen server relays between the browser and AbletonOSC on UDP ports 11000 an
 | Stack two instruments | Press **+** on an instrument |
 | Never hit a wrong note | **Notes → Snap**, or **Easy** (white keys only) |
 | Play chords with one finger | **Chords → Triad / 7th** |
-| Record a loop | Press **●** on a loop, tap a loop pad, or press **Record** on the controller. You get one bar of count-in, then it records for the loop length and starts playing. |
+| Record a loop | Press **●** on a loop, tap a loop pad, or press **Record** on the controller. You get one bar of count-in, then it records for that loop's length and starts playing. |
+| Set a loop's length | Use the **bars** menu on the loop (while it's empty), or *Shift + loop pad* on the APC |
+| Change an instrument's sound | Pick a style on its card, or **Style ◀ / ▶** on the APC |
 | Add to a loop | **●** on a loop that's playing (overdubs one pass) |
 | Stop / clear a loop | Tap it to stop it. Hold its pad, or press **✕**, to clear it. |
 | Go full-screen visuals | **Stage** button or **`** (Esc exits) |
@@ -259,6 +281,8 @@ public/js/
   main.js            wires everything together
   config.js          instruments, vibes, FX, scales
   devices.js         controller profiles: Oxygen Pro Mini, APC Key 25 (+ default mappings)
+  styles.js          the 5 sound styles per instrument (plain data the synth builds from)
+  scenes.js          the Oil and Stardust visualizers
   lights.js          APC Key 25 grid lights (also colours the on-screen grid)
   ticker.js          a timer that keeps running when the tab is in the background
   controller.js      MIDI/keyboard input → notes & actions, MIDI learn, setup wizard

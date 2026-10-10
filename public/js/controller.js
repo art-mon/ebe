@@ -4,8 +4,9 @@
 import { state, set } from './state.js';
 import {
   INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, CONTROL_PADS, CONTROLLER,
-  LOOP_BAR_OPTIONS, SCALES, NOTE_NAMES,
+  SCALES, NOTE_NAMES, VISUALS,
 } from './config.js';
+import { STYLES } from './styles.js';
 import { DEFAULT_MAPPINGS, APC_DRUM_GRID } from './devices.js';
 import { transform } from './transform.js';
 
@@ -61,6 +62,7 @@ export class Controller {
     this.absoluteKnobs = new Set(); // "relative" knobs that turned out to send absolute values
     this.shift = false;
     this.taps = [];
+    this.kbLoops = new Map(); // computer-keyboard loop key → loop index (Shift picks 5-8)
     this.learnTarget = null;
     this.wizard = null;
     this.tween = 0;
@@ -169,8 +171,8 @@ export class Controller {
       return undefined;
     }
     if (t.name === 'loop') {
-      // Shift + loop clears it straight away; otherwise tap vs hold is decided on release.
-      if (this.shift) return this.looper.clear(t.arg);
+      // Shift + loop changes its length (while empty); otherwise tap vs hold is decided on release.
+      if (this.shift) return this.cycleLoopBars(t.arg);
       this.loopPress.set(src, performance.now());
       return undefined;
     }
@@ -284,12 +286,13 @@ export class Controller {
         this.clock.stop();
         break;
       case 'record': {
+        if (this.shift) return this.action('quantize'); // Shift + Record = snap on/off
         const busy = lp.loops.findIndex((_, i) => ['armed', 'recording', 'overdub'].includes(lp.status(i)));
         if (busy >= 0) lp.tap(busy);
         else {
           const empty = lp.loops.findIndex((_, i) => lp.status(i) === 'empty');
           if (empty >= 0) lp.record(empty);
-          else this.bus.emit('toast', 'All four loops are full — hold a loop pad to clear one.');
+          else this.bus.emit('toast', `All ${lp.loops.length} loops are full — hold a loop pad to clear one.`);
         }
         break;
       }
@@ -324,6 +327,17 @@ export class Controller {
       case 'visual':
         set({ visual: arg });
         break;
+      case 'visualNext': {
+        const ids = Object.keys(VISUALS);
+        const next = ids[mod(ids.indexOf(state.visual) + (this.shift ? -1 : 1), ids.length)];
+        set({ visual: next });
+        this.bus.emit('toast', `Visuals · ${VISUALS[next]}`);
+        break;
+      }
+      case 'styleNext':
+      case 'stylePrev':
+        this.stepStyle(state.instrument, name === 'styleNext' ? 1 : -1);
+        break;
       case 'keyMode':
         set({ keyMode: arg });
         break;
@@ -338,16 +352,10 @@ export class Controller {
       }
       case 'quantize':
         set({ quantize: !state.quantize });
+        this.bus.emit('toast', `Snap loops to 16ths · ${state.quantize ? 'on' : 'off'}`);
         break;
-      case 'loopBars': {
-        const next = LOOP_BAR_OPTIONS[mod(LOOP_BAR_OPTIONS.indexOf(lp.bars) + 1, LOOP_BAR_OPTIONS.length)];
-        if (lp.setBars(next)) {
-          set({ loopBars: next });
-          this.bus.emit('toast', `Loop length · ${next} bar${next > 1 ? 's' : ''}`);
-        } else this.bus.emit('toast', 'Clear all loops to change the loop length (Shift + Stop All).');
-        break;
-      }
       case 'tap':
+        if (this.shift) return this.action('metronome'); // Shift + Tap = metronome on/off
         this.tapTempo();
         break;
       case 'nextScale': {
@@ -410,6 +418,44 @@ export class Controller {
     this.bus.emit('tap');
   }
 
+  // ── loop lengths ──
+  setLoopBars(i, bars) {
+    if (!this.looper.setLoopBars(i, bars)) {
+      this.bus.emit('toast', `Loop ${i + 1} has notes — clear it first (hold its pad) to change its length.`);
+      return false;
+    }
+    const loopBars = [...state.loopBars];
+    loopBars[i] = bars;
+    set({ loopBars });
+    return true;
+  }
+
+  cycleLoopBars(i) {
+    const lp = this.looper;
+    if (!lp.canResize(i)) return this.setLoopBars(i, lp.loops[i].bars); // explains why not
+    const next = lp.cycleLoopBars(i);
+    const loopBars = [...state.loopBars];
+    loopBars[i] = next;
+    set({ loopBars });
+    this.bus.emit('toast', `Loop ${i + 1} · ${next} bar${next > 1 ? 's' : ''}`);
+    return true;
+  }
+
+  // ── instrument styles ──
+  setStyle(inst, styleId) {
+    const id = INSTRUMENTS[inst].id;
+    set({ styles: { ...state.styles, [id]: styleId } });
+  }
+
+  stepStyle(inst, dir) {
+    const id = INSTRUMENTS[inst].id;
+    const list = STYLES[id];
+    if (!list) return;
+    const next = list[mod(list.findIndex((st) => st.id === state.styles[id]) + dir, list.length)];
+    this.setStyle(inst, next.id);
+    this.bus.emit('toast', `${INSTRUMENTS[inst].name} · ${next.name}`);
+  }
+
   selectInstrument(inst) {
     set({ instrument: inst, layerOn: state.layerOn && state.layer !== inst });
   }
@@ -424,7 +470,7 @@ export class Controller {
     const v = VIBES[i];
     const inst = INSTRUMENTS.findIndex((x) => x.id === v.instrument);
     const layer = v.layer ? INSTRUMENTS.findIndex((x) => x.id === v.layer) : state.layer;
-    set({ vibe: i, instrument: inst, layer, layerOn: !!v.layer, visual: v.visual });
+    set({ vibe: i, instrument: inst, layer, layerOn: !!v.layer, visual: v.visual, styles: { ...state.styles, ...v.styles } });
     this.morphFx(v.fx);
     this.bus.emit('vibe', v);
   }
@@ -526,14 +572,21 @@ export class Controller {
       if (e.repeat) return;
       if (PIANO_KEYS.has(code)) this.keyDown(`kb:${code}`, 60 + PIANO_KEYS.get(code), e.shiftKey ? 1 : 0.75);
       else if (digit(code) >= 0) this.padDown(digit(code), e.shiftKey ? 1 : 0.8);
-      else if (LOOP_KEYS.includes(code)) this.padDown(8 + LOOP_KEYS.indexOf(code), 1);
+      else if (LOOP_KEYS.includes(code)) {
+        const loop = LOOP_KEYS.indexOf(code) + (e.shiftKey ? 4 : 0);
+        this.kbLoops.set(code, loop);
+        this.press({ kind: 'action', name: 'loop', arg: loop }, 1, `kb:${code}`);
+      }
       else this.action(KEY_ACTIONS[code]);
     });
     window.addEventListener('keyup', (e) => {
       const { code } = e;
       if (PIANO_KEYS.has(code)) this.keyUp(`kb:${code}`);
       else if (digit(code) >= 0) this.padUp(digit(code));
-      else if (LOOP_KEYS.includes(code)) this.padUp(8 + LOOP_KEYS.indexOf(code));
+      else if (LOOP_KEYS.includes(code) && this.kbLoops.has(code)) {
+        this.release({ kind: 'action', name: 'loop', arg: this.kbLoops.get(code) }, `kb:${code}`);
+        this.kbLoops.delete(code);
+      }
     });
     window.addEventListener('blur', () => this.releaseAll('kb:'));
   }

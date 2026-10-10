@@ -4,8 +4,10 @@ import { state, set, resetSettings } from './state.js';
 import {
   INSTRUMENTS, MELODIC, DRUM_VOICES, VIBES, FX_MACROS, FX_CHANNEL, FX_CC_BASE, SCALES, NOTE_NAMES,
   KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, CONTROLLER, reverbDivision,
+  VISUALS, CLICK_SOUNDS, STYLE_CC,
 } from './config.js';
 import { WIZARD_STEPS, OXYGEN, APC, APC_SCENES, APC_TRACKS, apcGrid, deviceForPort } from './devices.js';
+import { STYLES } from './styles.js';
 import { gridLook, buttonLook, describeTarget } from './lights.js';
 import { isKeyInScale, chordName } from './transform.js';
 import { describe, AUTO } from './midi.js';
@@ -24,7 +26,6 @@ const h = (tag, attrs = {}, ...children) => {
   return n;
 };
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
-const VISUALS = { nebula: 'Nebula', rings: 'Rings', horizon: 'Horizon' };
 const PAD_ORDER = [4, 5, 6, 7, 0, 1, 2, 3]; // pad 1 is bottom-left, like the hardware
 const KB_LOW = 48;
 const KB_HIGH = 84;
@@ -119,6 +120,12 @@ export class UI {
     $('#tempo-up').addEventListener('click', () => this.onTempo?.(state.tempo + 1));
     $('#btn-tap').addEventListener('click', () => this.controller.action('tap'));
     $('#btn-metro').addEventListener('click', () => set({ metronome: !state.metronome }));
+    const clickSound = $('#click-sound');
+    for (const [id, name] of Object.entries(CLICK_SOUNDS)) clickSound.append(h('option', { value: id }, name));
+    clickSound.addEventListener('change', () => {
+      set({ clickSound: clickSound.value });
+      this.onPreviewClick?.(clickSound.value); // hear it right away
+    });
     $('#btn-settings').addEventListener('click', () => this.openDrawer());
     $('#btn-wizard').addEventListener('click', () => this.startWizard());
   }
@@ -172,6 +179,7 @@ export class UI {
     const tempo = $('#tempo');
     if (document.activeElement !== tempo) tempo.value = String(Math.round(state.tempo));
     $('#btn-metro').classList.toggle('on', state.metronome);
+    $('#click-sound').value = state.clickSound;
   }
 
   // ── vibes ──
@@ -201,9 +209,14 @@ export class UI {
     const root = $('#insts');
     for (const i of MELODIC) {
       const inst = INSTRUMENTS[i];
+      const style = h('select', { class: 'style', 'aria-label': `${inst.name} style`, title: `${inst.name} sound`,
+        onchange: (e) => this.controller.setStyle(i, e.target.value) },
+      STYLES[inst.id].map((st) => h('option', { value: st.id }, st.name)));
       root.append(h('div', { class: 'inst', style: `--c:${inst.color}`, 'data-i': i },
-        h('button', { type: 'button', class: 'pick', onclick: () => this.controller.selectInstrument(i) }, h('i'), inst.name),
-        h('button', { type: 'button', class: 'layer', title: `Layer ${inst.name} on top`, onclick: () => this.controller.toggleLayer(i) }, '+')));
+        h('div', { class: 'inst-row' },
+          h('button', { type: 'button', class: 'pick', onclick: () => this.controller.selectInstrument(i) }, h('i'), inst.name),
+          h('button', { type: 'button', class: 'layer', title: `Layer ${inst.name} on top`, onclick: () => this.controller.toggleLayer(i) }, '+')),
+        style));
     }
   }
 
@@ -212,6 +225,7 @@ export class UI {
       const i = Number(el.dataset.i);
       el.classList.toggle('on', i === state.instrument);
       el.classList.toggle('layered', state.layerOn && i === state.layer && i !== state.instrument);
+      el.querySelector('.style').value = state.styles[INSTRUMENTS[i].id];
     }
     this.tracks?.updateLabels();
   }
@@ -253,6 +267,7 @@ export class UI {
       seg.append(h('button', { type: 'button', 'data-v': id, onclick: () => set({ visual: id }) }, label));
     }
     $('#btn-stage').addEventListener('click', () => this.toggleStage());
+    $('#btn-chords').addEventListener('click', () => set({ showChords: !state.showChords }));
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (document.body.classList.contains('stage-mode')) this.toggleStage(false);
@@ -276,10 +291,12 @@ export class UI {
     const extras = [state.chord !== 'off' ? CHORD_MODES[state.chord] : null, state.octave ? `oct ${state.octave > 0 ? '+' : ''}${state.octave}` : null].filter(Boolean);
     $('#hud-sub').textContent = [names, key, ...extras].join(' · ');
     for (const b of $('#visual-seg').children) b.classList.toggle('on', b.dataset.v === state.visual);
+    $('#btn-chords').classList.toggle('on', state.showChords);
     this.visuals.setMode(state.visual);
   }
 
   #flashChord(notes) {
+    if (!state.showChords) return;
     const el = $('#hud-chord');
     el.textContent = notes.length > 1 ? chordName(notes, NOTE_NAMES) : NOTE_NAMES[notes[0] % 12];
     el.classList.add('show');
@@ -371,7 +388,7 @@ export class UI {
       }
       f.hw.textContent = this.device.fxHw[i];
     });
-    $('#fx-hint').textContent = this.device === OXYGEN ? 'knobs = tone · faders = space' : `the ${this.device.name}'s 8 knobs`;
+    $('#fx-hint').textContent = this.device === OXYGEN ? 'faders = tone · knobs = space' : `the ${this.device.name}'s 8 knobs`;
     if (touched !== undefined) {
       const w = this.fxEls[touched]?.wrap;
       if (w) {
@@ -384,33 +401,30 @@ export class UI {
 
   // ── looper ──
   #looper() {
-    const bars = $('#loop-bars');
-    LOOP_BAR_OPTIONS.forEach((b) => bars.append(h('option', { value: b }, `${b} bar${b > 1 ? 's' : ''}`)));
-    bars.addEventListener('change', () => {
-      if (this.looper.setBars(Number(bars.value))) set({ loopBars: Number(bars.value) });
-      else {
-        bars.value = String(this.looper.bars);
-        this.toast('Clear all loops to change the loop length.');
-      }
-    });
-    $('#btn-quant').addEventListener('click', () => set({ quantize: !state.quantize }));
+    $('#btn-quant').addEventListener('click', () => this.controller.action('quantize'));
     $('#btn-stop-loops').addEventListener('click', () => this.looper.stopAll());
 
     const root = $('#loops');
-    const C = 2 * Math.PI * 20;
+    const C = 2 * Math.PI * 15;
     this.looper.loops.forEach((_, i) => {
       const ring = h('button', { type: 'button', class: 'ring', title: 'Tap: record / play / stop', onclick: () => this.looper.tap(i) });
-      ring.innerHTML = `<svg viewBox="0 0 48 48"><circle class="bg" cx="24" cy="24" r="20" fill="none" stroke-width="4"/>
-        <circle class="fg" cx="24" cy="24" r="20" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><b>${i + 1}</b>`;
+      ring.innerHTML = `<svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15" fill="none" stroke-width="3.5"/>
+        <circle class="fg" cx="18" cy="18" r="15" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><b>${i + 1}</b>`;
       const stateEl = h('div', { class: 'state' }, 'empty');
       const dots = h('div', { class: 'dots' });
+      // Each loop has its own length; it can only change while the loop is empty.
+      const bars = h('select', { class: 'loop-bars', title: 'Loop length', 'aria-label': `Loop ${i + 1} length`,
+        onchange: (e) => {
+          if (!this.controller.setLoopBars(i, Number(e.target.value))) e.target.value = String(this.looper.loops[i].bars);
+        } },
+      LOOP_BAR_OPTIONS.map((b) => h('option', { value: b }, `${b} bar${b > 1 ? 's' : ''}`)));
       const rec = h('button', { type: 'button', title: 'Record / overdub', onclick: () => this.#recButton(i) }, '●');
       const play = h('button', { type: 'button', title: 'Play / stop', onclick: () => this.#playButton(i) }, '▶');
       const clear = h('button', { type: 'button', title: 'Clear', onclick: () => this.looper.clear(i) }, '✕');
       const card = h('div', { class: 'loop', 'data-state': 'empty' }, ring,
-        h('div', { class: 'loop-body' }, h('div', {}, stateEl, dots), h('div', { class: 'btns' }, rec, play, clear)));
+        h('div', { class: 'loop-info' }, stateEl, dots), bars, h('div', { class: 'btns' }, rec, play, clear));
       root.append(card);
-      this.loopEls.push({ card, ring, fg: ring.querySelector('.fg'), stateEl, dots, rec, play, clear, C });
+      this.loopEls.push({ card, ring, fg: ring.querySelector('.fg'), stateEl, dots, bars, rec, play, clear, C });
     });
   }
 
@@ -439,20 +453,19 @@ export class UI {
       e.play.disabled = !(s === 'playing' || s === 'stopped');
       e.clear.disabled = s === 'empty';
       e.rec.title = s === 'empty' ? 'Record (starts on the next bar)' : 'Overdub one more pass';
+      e.bars.value = String(loop.bars);
+      e.bars.disabled = !this.looper.canResize(i);
+      e.bars.title = e.bars.disabled ? 'Clear the loop to change its length' : 'Loop length';
     });
-    const bars = $('#loop-bars');
-    bars.value = String(this.looper.bars);
-    bars.disabled = this.looper.hasContent;
     $('#btn-quant').classList.toggle('on', state.quantize);
   }
 
   #frameLoops() {
-    const phase = this.looper.phase();
     this.looper.loops.forEach((_, i) => {
       const e = this.loopEls[i];
       const s = e.card.dataset.state;
       const active = this.clock.running && s !== 'empty' && s !== 'stopped';
-      e.fg.setAttribute('stroke-dashoffset', String(active ? e.C * (1 - phase) : s === 'stopped' ? 0 : e.C));
+      e.fg.setAttribute('stroke-dashoffset', String(active ? e.C * (1 - this.looper.phase(i)) : s === 'stopped' ? 0 : e.C));
     });
     // HUD: bar counter / count-in / rec indicator
     const hud = $('#hud-loop');
@@ -558,7 +571,7 @@ export class UI {
     for (const b of $('#apc .apc-mode').children) b.classList.toggle('on', b.dataset.mode === state.gridMode);
     this.gridHint.textContent = drums
       ? 'Drums: columns = Kick, Snare, Clap, Hat, Open Hat, Tom, Rim, Crash · rows = soft (bottom) → loud (top) · last button under the grid switches back'
-      : 'Knobs = FX 1–8 · Shift + instrument = layer · hold a loop (or Shift) = clear · Shift + Stop All = clear all · last button under the grid = drums';
+      : 'Knobs = FX 1–8 · Shift + instrument = layer · loops: hold = clear, Shift = length · Shift + Record = snap · Shift + Tap = metronome · last button under the grid = drums';
   }
 
   #renderPads() {
@@ -791,7 +804,13 @@ export class UI {
       ab.live ? h('button', { type: 'button', class: 'pill', onclick: () => ab.refreshTracks() }, 'Re-scan tracks') : null,
       verb,
       h('p', { style: 'margin-top:14px' }, `FX mapping (one time): in Live press ⌘M, click a parameter, then press Send here. Lumen sends these on MIDI channel ${FX_CHANNEL}.`),
-      h('div', { class: 'kv' }, fxRows)));
+      h('div', { class: 'kv' }, fxRows),
+      h('p', { style: 'margin-top:14px' }, `Instrument styles (optional): on a Live track, group 5 sounds in an Instrument Rack, one chain per style in Lumen’s order, and choose “Distribute Ranges Equally” on the chain selector. Then press ⌘M, click the Chain Selector, and press Send for that instrument.`),
+      h('div', { class: 'kv' }, MELODIC.flatMap((i) => [
+        h('span', {}, INSTRUMENTS[i].name),
+        h('span', { class: 'src' }, `CC ${STYLE_CC} · ch ${INSTRUMENTS[i].channel} → Chain Selector`),
+        h('button', { type: 'button', class: 'pill', onclick: () => this.engine.sendStyle(i, state.styles[INSTRUMENTS[i].id]) }, 'Send'),
+      ]))));
 
     // Visual input
     const audioSel = h('select', { onchange: (e) => this.onAudioInput?.(e.target.value) });
@@ -805,7 +824,7 @@ export class UI {
     // Shortcuts
     const sc = [
       ['A W S E D F T G Y H U J K O L P ;', 'piano keys (Shift = loud)'],
-      ['1 – 8', 'drum pads'], ['C V B N', 'loops 1–4 (hold to clear)'], ['M', 'stop all loops'],
+      ['1 – 8', 'drum pads'], ['C V B N', 'loops 1–4 (hold to clear)'], ['Shift + C V B N', 'loops 5–8'], ['M', 'stop all loops'],
       ['Space', 'play / stop'], ['Z / X', 'octave down / up'], ['← → or , .', 'previous / next vibe'],
       ['↑ ↓', 'previous / next instrument'], ['`', 'stage mode'],
     ];
@@ -858,14 +877,18 @@ export class UI {
         this.#renderEngine();
         this.#renderStatus();
       }
-      if ('instrument' in patch || 'layer' in patch || 'layerOn' in patch) this.#renderInstruments();
+      if ('instrument' in patch || 'layer' in patch || 'layerOn' in patch || 'styles' in patch) this.#renderInstruments();
       if (['root', 'scale', 'keyMode', 'chord', 'octave'].some((k) => k in patch)) {
         this.#renderHelpers();
         this.#renderKeyboard();
       }
       if (['vibe', 'instrument', 'layer', 'layerOn', 'root', 'scale', 'keyMode', 'chord', 'octave', 'visual'].some((k) => k in patch)) this.#renderHud();
       if ('fx' in patch) this.#renderFx();
-      if ('tempo' in patch || 'metronome' in patch) this.#renderTransport();
+      if ('tempo' in patch || 'metronome' in patch || 'clickSound' in patch) this.#renderTransport();
+      if ('showChords' in patch) {
+        this.#renderHud();
+        if (!state.showChords) $('#hud-chord').classList.remove('show');
+      }
       if ('tempo' in patch) this.#renderFx(); // Space shows seconds at the current tempo
       if ('quantize' in patch) this.#renderLoops();
       if ('mappings' in patch && this.drawerOpen) this.renderDrawer();

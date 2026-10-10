@@ -5,6 +5,7 @@
 //                                                                         ├─▶ echo ─────┤─▶ limiter ─▶ out
 //                                                                         └─▶ reverb ───┘
 import { INSTRUMENTS, DRUMS_INDEX, FX_MACROS, PREDELAY_BEATS, reverbDivision } from './config.js';
+import { styleFor } from './styles.js';
 
 const mtof = (n) => 440 * 2 ** ((n - 69) / 12);
 const MAX_VOICES = 12;
@@ -45,90 +46,97 @@ function releaseParam(param, t, r) {
   param.setTargetAtTime(0, t, r / 4);
 }
 
-// ── Patches ─────────────────────────────────────────────────────────────────
-// Each returns { out, oscs, release } — `out` is the voice's amp gain node.
-const PATCHES = {
-  // FM electric piano: bell-like attack that mellows out.
-  keys(s, f, vel, t) {
-    const { ctx } = s;
-    const car = s.osc('sine', f);
-    const mod = s.osc('sine', f);
-    const modG = s.gain(0);
-    mod.connect(modG).connect(car.frequency);
-    modG.gain.setValueAtTime(f * (1.2 + vel * 2.4), t);
-    modG.gain.setTargetAtTime(f * 0.3, t, 0.4);
-    const tine = s.osc('sine', f * 14);
-    const tineG = s.gain(0);
-    tine.connect(tineG).connect(car.frequency);
-    tineG.gain.setValueAtTime(f * vel * 0.9, t);
-    tineG.gain.setTargetAtTime(0, t, 0.03);
-    const amp = ctx.createGain();
-    car.connect(amp);
-    adsr(amp.gain, t, { a: 0.004, d: 2.2, s: 0.12, peak: 0.12 + vel * 0.38 });
-    return { out: amp, oscs: [car, mod, tine], release: 0.45 };
-  },
+// ── Voices from styles ──────────────────────────────────────────────────────
+// Builds one note from a style description (see styles.js).
+// Returns { out, oscs (pitched, follow bend/vibrato), extras (LFOs/noise: start+stop only), release }.
+function buildVoice(s, style, f, vel, t) {
+  const { ctx } = s;
+  const input = s.gain(1);
+  const amp = ctx.createGain();
+  const oscs = [];
+  const extras = [];
 
-  // Warm detuned-saw pad.
-  pad(s, f, vel, t) {
-    const { ctx } = s;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.Q.value = 0.7;
-    filter.frequency.setValueAtTime(500, t);
-    filter.frequency.setTargetAtTime(1200 + vel * 1600, t, 0.6);
-    const oscs = [-11, -3, 4, 12].map((cents) => {
-      const o = s.osc('sawtooth', f, cents);
-      o.connect(filter);
-      return o;
+  // Tone shaping: one filter, or parallel vowel formants, or nothing.
+  if (style.formants) {
+    style.formants.forEach((hz, i) => {
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = hz;
+      bp.Q.value = 7;
+      const g = s.gain([1, 0.6, 0.35][i] ?? 0.3);
+      input.connect(bp).connect(g).connect(amp);
     });
-    const sub = s.osc('sine', f / 2);
-    const subG = s.gain(0.5);
-    sub.connect(subG).connect(filter);
-    oscs.push(sub);
-    const amp = ctx.createGain();
-    filter.connect(amp);
-    adsr(amp.gain, t, { a: 0.45, d: 1.5, s: 0.8, peak: 0.07 + vel * 0.06 });
-    return { out: amp, oscs, release: 1.6 };
-  },
-
-  // Round sub bass with a plucky filter.
-  bass(s, f, vel, t) {
-    const { ctx } = s;
+  } else if (style.filter) {
+    const { type = 'lowpass', freq, q = 0.7, env = 0, decay = 0.2, keytrack = 0 } = style.filter;
     const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.Q.value = 6;
-    filter.frequency.setValueAtTime(200 + vel * 2600, t);
-    filter.frequency.setTargetAtTime(380, t + 0.01, 0.12);
-    const sine = s.osc('sine', f);
-    const sq = s.osc('square', f, 3);
-    const sqG = s.gain(0.28);
-    sine.connect(filter);
-    sq.connect(sqG).connect(filter);
-    const amp = ctx.createGain();
-    filter.connect(amp);
-    adsr(amp.gain, t, { a: 0.004, d: 0.35, s: 0.7, peak: 0.3 + vel * 0.3 });
-    return { out: amp, oscs: [sine, sq], release: 0.12 };
-  },
+    filter.type = type;
+    filter.Q.value = q;
+    const base = freq * (f / 261.6) ** keytrack;
+    filter.frequency.setValueAtTime(Math.max(30, base + env * (env > 0 ? vel : 1)), t);
+    filter.frequency.setTargetAtTime(base, t + 0.005, decay / 3);
+    if (style.wobble) {
+      // Tempo-locked filter sweep (dubstep wobble, slow drone movement).
+      const lfo = s.osc('sine', s.bpm / 60 / style.wobble.beats);
+      const depth = s.gain(style.wobble.depth);
+      lfo.connect(depth).connect(filter.frequency);
+      extras.push(lfo);
+    }
+    input.connect(filter).connect(amp);
+  } else {
+    input.connect(amp);
+  }
 
-  // Bright saw/square lead.
-  lead(s, f, vel, t) {
-    const { ctx } = s;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.Q.value = 3;
-    filter.frequency.setValueAtTime(900 + vel * 5200, t);
-    filter.frequency.setTargetAtTime(2400, t + 0.01, 0.18);
-    const saw = s.osc('sawtooth', f, -6);
-    const sq = s.osc('square', f, 6);
-    const sqG = s.gain(0.45);
-    saw.connect(filter);
-    sq.connect(sqG).connect(filter);
-    const amp = ctx.createGain();
-    filter.connect(amp);
-    adsr(amp.gain, t, { a: 0.008, d: 0.25, s: 0.65, peak: 0.1 + vel * 0.14 });
-    return { out: amp, oscs: [saw, sq], release: 0.25 };
-  },
-};
+  // Oscillators (+ optional FM modulator driving all of them).
+  let fmGain = null;
+  if (style.fm) {
+    const { ratio, index, decay, floor } = style.fm;
+    const mod = s.osc('sine', f * ratio);
+    fmGain = s.gain(0);
+    fmGain.gain.setValueAtTime(f * index * (0.45 + vel * 0.55), t);
+    fmGain.gain.setTargetAtTime(f * floor, t, decay / 3);
+    mod.connect(fmGain);
+    oscs.push(mod);
+  }
+  for (const { type, ratio = 1, detune = 0, gain = 1 } of style.osc) {
+    const o = s.osc(type, f * ratio, detune);
+    if (fmGain) fmGain.connect(o.frequency);
+    o.connect(s.gain(gain)).connect(input);
+    oscs.push(o);
+  }
+
+  // Noise layer: a hammer/pluck transient, or a sustained breath.
+  if (style.noise) {
+    const { gain, type = 'bandpass', freq = 2000, q = 1, decay } = style.noise;
+    const src = ctx.createBufferSource();
+    src.buffer = s.noise;
+    src.loop = true;
+    const nf = ctx.createBiquadFilter();
+    nf.type = type;
+    nf.frequency.value = freq;
+    nf.Q.value = q;
+    const ng = s.gain(0);
+    ng.gain.setValueAtTime(gain * (0.4 + vel * 0.6), t);
+    if (decay) ng.gain.setTargetAtTime(0, t, decay / 3);
+    src.connect(nf).connect(ng).connect(input);
+    extras.push(src);
+  }
+
+  // Vibrato that fades in after `delay`.
+  if (style.vibrato) {
+    const { rate, depth, delay = 0 } = style.vibrato;
+    const lfo = s.osc('sine', rate);
+    const dg = s.gain(0);
+    dg.gain.setValueAtTime(0, t);
+    dg.gain.linearRampToValueAtTime(depth, t + delay + 0.25);
+    lfo.connect(dg);
+    for (const o of oscs) dg.connect(o.detune);
+    extras.push(lfo);
+  }
+
+  const { a, d, s: sus, r, peak } = style.amp;
+  adsr(amp.gain, t, { a, d, s: sus, peak: peak * (0.25 + vel * 0.75) });
+  return { out: amp, oscs, extras, release: r };
+}
 
 export class Synth {
   constructor(ctx) {
@@ -198,6 +206,9 @@ export class Synth {
       g.connect(this.fxIn);
       return { gain: g, level, meter, data: new Float32Array(meter.fftSize), muted: false };
     });
+
+    // Each melodic instrument plays one of its styles (styles.js).
+    this.styles = INSTRUMENTS.map((inst) => (inst.isDrums ? null : styleFor(inst.id)));
 
     // Vibrato (mod wheel): one LFO, one depth per instrument
     this.lfo = this.osc('sine', 5.5);
@@ -279,9 +290,7 @@ export class Synth {
 
   // ── voices ──
   #voice(inst, note, vel, t) {
-    const patch = PATCHES[INSTRUMENTS[inst].patch];
-    const f = mtof(note);
-    const v = patch(this, f, vel, t);
+    const v = buildVoice(this, this.styles[inst], mtof(note), vel, t);
     const releaseTime = v.release;
     v.out.connect(this.buses[inst].gain);
     v.inst = inst;
@@ -293,13 +302,14 @@ export class Synth {
       this.vibrato[inst].connect(o.detune);
       o.start(t);
     }
+    for (const x of v.extras) x.start(t);
     // fast = "cut it now" (voice stealing, loop muting) and may override a normal release.
     v.release = (time, fast = false) => {
       if (v.released && !fast) return;
       const r = fast ? 0.03 : releaseTime;
       v.released = true;
       releaseParam(v.out.gain, time, r);
-      for (const o of v.oscs) o.stop(time + r * 1.6 + 0.05);
+      for (const o of [...v.oscs, ...v.extras]) o.stop(time + r * 1.6 + 0.05);
     };
     v.oscs[0].onended = () => {
       this.all[inst].delete(v);
@@ -469,13 +479,60 @@ export class Synth {
     }
   }
 
-  /** Metronome tick — bypasses the FX so it stays dry and clear. */
-  click(time, accent) {
-    const o = this.osc('sine', accent ? 1760 : 1180);
-    const g = this.#env(time, accent ? 0.35 : 0.2, 0.05);
-    o.connect(g).connect(this.out);
-    o.start(time);
-    o.stop(time + 0.06);
+  /** Metronome tick — bypasses the FX so it stays dry and clear. The downbeat is accented. */
+  click(time, accent, sound = 'soft') {
+    const { ctx } = this;
+    const out = this.out;
+    const tone = (type, freq, peak, decay, toFreq) => {
+      const o = this.osc(type, freq);
+      if (toFreq) o.frequency.exponentialRampToValueAtTime(toFreq, time + decay * 0.6);
+      o.connect(this.#env(time, peak, decay)).connect(out);
+      o.start(time);
+      o.stop(time + decay + 0.02);
+      return o;
+    };
+    const noise = (type, freq, q, peak, decay, attack = 0) => {
+      const f = ctx.createBiquadFilter();
+      f.type = type;
+      f.frequency.value = freq;
+      f.Q.value = q;
+      const g = this.gain(0);
+      g.gain.setValueAtTime(0.0001, time);
+      g.gain.linearRampToValueAtTime(peak, time + attack + 0.001);
+      g.gain.exponentialRampToValueAtTime(0.0008, time + attack + decay);
+      this.#noiseSrc(time, attack + decay + 0.02).connect(f).connect(g).connect(out);
+    };
+    switch (sound) {
+      case 'wood': // hollow "tok": a resonant band-passed tick plus a short body
+        noise('bandpass', accent ? 1500 : 1100, 12, accent ? 0.9 : 0.6, 0.05);
+        tone('sine', accent ? 900 : 700, accent ? 0.18 : 0.12, 0.04);
+        break;
+      case 'shaker': // a soft shake that swells in, brighter on the downbeat
+        noise('bandpass', accent ? 7000 : 5500, 1.2, accent ? 0.22 : 0.14, 0.07, 0.012);
+        break;
+      case 'cowbell': // the classic drum-machine bell: two detuned squares through a band-pass
+        for (const hz of [540, 800]) {
+          const o = this.osc('square', accent ? hz * 1.06 : hz);
+          const bp = ctx.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = 2400;
+          bp.Q.value = 1.5;
+          o.connect(bp).connect(this.#env(time, accent ? 0.16 : 0.1, 0.18)).connect(out);
+          o.start(time);
+          o.stop(time + 0.2);
+        }
+        break;
+      case 'beep': // the old-school metronome
+        tone('sine', accent ? 1760 : 1180, accent ? 0.35 : 0.2, 0.05);
+        break;
+      default: // 'soft': a muted low knock with a hint of tick — present but never piercing
+        tone('sine', accent ? 190 : 150, accent ? 0.5 : 0.32, 0.09, accent ? 110 : 90);
+        noise('highpass', 3000, 0.7, accent ? 0.05 : 0.03, 0.012);
+    }
+  }
+
+  setStyle(inst, styleId) {
+    this.styles[inst] = styleFor(INSTRUMENTS[inst].id, styleId);
   }
 
   // ── FX + mixing ──

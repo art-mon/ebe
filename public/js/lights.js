@@ -1,7 +1,8 @@
 // Light feedback for controllers with LEDs (the APC Key 25). The same "look"
 // drives the on-screen grid, so the screen and the hardware always agree.
 import { state } from './state.js';
-import { VIBES, INSTRUMENTS, DRUM_VOICES, NOTE_NAMES, SCALES } from './config.js';
+import { VIBES, INSTRUMENTS, DRUM_VOICES, NOTE_NAMES, SCALES, VISUALS } from './config.js';
+import { STYLES } from './styles.js';
 import { APC, APC_SCENES, APC_TRACKS, apcNote, apcGrid } from './devices.js';
 import { every } from './ticker.js';
 
@@ -77,7 +78,9 @@ const LOOP_LOOK = {
   playing: { color: '#00ff00', level: 'full', mk1: MK1.green },
   stopped: { color: '#ffbd6c', level: 'dim', mk1: MK1.amber },
 };
-const BAR_COLORS = { 1: '#4cff4c', 2: '#ffff4c', 4: '#ff7f00', 8: '#ff4c4c' };
+// Empty loop pads show their length: green 1 bar, yellow 2, orange 4, purple 8.
+export const BAR_COLORS = { 1: '#4cff4c', 2: '#ffff4c', 4: '#ff7f00', 8: '#874cff' };
+const VISUAL_COLORS = { nebula: '#4cc3ff', rings: '#ff4cff', horizon: '#ff7f00', oil: '#4c88ff', stardust: '#e0ffff' };
 const KEY_COLORS = { off: '#7f7f7f', snap: '#4cc3ff', white: '#4cff88' };
 
 export const targetKey = (t) => `${t.kind}:${t.name ?? ''}:${t.index ?? ''}:${t.arg ?? ''}`;
@@ -105,7 +108,14 @@ export function gridLook(t, ctx) {
     }
     case 'visual': return { color: '#4cc3ff', level: state.visual === a ? 'full' : 'dim' };
     case 'stage': return { color: '#ff4cff', level: ctx.stage ? 'pulse' : 'dim' };
-    case 'loop': return LOOP_LOOK[ctx.looper.status(a)];
+    case 'loop': {
+      const st = ctx.looper.status(a);
+      if (st === 'empty') return { color: BAR_COLORS[ctx.looper.loops[a].bars] ?? '#ffffff', level: 'dim', mk1: 0 };
+      return LOOP_LOOK[st];
+    }
+    case 'stylePrev':
+    case 'styleNext': return { color: INSTRUMENTS[state.instrument].color, level: ctx.held.has(targetKey(t)) ? 'full' : 'dim', mk1: MK1.amber };
+    case 'visualNext': return { color: VISUAL_COLORS[state.visual] ?? '#ffffff', level: 'full' };
     case 'stopLoops': return { color: '#ff4c4c', level: ctx.looper.loops.some((l) => l.playing && l.events.length) ? 'full' : 'dim' };
     case 'quantize': return { color: '#4cffb7', level: state.quantize ? 'full' : 'dim' };
     case 'loopBars': return { color: BAR_COLORS[ctx.looper.bars] ?? '#ffffff', level: ctx.looper.hasContent ? 'dim' : 'full', mk1: MK1.amber };
@@ -142,7 +152,14 @@ export function describeTarget(t) {
     case 'inst': return [`${INSTRUMENTS[a].name} (Shift: layer)`, INSTRUMENTS[a].name.slice(0, 3)];
     case 'visual': return [`Visuals · ${a}`, a.slice(0, 3)];
     case 'stage': return ['Stage mode', '⛶'];
-    case 'loop': return [`Loop ${a + 1} (tap: rec/play/stop · hold or Shift: clear)`, `L${a + 1}`];
+    case 'loop': return [`Loop ${a + 1} (tap: rec/play/stop · hold: clear · Shift: length)`, `${a + 1}`];
+    case 'stylePrev':
+    case 'styleNext': {
+      const id = INSTRUMENTS[state.instrument].id;
+      const name = STYLES[id]?.find((st) => st.id === state.styles[id])?.name ?? '';
+      return [`${t.name === 'styleNext' ? 'Next' : 'Previous'} ${INSTRUMENTS[state.instrument].name} style · now ${name}`, t.name === 'styleNext' ? 'St▶' : '◀St'];
+    }
+    case 'visualNext': return [`Next visuals (Shift: previous) · now ${VISUALS[state.visual]}`, 'Vis'];
     case 'stopLoops': return ['Stop all loops (Shift: clear all)', '■'];
     case 'quantize': return ['Snap loops to 16ths', 'Snp'];
     case 'loopBars': return ['Loop length (1 / 2 / 4 / 8 bars)', 'Len'];
@@ -151,9 +168,9 @@ export function describeTarget(t) {
     case 'chord': return [`Chords · ${a}`, { off: 'Off', triad: '3', seventh: '7', power: '5', octave: '8' }[a]];
     case 'randomVibe': return ['Random vibe', '?'];
     case 'layer': return ['Layer on/off', 'L'];
-    case 'record': return ['Record next loop', '●'];
+    case 'record': return ['Record next loop (Shift: snap on/off)', '●'];
     case 'nextScale': return [`Next scale (Shift: next key) · ${NOTE_NAMES[state.root]} ${SCALES[state.scale].name}`, '♯'];
-    case 'tap': return ['Tap tempo', 'Tap'];
+    case 'tap': return ['Tap tempo (Shift: metronome on/off)', 'Tap'];
     case 'mute': return [`Mute ${INSTRUMENTS[a].name}`, INSTRUMENTS[a].name[0]];
     case 'octDown': return ['Octave down', '−'];
     case 'octUp': return ['Octave up', '+'];
