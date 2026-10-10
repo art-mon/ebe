@@ -132,14 +132,21 @@
 
     <!-- RIGHT: looper + pads -->
     <aside class="col right">
-      <section class="panel">
-        <h2>Looper
+      <section class="panel looper-panel">
+        <h2>Looper <span class="hint">song → each column is a section, each cell a loop</span>
           <span class="loop-opts">
             <button type="button" class="pill toggle small" id="btn-quant" title="Snap recorded notes to 16ths">Snap</button>
           </span>
         </h2>
         <div class="loops" id="loops"></div>
-        <button type="button" class="btn ghost wide" id="btn-stop-loops">Stop all loops</button>
+        <div class="looper-foot">
+          <button type="button" class="btn ghost" id="btn-stop-loops">Stop all loops</button>
+          <div class="song-ctl">
+            <button type="button" class="btn" id="btn-song" title="Play the song grid (Shift + Space, or Shift + Play on the APC)">▶ Song</button>
+            <button type="button" class="pill toggle" id="btn-song-repeat" title="Start over when the song ends">Repeat</button>
+            <button type="button" class="pill" id="btn-song-clear" title="Untick every cell">Clear</button>
+          </div>
+        </div>
       </section>
       <section class="panel">
         <h2>Pads

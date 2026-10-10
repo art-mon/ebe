@@ -6,6 +6,7 @@ import { Ableton } from './ableton.js';
 import { Engine } from './engine.js';
 import { Clock } from './clock.js';
 import { Looper } from './looper.js';
+import { Song } from './song.js';
 import { Controller } from './controller.js';
 import { AudioFeed } from './feed.js';
 import { Visuals } from './visuals.js';
@@ -24,7 +25,9 @@ const ableton = new Ableton(bus);
 const engine = new Engine({ ctx, synth, midi, ableton, bus });
 const clock = new Clock(ctx, bus);
 const looper = new Looper({ clock, engine, bus });
+const song = new Song({ clock, looper, bus });
 const controller = new Controller({ engine, looper, clock, bus });
+controller.song = song;
 const feed = new AudioFeed(ctx);
 // When stopped, the horizon grid keeps drifting slowly so the stage never looks frozen.
 const visuals = new Visuals($('#visuals'), feed, () => (clock.running ? clock.beat : (performance.now() / 1000) * 0.4));
@@ -43,7 +46,7 @@ applyStyles();
 feed.useAnalyser(state.engine === 'builtin' ? synth.analyser : null);
 
 const lights = new Lights({ midi, looper, bus });
-const ui = new UI({ controller, looper, clock, engine, midi, ableton, feed, visuals, bus, lights });
+const ui = new UI({ controller, looper, song, clock, engine, midi, ableton, feed, visuals, bus, lights });
 const tracks = new Tracks($('#tracks'), { synth, ableton, engine, controller, bus });
 ui.tracks = tracks;
 tracks.updateLabels();
@@ -211,4 +214,4 @@ if (new URLSearchParams(location.search).has('debug')) {
 }
 
 // Handy for poking around in the console.
-window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, controller, feed, visuals, lights, state };
+window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, song, controller, feed, visuals, lights, state };

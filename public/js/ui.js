@@ -88,6 +88,7 @@ export class UI {
     this.#renderHud();
     this.#renderFx();
     this.#renderLoops();
+    this.#renderSong();
     this.#renderPads();
     this.#renderKeyboard();
   }
@@ -406,6 +407,24 @@ export class UI {
 
     const root = $('#loops');
     const C = 2 * Math.PI * 15;
+
+    // Song grid header: one bars button per section, aligned above the cells.
+    this.songHeads = [];
+    const head = h('div', { class: 'loop song-head-row' }, h('span', { class: 'song-label' }, 'Song sections · bars ▸'));
+    const heads = h('div', { class: 'song-cells' });
+    for (let j = 0; j < this.song.sections.length; j++) {
+      const b = h('button', { type: 'button', class: 'song-head',
+        onclick: (e) => this.song.cycleBars(j, e.shiftKey ? -1 : 1),
+        oncontextmenu: (e) => { e.preventDefault(); this.song.cycleBars(j, -1); } });
+      heads.append(b);
+      this.songHeads.push(b);
+    }
+    head.append(heads);
+    root.append(head);
+    $('#btn-song').addEventListener('click', () => this.song.toggle());
+    $('#btn-song-repeat').addEventListener('click', () => set({ song: { ...state.song, repeat: !state.song.repeat } }));
+    $('#btn-song-clear').addEventListener('click', () => this.song.clear());
+
     this.looper.loops.forEach((_, i) => {
       const ring = h('button', { type: 'button', class: 'ring', title: 'Tap: record / play / stop', onclick: () => this.looper.tap(i) });
       ring.innerHTML = `<svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15" fill="none" stroke-width="3.5"/>
@@ -421,10 +440,13 @@ export class UI {
       const rec = h('button', { type: 'button', title: 'Record / overdub', onclick: () => this.#recButton(i) }, '●');
       const play = h('button', { type: 'button', title: 'Play / stop', onclick: () => this.#playButton(i) }, '▶');
       const clear = h('button', { type: 'button', title: 'Clear', onclick: () => this.looper.clear(i) }, '✕');
+      const cells = this.song.sections.map((_, j) => h('button', { type: 'button', class: 'song-cell',
+        title: `Section ${j + 1}: play loop ${i + 1}`, onclick: () => this.song.toggleCell(j, i) }));
       const card = h('div', { class: 'loop', 'data-state': 'empty' }, ring,
-        h('div', { class: 'loop-info' }, stateEl, dots), bars, h('div', { class: 'btns' }, rec, play, clear));
+        h('div', { class: 'loop-info' }, stateEl, dots), bars, h('div', { class: 'btns' }, rec, play, clear),
+        h('div', { class: 'song-cells' }, cells));
       root.append(card);
-      this.loopEls.push({ card, ring, fg: ring.querySelector('.fg'), stateEl, dots, bars, rec, play, clear, C });
+      this.loopEls.push({ card, ring, fg: ring.querySelector('.fg'), stateEl, dots, bars, rec, play, clear, cells, C });
     });
   }
 
@@ -460,7 +482,35 @@ export class UI {
     $('#btn-quant').classList.toggle('on', state.quantize);
   }
 
+  #renderSong() {
+    const song = this.song;
+    const secs = song.sections;
+    const used = song.length;
+    this.songHeads.forEach((b, j) => {
+      b.textContent = String(secs[j].bars);
+      b.title = `Section ${j + 1}: ${secs[j].bars} bar${secs[j].bars > 1 ? 's' : ''} (click: more, right-click: fewer)`;
+      b.classList.toggle('now', song.playing && song.index === j);
+      b.classList.toggle('unused', j >= used);
+    });
+    this.looper.loops.forEach((loop, i) => {
+      const color = loop.insts.size ? INSTRUMENTS[[...loop.insts][0]].color : 'var(--accent)';
+      this.loopEls[i].cells.forEach((c, j) => {
+        const on = !!secs[j].on[i];
+        c.classList.toggle('on', on);
+        c.classList.toggle('now', song.playing && song.index === j);
+        c.classList.toggle('empty-loop', !loop.events.length);
+        c.style.setProperty('--c', color);
+      });
+    });
+    $('#btn-song').textContent = song.playing ? '■ Song' : '▶ Song';
+    $('#btn-song').classList.toggle('playing', song.playing);
+    $('#btn-song-repeat').classList.toggle('on', state.song.repeat);
+  }
+
   #frameLoops() {
+    if (this.song.playing && this.song.index >= 0) {
+      this.songHeads[this.song.index]?.style.setProperty('--p', this.song.progress().toFixed(3));
+    }
     this.looper.loops.forEach((_, i) => {
       const e = this.loopEls[i];
       const s = e.card.dataset.state;
@@ -825,7 +875,7 @@ export class UI {
     const sc = [
       ['A W S E D F T G Y H U J K O L P ;', 'piano keys (Shift = loud)'],
       ['1 – 8', 'drum pads'], ['C V B N', 'loops 1–4 (hold to clear)'], ['Shift + C V B N', 'loops 5–8'], ['M', 'stop all loops'],
-      ['Space', 'play / stop'], ['Z / X', 'octave down / up'], ['← → or , .', 'previous / next vibe'],
+      ['Space', 'play / stop'], ['Shift + Space', 'song play / stop'], ['Z / X', 'octave down / up'], ['← → or , .', 'previous / next vibe'],
       ['↑ ↓', 'previous / next instrument'], ['`', 'stage mode'],
     ];
     sections.push(h('section', {}, h('h3', {}, 'Computer keyboard'),
@@ -891,10 +941,15 @@ export class UI {
       }
       if ('tempo' in patch) this.#renderFx(); // Space shows seconds at the current tempo
       if ('quantize' in patch) this.#renderLoops();
+      if ('song' in patch) this.#renderSong();
       if ('mappings' in patch && this.drawerOpen) this.renderDrawer();
     });
     b.on('transport', () => this.#renderTransport());
-    b.on('looper', () => this.#renderLoops());
+    b.on('looper', () => {
+      this.#renderLoops();
+      this.#renderSong();
+    });
+    b.on('song', () => this.#renderSong());
     b.on('loopNote', () => this.#renderLoops());
     b.on('midiPorts', () => {
       this.#renderStatus();

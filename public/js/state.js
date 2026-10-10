@@ -24,6 +24,11 @@ export const bus = new Bus();
 
 const STORAGE_KEY = 'lumen:v1';
 
+// Song grid: 8 sections (columns), each N bars long with one on/off cell per loop.
+function defaultSong() {
+  return { repeat: true, sections: Array.from({ length: 8 }, () => ({ bars: 4, on: Array(LOOP_COUNT).fill(false) })) };
+}
+
 const DEFAULTS = {
   engine: 'builtin', // 'builtin' | 'ableton'
   vibe: 0,
@@ -43,6 +48,7 @@ const DEFAULTS = {
   quantize: true,
   showChords: true, // big chord name on the stage
   styles: { ...DEFAULT_STYLES }, // sound style per instrument
+  song: defaultSong(), // song grid: sections × loops
   visual: 'nebula',
   syncTempo: true,
   midiInputId: null,
@@ -72,6 +78,8 @@ export function migrate(s) {
   if (!Array.isArray(s.loopBars)) s.loopBars = Array(LOOP_COUNT).fill(Number(s.loopBars) || 2);
   while (s.loopBars.length < LOOP_COUNT) s.loopBars.push(s.loopBars.at(-1) ?? 2);
   s.styles = { ...DEFAULT_STYLES, ...s.styles };
+  if (!s.song?.sections) s.song = defaultSong();
+  for (const sec of s.song.sections) while (sec.on.length < LOOP_COUNT) sec.on.push(false);
   // v2 swapped the Oxygen's roles: faders now drive FX 1-4 and knobs FX 5-8. Controls
   // learned with the wizard keep their hardware role, so move their FX by four.
   if ((s.version ?? 1) < 2 && s.mappings) {

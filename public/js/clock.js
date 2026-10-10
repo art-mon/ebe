@@ -19,6 +19,7 @@ export class Clock {
     this.metronome = true;
     this.onClick = null; // (time, accent) => void
     this.tickers = new Set();
+    this.earlyTickers = new Set(); // run first in each tick (the song decides what plays before the looper schedules)
     this.stopTimer = null;
   }
 
@@ -40,8 +41,8 @@ export class Clock {
   }
 
   /** Called every tick with the beat window [from, to) that needs scheduling. */
-  onTick(fn) {
-    this.tickers.add(fn);
+  onTick(fn, early = false) {
+    (early ? this.earlyTickers : this.tickers).add(fn);
   }
 
   start(countInBeats = 0) {
@@ -91,6 +92,7 @@ export class Clock {
         Math.max(0, (time - now) * 1000),
       );
     }
+    for (const fn of this.earlyTickers) fn(from, until);
     for (const fn of this.tickers) fn(from, until);
   }
 }

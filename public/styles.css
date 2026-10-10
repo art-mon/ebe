@@ -127,7 +127,7 @@ body.running #btn-play { border-color: var(--ok); color: var(--ok); }
 /* ── layout ─────────────────────────────────────────────────────────── */
 .layout {
   display: grid; gap: var(--gap); padding: var(--gap) 16px 16px;
-  grid-template-columns: 270px minmax(0, 1fr) 300px;
+  grid-template-columns: 270px minmax(0, 1fr) 510px;
   grid-template-areas:
     "left center right"
     "keys keys keys";
@@ -241,7 +241,7 @@ body.stage-mode .stage { position: fixed; inset: 0; z-index: 20; border-radius: 
 .loops { display: grid; gap: 4px; }
 .loop {
   border: 1px solid var(--line-2); border-radius: 10px; background: var(--panel-2); padding: 3px 6px;
-  display: grid; grid-template-columns: 34px minmax(0, 1fr) 62px auto; gap: 6px; align-items: center;
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) 56px auto auto; gap: 6px; align-items: center;
 }
 .loop .ring { width: 34px; height: 34px; position: relative; cursor: pointer; border: 0; padding: 0; background: none; }
 .loop .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -271,7 +271,7 @@ body.stage-mode .stage { position: fixed; inset: 0; z-index: 20; border-radius: 
 /* pads */
 .pads { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .pad {
-  aspect-ratio: 1; border-radius: 12px; border: 1px solid var(--line-2); padding: 6px;
+  height: 62px; border-radius: 12px; border: 1px solid var(--line-2); padding: 6px;
   background: color-mix(in srgb, var(--pc, #555) 14%, var(--panel-2));
   display: flex; flex-direction: column; justify-content: space-between; text-align: left;
   font-size: 11px; font-weight: 700; touch-action: none; user-select: none; transition: background .12s, box-shadow .12s;
@@ -424,3 +424,31 @@ body.stage-mode .stage { position: fixed; inset: 0; z-index: 20; border-radius: 
 
 .click-sound { padding: 3px 6px; font-size: 12px; border-radius: 999px; max-width: 110px; }
 .hud-bottom .row { gap: 6px; }
+
+/* ── song grid (cells to the right of each loop) ─────────────────────── */
+.loops { overflow-x: auto; }
+.song-cells { display: flex; gap: 2px; margin-left: 4px; padding-left: 6px; border-left: 1px solid var(--line-2); }
+.song-cell, .song-head {
+  width: 21px; height: 22px; padding: 0; border-radius: 5px; flex: none;
+  border: 1px solid rgba(255,255,255,.2); background: #1e1d2b; color: var(--muted);
+}
+.song-cell:hover, .song-head:hover { border-color: var(--accent); }
+.song-cell.on { background: color-mix(in srgb, var(--c) 70%, #121218); border-color: var(--c); }
+.song-cell.empty-loop { border-style: dashed; background: #17161f; }
+.song-cell.now { box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.song-cell.on.now { background: var(--c); box-shadow: 0 0 10px var(--c); }
+.song-head-row { background: transparent; border-color: transparent; padding-top: 0; padding-bottom: 0; }
+.song-label { grid-column: 1 / 5; font-size: 10px; color: var(--muted); text-align: right; letter-spacing: .04em; }
+.song-head {
+  position: relative; overflow: hidden; font: 800 10px/1 ui-sans-serif, system-ui, sans-serif; color: var(--text);
+  background: var(--panel-2);
+}
+.song-head.unused { color: #5c5a73; }
+.song-head.now { border-color: var(--accent); color: #0b0716; background: color-mix(in srgb, var(--accent) 35%, var(--panel-2)); }
+.song-head.now::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: calc(var(--p, 0) * 100%); background: var(--accent);
+}
+.looper-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.song-ctl { display: flex; gap: 6px; align-items: center; }
+#btn-song.playing { border-color: var(--ok); color: var(--ok); }
+.apc { max-width: 380px; margin: 0 auto; }

@@ -171,7 +171,8 @@ export const CONTROL_PADS = [
 // Actions any button/pad on the controller can be MIDI-learned to.
 export const ACTIONS = {
   shift: 'Shift (hold)',
-  transport: 'Play / Stop',
+  transport: 'Play / Stop (Shift: song)',
+  song: 'Song play / stop',
   stop: 'Stop',
   record: 'Record next loop',
   stopLoops: 'Stop all loops',

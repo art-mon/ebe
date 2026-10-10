@@ -19,6 +19,7 @@ export class Looper {
       events: [], // { pos, dur, inst, note, vel, recordedAt }
       playing: false,
       playFrom: 0,
+      stopAt: Infinity, // a beat where a playing loop will stop (the song schedules these)
       rec: null, // { start, end }
       pending: new Map(),
       handles: [],
@@ -140,13 +141,33 @@ export class Looper {
     if (!this.clock.running) this.clock.start(0);
     loop.playing = true;
     loop.playFrom = Math.max(0, this.clock.beat);
+    loop.stopAt = Infinity;
     this.#changed();
   }
 
   stop(i) {
     const loop = this.loops[i];
     loop.playing = false;
+    loop.stopAt = Infinity;
     this.#cancelHandles(loop);
+    this.#changed();
+  }
+
+  /**
+   * Turn a loop on or off exactly at a future beat (used by the song, so changes
+   * land on the bar). A loop that's already in the right state is left alone.
+   */
+  scheduleState(i, on, at) {
+    const loop = this.loops[i];
+    if (on) {
+      if (!loop.events.length) return;
+      if (loop.playing && loop.stopAt === Infinity) return;
+      if (!loop.playing) loop.playFrom = at;
+      loop.playing = true;
+      loop.stopAt = Infinity;
+    } else if (loop.playing && loop.stopAt === Infinity) {
+      loop.stopAt = at;
+    } else return;
     this.#changed();
   }
 
@@ -157,6 +178,7 @@ export class Looper {
     loop.rec = null;
     loop.pending.clear();
     loop.playing = false;
+    loop.stopAt = Infinity;
     loop.insts.clear();
     this.#changed();
   }
@@ -222,6 +244,11 @@ export class Looper {
     const b = this.clock.beat;
     for (const loop of this.loops) {
       if (loop.rec && b >= loop.rec.end) this.#finish(loop);
+      if (loop.playing && b >= loop.stopAt) {
+        loop.playing = false;
+        loop.stopAt = Infinity;
+        this.#changed();
+      }
     }
   }
 
@@ -234,7 +261,7 @@ export class Looper {
       for (const ev of loop.events) {
         for (let abs = Math.ceil((from - ev.pos) / L) * L + ev.pos; abs < to; abs += L) {
           // Skip the pass where this note was just played live (avoids a double hit).
-          if (abs < 0 || abs < loop.playFrom || abs < ev.recordedAt + L / 2) continue;
+          if (abs < 0 || abs < loop.playFrom || abs >= loop.stopAt || abs < ev.recordedAt + L / 2) continue;
           const start = this.clock.timeAt(abs);
           const end = this.clock.timeAt(abs + ev.dur);
           const h = this.engine.playNote(ev.inst, ev.note, ev.vel, start, end);
@@ -254,6 +281,12 @@ export class Looper {
     for (const loop of this.loops) {
       if (loop.rec) this.#finish(loop);
       this.#cancelHandles(loop);
+      // The beat counter starts again from 0 on the next Play, so forget beats from
+      // this run — otherwise loops stay silent until the counter catches up again.
+      loop.playFrom = 0;
+      if (loop.stopAt !== Infinity) loop.playing = false;
+      loop.stopAt = Infinity;
+      for (const ev of loop.events) ev.recordedAt = -Infinity;
     }
     this.#changed();
   }

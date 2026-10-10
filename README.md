@@ -17,6 +17,10 @@ A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai A
   - *Lead*: Saw, Square, Supersaw, Soft Flute, Chiptune.
   - Pick one from the menu on each instrument card. Some vibes pick styles for you.
 - **8-track looper:** each loop has its own length (1, 2, 4 or 8 bars), and they all stay in sync. One bar of count-in, records on the bar, snaps to 16ths if you want, overdubs. You can drive it from the pads.
+- **Song grid:** turn your loops into an arrangement.
+  - Every loop row has 8 cells to its right, one per song section.
+  - The button above each column sets how many bars that section lasts.
+  - Tick which loops play in each section, then press **▶ Song**. Sections change on the bar, and the song can repeat.
 - **Metronome sounds:** Soft knock (the default), Woodblock, Shaker, Cowbell or Beep, chosen next to the **Click** button.
 - **Visuals:**
   - *Nebula*: particles.
@@ -241,6 +245,7 @@ The Lumen server relays between the browser and AbletonOSC on UDP ports 11000 an
 | Play chords with one finger | **Chords → Triad / 7th** |
 | Record a loop | Press **●** on a loop, tap a loop pad, or press **Record** on the controller. You get one bar of count-in, then it records for that loop's length and starts playing. |
 | Set a loop's length | Use the **bars** menu on the loop (while it's empty), or *Shift + loop pad* on the APC |
+| Play an arrangement | In the song grid to the right of the loops, tick which loops play in each section (column). Set each section's length with the number above it (click for more bars, right-click for fewer). Then press **▶ Song**, or *Shift + Space*, or *Shift + Play* on the APC. An empty column is a break. **Repeat** loops the song. The grid is saved; recorded loops are not saved yet, so they reset on reload. |
 | Change an instrument's sound | Pick a style on its card, or **Style ◀ / ▶** on the APC |
 | Add to a loop | **●** on a loop that's playing (overdubs one pass) |
 | Stop / clear a loop | Tap it to stop it. Hold its pad, or press **✕**, to clear it. |
@@ -290,7 +295,8 @@ public/js/
   engine.js          routes notes to the built-in synth or to Live over MIDI
   synth.js           Web Audio instruments, drums and FX chain
   clock.js           look-ahead transport + metronome
-  looper.js          4-track MIDI looper
+  looper.js          8-track MIDI looper (each loop has its own length)
+  song.js            song mode: plays the looper as an arrangement of sections
   ableton.js         AbletonOSC client (meters, tempo, mute)
   feed.js            audio/notes → level + spectrum for the visuals
   visuals.js         Nebula / Rings / Horizon

@@ -276,8 +276,12 @@ export class Controller {
     const lp = this.looper;
     switch (name) {
       case 'transport':
+        if (this.shift) return this.action('song'); // Shift + Play = song play/stop
         if (this.clock.running) this.clock.stop();
         else this.clock.start(0);
+        break;
+      case 'song':
+        this.song?.toggle();
         break;
       case 'play':
         if (!this.clock.running) this.clock.start(0);
@@ -577,6 +581,7 @@ export class Controller {
         this.kbLoops.set(code, loop);
         this.press({ kind: 'action', name: 'loop', arg: loop }, 1, `kb:${code}`);
       }
+      else if (code === 'Space' && e.shiftKey) this.action('song'); // Shift + Space = song
       else this.action(KEY_ACTIONS[code]);
     });
     window.addEventListener('keyup', (e) => {
