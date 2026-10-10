@@ -3,8 +3,10 @@
 import { state, set, resetSettings } from './state.js';
 import {
   INSTRUMENTS, MELODIC, DRUM_VOICES, VIBES, FX_MACROS, FX_CHANNEL, FX_CC_BASE, SCALES, NOTE_NAMES,
-  KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, WIZARD_STEPS, CONTROLLER, reverbDivision,
+  KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, CONTROLLER, reverbDivision,
 } from './config.js';
+import { WIZARD_STEPS, OXYGEN, APC, APC_GRID, APC_SCENES, APC_TRACKS } from './devices.js';
+import { gridLook, buttonLook, describeTarget } from './lights.js';
 import { isKeyInScale, chordName } from './transform.js';
 import { describe, AUTO } from './midi.js';
 
@@ -30,10 +32,11 @@ const BLACK = [1, 3, 6, 8, 10];
 
 function targetLabel(t) {
   if (!t) return '';
-  if (t.kind === 'fx') return `${FX_MACROS[t.index].name} (${FX_MACROS[t.index].hw})`;
+  if (t.kind === 'fx') return `${FX_MACROS[t.index].name} (FX ${t.index + 1})`;
   if (t.kind === 'pad') {
     return t.index < 8 ? `Pad ${t.index + 1} · ${DRUM_VOICES[t.index].name}` : `Pad B${t.index - 7} · ${CONTROL_PADS[t.index - 8].label}`;
   }
+  if (t.arg !== undefined) return describeTarget(t)[0];
   return ACTIONS[t.name] ?? t.name;
 }
 
@@ -42,7 +45,8 @@ function sourceLabel(key) {
   const m = /^(\w+)\|(cc|note):([\d*]+):(\d+)$/.exec(key);
   if (!m) return key;
   const [, port, kind, ch, num] = m;
-  return `${kind === 'cc' ? 'CC' : 'Note'} ${num} · ${ch === '*' ? 'any ch' : `ch ${ch}`}${port === 'daw' ? ' · DAW' : ''}`;
+  const where = port === 'daw' ? ' · DAW' : port.startsWith('apc') ? ' · APC' : '';
+  return `${kind === 'cc' ? 'CC' : 'Note'} ${num} · ${ch === '*' ? 'any ch' : `ch ${ch}`}${where}`;
 }
 
 export class UI {
@@ -113,21 +117,25 @@ export class UI {
     $('#tempo').addEventListener('change', (e) => this.onTempo?.(Number(e.target.value)));
     $('#tempo-down').addEventListener('click', () => this.onTempo?.(state.tempo - 1));
     $('#tempo-up').addEventListener('click', () => this.onTempo?.(state.tempo + 1));
-    $('#btn-tap').addEventListener('click', () => this.#tap());
+    $('#btn-tap').addEventListener('click', () => this.controller.action('tap'));
     $('#btn-metro').addEventListener('click', () => set({ metronome: !state.metronome }));
     $('#btn-settings').addEventListener('click', () => this.openDrawer());
-    $('#btn-wizard').addEventListener('click', () => this.controller.startWizard(WIZARD_STEPS));
+    $('#btn-wizard').addEventListener('click', () => this.startWizard());
   }
 
-  #tap() {
-    const now = performance.now();
-    this.taps = this.taps.filter((t) => now - t < 2500);
-    this.taps.push(now);
-    if (this.taps.length >= 3) {
-      const gaps = this.taps.slice(1).map((t, i) => t - this.taps[i]);
-      const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-      this.onTempo?.(Math.round(60000 / avg));
+  startWizard() {
+    const ids = this.midi.devices.map((d) => d.device.id);
+    if (ids.includes('apc') && !ids.includes('oxygen')) {
+      this.toast('The APC Key 25 needs no setup — every control is already mapped.');
+      return;
     }
+    this.closeDrawer();
+    this.controller.startWizard(WIZARD_STEPS);
+  }
+
+  /** The controller whose labels we show (first one connected; Oxygen if none). */
+  get device() {
+    return this.midi.devices[0]?.device ?? OXYGEN;
   }
 
   #renderEngine() {
@@ -144,9 +152,10 @@ export class UI {
     const chipLive = $('#chip-live');
     const ins = this.midi.inputs;
     chipIn.className = `chip ${ins.length ? 'ok' : 'warn'}`;
-    chipIn.querySelector('b').textContent = ins.length
-      ? (ins.find((p) => CONTROLLER.inputMatch.test(p.name))?.name.replace(/\s*(USB MIDI|MIDI)\s*$/i, '') ?? ins[0].name)
-      : this.midi.error ? 'No Web MIDI' : 'No controller';
+    const devs = this.midi.devices.map((d) => `${d.device.name}${d.variant === 'mk2' ? ' mk2' : ''}`);
+    chipIn.querySelector('b').textContent = devs.length
+      ? devs.join(' + ')
+      : ins.length ? ins[0].name : this.midi.error ? 'No Web MIDI' : 'No controller';
     const out = this.midi.output;
     const needOut = state.engine === 'ableton';
     chipOut.className = `chip ${out && !this.midi.feedbackRisk ? 'ok' : needOut ? 'warn' : ''}`;
@@ -255,6 +264,7 @@ export class UI {
   toggleStage(force) {
     const on = force ?? !document.body.classList.contains('stage-mode');
     document.body.classList.toggle('stage-mode', on);
+    this.bus.emit('stageMode', on);
     if (on) this.toast('Stage mode — press ` or Esc to exit', 1800);
   }
 
@@ -282,32 +292,30 @@ export class UI {
     const root = $('#fx');
     const C = 2 * Math.PI * 22;
     FX_MACROS.forEach((m, i) => {
-      const isFader = i >= 4;
-      let control;
-      if (isFader) {
-        control = h('div', { class: 'fader', role: 'slider', 'aria-label': m.name, tabindex: 0 },
-          h('div', { class: 'fill' }), h('div', { class: 'cap' }));
-      } else {
-        control = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        control.setAttribute('viewBox', '0 0 58 58');
-        control.setAttribute('class', 'knob');
-        control.setAttribute('role', 'slider');
-        control.setAttribute('aria-label', m.name);
-        control.setAttribute('tabindex', '0');
-        control.innerHTML = `
-          <circle class="kt" cx="29" cy="29" r="22" fill="none" stroke-width="5" stroke-linecap="round"
-            stroke-dasharray="${C * 0.75} ${C}" transform="rotate(135 29 29)"/>
-          <circle class="arc" cx="29" cy="29" r="22" fill="none" stroke-width="5" stroke-linecap="round"
-            stroke-dasharray="0 ${C}" transform="rotate(135 29 29)"/>
-          <circle class="cap" cx="29" cy="29" r="14" stroke-width="1"/>
-          <line class="tick" x1="29" y1="29" x2="29" y2="18" stroke-width="2.5" stroke-linecap="round"/>`;
-      }
+      // Each slot has a knob and a fader; the connected controller decides which one shows.
+      const fader = h('div', { class: 'fader', role: 'slider', 'aria-label': m.name, tabindex: 0 },
+        h('div', { class: 'fill' }), h('div', { class: 'cap' }));
+      const knob = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      knob.setAttribute('viewBox', '0 0 58 58');
+      knob.setAttribute('class', 'knob');
+      knob.setAttribute('role', 'slider');
+      knob.setAttribute('aria-label', m.name);
+      knob.setAttribute('tabindex', '0');
+      knob.innerHTML = `
+        <circle class="kt" cx="29" cy="29" r="22" fill="none" stroke-width="5" stroke-linecap="round"
+          stroke-dasharray="${C * 0.75} ${C}" transform="rotate(135 29 29)"/>
+        <circle class="arc" cx="29" cy="29" r="22" fill="none" stroke-width="5" stroke-linecap="round"
+          stroke-dasharray="0 ${C}" transform="rotate(135 29 29)"/>
+        <circle class="cap" cx="29" cy="29" r="14" stroke-width="1"/>
+        <line class="tick" x1="29" y1="29" x2="29" y2="18" stroke-width="2.5" stroke-linecap="round"/>`;
       const val = h('span', { class: 'val' }, '0');
-      const wrap = h('div', { class: 'ctl', title: `${m.hw} · in Live: ${m.hint}` },
-        control, h('span', { class: 'label' }, m.name), h('span', { class: 'hw' }, m.hw), val);
+      const hw = h('span', { class: 'hw' });
+      const wrap = h('div', { class: 'ctl' }, knob, fader, h('span', { class: 'label' }, m.name), hw, val);
       root.append(wrap);
-      this.fxEls.push({ wrap, control, val, isFader, C });
-      this.#dragValue(control, () => state.fx[i], (v) => this.controller.setFx(i, v), () => this.controller.setFx(i, VIBES[state.vibe].fx[i]));
+      this.fxEls.push({ wrap, knob, fader, val, hw, C });
+      for (const control of [knob, fader]) {
+        this.#dragValue(control, () => state.fx[i], (v) => this.controller.setFx(i, v), () => this.controller.setFx(i, VIBES[state.vibe].fx[i]));
+      }
     });
   }
 
@@ -342,25 +350,28 @@ export class UI {
   #renderFx(touched) {
     state.fx.forEach((v, i) => {
       const f = this.fxEls[i];
-      if (f.isFader) {
-        f.control.querySelector('.fill').style.transform = `scaleY(${v})`;
-        f.control.querySelector('.cap').style.bottom = `calc(${v * 100}% - ${v * 6}px)`;
-      } else {
-        f.control.querySelector('.arc').setAttribute('stroke-dasharray', `${f.C * 0.75 * v} ${f.C}`);
-        f.control.querySelector('.tick').setAttribute('transform', `rotate(${-135 + v * 270} 29 29)`);
-      }
-      f.control.setAttribute('aria-valuenow', String(Math.round(v * 100)));
+      const isFader = this.device.fxHw[i].startsWith('Fader');
+      f.knob.style.display = isFader ? 'none' : '';
+      f.fader.style.display = isFader ? '' : 'none';
+      f.fader.querySelector('.fill').style.transform = `scaleY(${v})`;
+      f.fader.querySelector('.cap').style.bottom = `calc(${v * 100}% - ${v * 6}px)`;
+      f.knob.querySelector('.arc').setAttribute('stroke-dasharray', `${f.C * 0.75 * v} ${f.C}`);
+      f.knob.querySelector('.tick').setAttribute('transform', `rotate(${-135 + v * 270} 29 29)`);
+      for (const c of [f.knob, f.fader]) c.setAttribute('aria-valuenow', String(Math.round(v * 100)));
       if (FX_MACROS[i].id === 'space') {
         // Space is a note length: the reverb tail follows the tempo.
         const div = reverbDivision(v);
         const secs = (div.beats * 60) / state.tempo;
         f.val.textContent = div.label;
-        f.control.setAttribute('aria-valuetext', `${div.label} reverb`);
-        f.wrap.title = `${FX_MACROS[i].hw} · reverb tail = ${div.label} → ${secs.toFixed(2)} s at ${Math.round(state.tempo)} BPM`;
+        for (const c of [f.knob, f.fader]) c.setAttribute('aria-valuetext', `${div.label} reverb`);
+        f.wrap.title = `${this.device.fxHw[i]} · reverb tail = ${div.label} → ${secs.toFixed(2)} s at ${Math.round(state.tempo)} BPM`;
       } else {
         f.val.textContent = String(Math.round(v * 100));
+        f.wrap.title = `${this.device.fxHw[i]} · in Live: ${FX_MACROS[i].hint}`;
       }
+      f.hw.textContent = this.device.fxHw[i];
     });
+    $('#fx-hint').textContent = this.device === OXYGEN ? 'knobs = tone · faders = space' : `the ${this.device.name}'s 8 knobs`;
     if (touched !== undefined) {
       const w = this.fxEls[touched]?.wrap;
       if (w) {
@@ -459,12 +470,12 @@ export class UI {
     hud.className = `hud-loop show${recording || b < 0 ? ' rec' : ''}`;
   }
 
-  // ── pads ──
+  // ── pads (Oxygen banks A/B) + the APC Key 25 grid ──
   #pads() {
     $('#bank-seg').addEventListener('click', (e) => {
       const b = e.target.closest('[data-bank]');
       if (b) {
-        this.bank = Number(b.dataset.bank);
+        this.bank = b.dataset.bank === 'grid' ? 'grid' : Number(b.dataset.bank);
         this.#renderPads();
       }
     });
@@ -485,12 +496,61 @@ export class UI {
       pad.addEventListener('pointercancel', up);
       root.append(pad);
     }
+    this.#grid();
+  }
+
+  /** A clickable copy of the APC Key 25: 5×8 grid, scene buttons on the right, track buttons below. */
+  #grid() {
+    const root = $('#apc');
+    this.gridEls = [];
+    const button = (t, cls, src) => {
+      const [label, tag] = describeTarget(t);
+      const b = h('button', { type: 'button', class: cls, title: label }, tag);
+      b.addEventListener('pointerdown', (e) => {
+        b.setPointerCapture(e.pointerId);
+        this.controller.press(t, 0.85, src);
+      });
+      const up = () => this.controller.release(t, src);
+      b.addEventListener('pointerup', up);
+      b.addEventListener('pointercancel', up);
+      this.gridEls.push({ el: b, t, single: cls !== 'cell' });
+      return b;
+    };
+    const grid = h('div', { class: 'apc-grid' });
+    APC_GRID.forEach((cells, row) => {
+      cells.forEach((t, col) => grid.append(button(t, 'cell', `grid:${row}:${col}`)));
+      grid.append(button(APC_SCENES[row], 'scene', `scene:${row}`));
+    });
+    APC_TRACKS.forEach((t, i) => grid.append(button(t, 'trackbtn', `track:${i}`)));
+    root.append(grid, h('p', { class: 'apc-hint' },
+      'Knobs = FX 1–8 · Shift + instrument = layer · hold a loop (or Shift) = clear · Shift + Stop All = clear all'));
+  }
+
+  #renderGrid(ctx) {
+    if (!this.gridEls || this.bank !== 'grid') return;
+    for (const { el, t, single } of this.gridEls) {
+      if (single) {
+        const v = buttonLook(t, ctx);
+        el.classList.toggle('on', v === 1);
+        el.classList.toggle('blink', v === 2);
+      } else {
+        const look = gridLook(t, ctx);
+        el.style.setProperty('--c', look.color);
+        el.dataset.level = look.level;
+      }
+    }
   }
 
   #renderPads() {
-    for (const b of $('#bank-seg').children) b.classList.toggle('on', Number(b.dataset.bank) === this.bank);
-    const pads = [...$('#pads').children];
+    for (const b of $('#bank-seg').children) b.classList.toggle('on', b.dataset.bank === String(this.bank));
+    $('#pads').hidden = this.bank === 'grid';
+    $('#apc').hidden = this.bank !== 'grid';
     this.padEls.clear();
+    if (this.bank === 'grid') {
+      this.#renderGrid(this.lights?.ctx ?? { looper: this.looper, held: new Set(), hits: new Set() });
+      return;
+    }
+    const pads = [...$('#pads').children];
     PAD_ORDER.forEach((slot, k) => {
       const index = this.bank * 8 + slot;
       const pad = pads[k];
@@ -510,6 +570,7 @@ export class UI {
   }
 
   #padHit({ index, on }) {
+    if (this.bank === 'grid') return; // the grid lights up through the lights pipeline
     const pad = this.padEls.get(index);
     if (pad) pad.classList.toggle('hit', on);
     else if (on) {
@@ -651,7 +712,7 @@ export class UI {
       h('h3', {}, 'Controller mapping'),
       h('p', {}, 'Fastest: run the setup wizard and touch each control once. Or press Learn next to anything below, then move the control.'),
       h('div', { class: 'row', style: 'margin-bottom:12px' },
-        h('button', { type: 'button', class: 'btn primary', onclick: () => { this.closeDrawer(); this.controller.startWizard(WIZARD_STEPS); } }, 'Run setup wizard'),
+        h('button', { type: 'button', class: 'btn primary', onclick: () => this.startWizard() }, 'Run setup wizard'),
         h('button', { type: 'button', class: 'btn ghost', onclick: () => { set({ mappings: null }); this.renderDrawer(); } }, 'Reset to defaults')),
       h('div', { class: 'kv' }, rows),
       h('p', { class: 'muted small', style: 'margin-top:12px' }, 'Unlearned pads: notes on channel ', padCh, ' starting at note ', padBase, ' (bank A = first 8).')));
@@ -783,8 +844,18 @@ export class UI {
     b.on('loopNote', () => this.#renderLoops());
     b.on('midiPorts', () => {
       this.#renderStatus();
+      this.#renderFx(); // knob labels follow the connected controller
+      // An APC Key 25 just showed up: show its grid on screen too.
+      const hasApc = this.midi.devices.some((d) => d.device === APC);
+      if (hasApc && !this.hadApc) {
+        this.bank = 'grid';
+        this.#renderPads();
+        this.toast(`${this.midi.devices.find((d) => d.device === APC).name} connected — the grid is live ✦`);
+      }
+      this.hadApc = hasApc;
       if (this.drawerOpen) this.renderDrawer();
     });
+    b.on('lights', (ctx) => this.#renderGrid(ctx));
     b.on('ableton', () => {
       this.#renderStatus();
       this.tracks?.updateLabels();

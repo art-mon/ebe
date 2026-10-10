@@ -381,3 +381,30 @@ body.stage-mode .stage { position: fixed; inset: 0; z-index: 20; border-radius: 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ── APC Key 25 grid (mirrors the hardware lights) ───────────────────── */
+.apc[hidden], .pads[hidden] { display: none; }
+.apc-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)) 20px; gap: 4px; align-items: center; }
+.apc-grid .cell {
+  aspect-ratio: 1; padding: 0; border-radius: 5px; border: 1px solid rgba(255,255,255,.08);
+  background: #121218; color: rgba(255,255,255,.55); font: 800 9px/1 ui-sans-serif, system-ui, sans-serif;
+  display: grid; place-items: center; overflow: hidden; touch-action: none; user-select: none;
+  transition: background .08s, box-shadow .08s;
+}
+.apc-grid .cell[data-level="dim"] { background: color-mix(in srgb, var(--c) 26%, #121218); color: rgba(255,255,255,.75); }
+.apc-grid .cell[data-level="full"],
+.apc-grid .cell[data-level="pulse"],
+.apc-grid .cell[data-level="blink"] { background: var(--c); color: #0b0716; box-shadow: 0 0 10px color-mix(in srgb, var(--c) 70%, transparent); }
+.apc-grid .cell[data-level="pulse"] { animation: apc-pulse 1.1s ease-in-out infinite; }
+.apc-grid .cell[data-level="blink"] { animation: blink .5s steps(2) infinite; }
+.apc-grid .scene, .apc-grid .trackbtn {
+  padding: 0; border: 1px solid var(--line-2); background: #18171f; color: var(--muted);
+  font: 800 8px/1 ui-sans-serif, system-ui, sans-serif; touch-action: none; user-select: none;
+}
+.apc-grid .scene { width: 20px; height: 20px; border-radius: 50%; justify-self: center; }
+.apc-grid .trackbtn { height: 14px; border-radius: 4px; margin-top: 4px; }
+.apc-grid .scene.on, .apc-grid .scene.blink { background: #4cff4c; color: #06260a; box-shadow: 0 0 8px #4cff4c; }
+.apc-grid .trackbtn.on, .apc-grid .trackbtn.blink { background: #ff4c4c; color: #2a0505; box-shadow: 0 0 8px #ff4c4c; }
+.apc-grid .blink { animation: blink .5s steps(2) infinite; }
+.apc-hint { margin: 10px 0 0; font-size: 11px; color: var(--muted); line-height: 1.5; }
+@keyframes apc-pulse { 50% { filter: brightness(.45); } }

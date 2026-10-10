@@ -1,9 +1,9 @@
 # ✦ Lumen
 
-A playful performance screen for the **M-Audio Oxygen Pro Mini** and **Ableton Live 12 Lite**.
+A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai APC Key 25** (mk1 and mk2), with **Ableton Live 12 Lite**.
 
 - **Vibes:** one tap changes the instrument (or a layered pair), all eight effects, the colours and the visuals.
-- **Eight FX macros** on the 4 knobs and 4 faders: Filter, Reso, Drive and Crush; Echo, Repeats, Reverb and Space. Switching vibes glides the effects smoothly instead of jumping.
+- **Eight FX macros** on the Oxygen's 4 knobs and 4 faders, or the APC's 8 knobs: Filter, Reso, Drive and Crush; Echo, Repeats, Reverb and Space. Switching vibes glides the effects smoothly instead of jumping.
 - **Effects that follow the tempo.** The echo is a dotted 1/8. **Space** picks how long the reverb lasts as a note length (1/8, 1/4, 1/2, 1 bar, 2 bars, 4 bars), so the tail dies away on the beat. The reverb's pre-delay is a 1/64 note. All of it re-times when you change the BPM, including on Live's Reverb when AbletonOSC is installed.
 - **Play helpers** so wrong notes are hard to hit:
   - *Snap to scale*.
@@ -17,6 +17,7 @@ A playful performance screen for the **M-Audio Oxygen Pro Mini** and **Ableton L
   - *Horizon*: a synthwave grid that rolls on the beat.
   - Pitch sets where a note appears and its colour. Velocity sets its size. Drums kick and sparkle.
 - **Track view:** a live, scrolling level trace and note marks for every instrument.
+- **The APC Key 25's grid lights up as Lumen's control surface:** vibes, instruments, loops, play helpers and drums, each in its own colour, with the same layout mirrored on screen.
 - Works **with or without Ableton**. A built-in synth lets you play right away. Flip one switch to drive Live instead.
 
 ```
@@ -49,7 +50,43 @@ No controller? Play the computer keyboard. `A W S E D F T G Y H U J K O L P ;` a
 
 > If `npm install` complains that files under `~/.npm` belong to root, run `sudo chown -R $(id -u):$(id -g) ~/.npm` once. You can also use `npm install --cache /tmp/npm-cache`.
 
-## 2. Set up the controller (2 minutes, once)
+## 2. Set up the controller
+
+Lumen recognises both controllers by their USB name. Both can be plugged in at once.
+
+### Akai APC Key 25 (mk1 or mk2): no setup needed
+
+Plug it in. Lumen maps every control and lights up the grid. The **Pads** panel switches to a copy of the grid, which you can also click with the mouse. The numbers come from Live 12's own APC Key 25 scripts.
+
+| Grid row | The 8 pads |
+|---|---|
+| **5** (top) | The 8 **vibes**, in each vibe's colour. The active one is bright. |
+| **4** | **Keys, Pad, Bass, Lead** (*Shift + pad* layers it) · visuals **Nebula, Rings, Horizon** · **Stage** mode |
+| **3** | **Loops 1–4**: tap to record, play or stop; *hold* (or *Shift + tap*) to clear. Then **Stop loops** · **Snap** · **Loop length** (green 1, yellow 2, orange 4, red 8 bars) · **Metronome** |
+| **2** | Notes: **Free, Snap, Easy** · Chords: **Off, Triad, 7th, Power, Octave** |
+| **1** (bottom) | **Drums**: Kick, Snare, Clap, Hat, Open Hat, Tom, Rim, Crash |
+
+Loop pads change colour with their state:
+- dim white: empty
+- blinking red: waiting for the bar
+- red: recording
+- pulsing red: overdubbing
+- green: playing
+- amber: stopped
+
+| Other controls | Do |
+|---|---|
+| **8 knobs** | FX 1–8 (Filter … Space). On the mk2 the knobs are endless; hold **Shift** for fine steps. |
+| **Scene buttons** (right, top→bottom) | Random vibe · Layer on/off · Record next loop · Next scale (*Shift*: next key) · Tap tempo (flashes on the beat) |
+| **Buttons under the grid** | Mute Keys / Pad / Bass / Lead / Drums (lit = muted) · Octave − · Octave + · All notes off |
+| **Play/Pause** · **Record** · **Stop All Clips** | Play/stop · record next loop · stop all loops (*Shift*: clear all loops) |
+| **Sustain** | Sustain pedal |
+
+The mk2 shows Lumen's exact colours using its 128-colour palette. The mk1 does green, red and amber.
+
+In **Live's MIDI settings**, turn *Track* and *Remote* **off** for the APC's ports, and set its Control Surface slot to **None**. Otherwise Live and Lumen fight over the grid lights and you hear notes twice.
+
+### M-Audio Oxygen Pro Mini (2 minutes, once)
 
 Click **Controller setup** in the top bar, then touch each control when asked: 4 knobs, 4 faders, the pads in both banks, Play, Stop and Record. Press **Skip** for anything you don't want mapped.
 
@@ -86,9 +123,9 @@ Open **Settings → Link, Tempo & MIDI**:
 | Port | Track | Remote |
 |---|---|---|
 | **IAC Driver (Bus 1)**, input | ✅ on | ✅ on (needed for FX mapping) |
-| **Oxygen Pro Mini** (all its inputs) | ❌ off | ❌ off |
+| **Oxygen Pro Mini** / **APC Key 25** (all their inputs) | ❌ off | ❌ off |
 
-Also set the Control Surface slot for *Oxygen Pro Mini* to **None**. Otherwise Live grabs the controller and you hear every note twice.
+Also set the Control Surface slot for *Oxygen Pro Mini* or *APC Key 25* to **None**. Otherwise Live grabs the controller and you hear every note twice.
 
 ### c) Tracks
 Live 12 Lite allows 8 tracks, which is plenty. Create these MIDI tracks. Lumen finds them **by name**, so the names matter for meters and mute.
@@ -174,7 +211,8 @@ Everything tweakable is in [`public/js/config.js`](public/js/config.js):
 
 - `VIBES`: name, instrument, layer, the 8 FX values, palette and visual mode.
 - `INSTRUMENTS`: names, MIDI channels and colours. The names must match your Live track names.
-- `DRUM_VOICES`, `CONTROL_PADS`, `SCALES`, `FX_MACROS`, `DEFAULT_MAPPINGS`.
+- `DRUM_VOICES`, `CONTROL_PADS`, `SCALES`, `FX_MACROS`.
+- Controller layouts are in [`public/js/devices.js`](public/js/devices.js): for example `APC_GRID`, which decides what each APC pad does.
 
 Changing code? Run `npm test` to check the scale/chord logic and the OSC codec.
 
@@ -194,7 +232,9 @@ server/osc.js        tiny OSC encoder/decoder (no dependencies)
 public/index.html    the page
 public/js/
   main.js            wires everything together
-  config.js          instruments, vibes, FX, scales, controller defaults
+  config.js          instruments, vibes, FX, scales
+  devices.js         controller profiles: Oxygen Pro Mini, APC Key 25 (+ default mappings)
+  lights.js          APC Key 25 grid lights (also colours the on-screen grid)
   controller.js      MIDI/keyboard input → notes & actions, MIDI learn, setup wizard
   transform.js       octave / scale snap / easy mode / chords
   engine.js          routes notes to the built-in synth or to Live over MIDI

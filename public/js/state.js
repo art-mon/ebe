@@ -1,5 +1,5 @@
 // Tiny event bus + app state with best-effort persistence.
-import { FX_MACROS, VIBES } from './config.js';
+import { FX_MACROS, VIBES, INSTRUMENTS } from './config.js';
 
 export class Bus {
   #handlers = new Map();
@@ -43,7 +43,8 @@ const DEFAULTS = {
   syncTempo: true,
   midiInputId: null,
   midiOutputId: null,
-  mappings: null, // null → defaults from CONTROLLER
+  mappings: null, // null → the device defaults in devices.js
+  mutes: INSTRUMENTS.map(() => false),
   padBase: null,
   padChannel: null,
 };
@@ -51,7 +52,8 @@ const DEFAULTS = {
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS, ...vibeDefaults(0) };
+    // Mutes start fresh each session: a silent instrument after a reload is confusing.
+    return raw ? { ...DEFAULTS, ...JSON.parse(raw), mutes: DEFAULTS.mutes } : { ...DEFAULTS, ...vibeDefaults(0) };
   } catch {
     return { ...DEFAULTS, ...vibeDefaults(0) };
   }
@@ -76,7 +78,7 @@ function save() {
   }
 }
 // Don't lose a change made just before the tab closes or reloads.
-addEventListener('pagehide', save);
+globalThis.addEventListener?.('pagehide', save);
 
 /** Update state, notify listeners, persist (debounced). */
 export function set(patch) {

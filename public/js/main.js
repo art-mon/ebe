@@ -11,6 +11,7 @@ import { AudioFeed } from './feed.js';
 import { Visuals } from './visuals.js';
 import { Tracks } from './tracks.js';
 import { UI } from './ui.js';
+import { Lights } from './lights.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -37,7 +38,8 @@ engine.tempo(state.tempo);
 engine.pushAllFx(state.fx);
 feed.useAnalyser(state.engine === 'builtin' ? synth.analyser : null);
 
-const ui = new UI({ controller, looper, clock, engine, midi, ableton, feed, visuals, bus });
+const lights = new Lights({ midi, looper, bus });
+const ui = new UI({ controller, looper, clock, engine, midi, ableton, feed, visuals, bus, lights });
 const tracks = new Tracks($('#tracks'), { synth, ableton, engine, controller, bus });
 ui.tracks = tracks;
 tracks.updateLabels();
@@ -94,6 +96,7 @@ bus.on('state', (patch) => {
     if (state.syncTempo) ableton.setTempo(state.tempo);
   }
   if ('metronome' in patch) clock.metronome = state.metronome;
+  if ('mutes' in patch) state.mutes.forEach((m, i) => engine.mute(i, m));
   if ('quantize' in patch) looper.quantize = state.quantize;
 });
 
@@ -152,4 +155,4 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Handy for poking around in the console.
-window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, controller, feed, visuals, state };
+window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, controller, feed, visuals, lights, state };

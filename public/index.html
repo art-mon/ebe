@@ -117,7 +117,7 @@
         </div>
       </div>
       <section class="panel fx-panel">
-        <h2>FX <span class="hint">knobs = tone · faders = space</span></h2>
+        <h2>FX <span class="hint" id="fx-hint">knobs = tone · faders = space</span></h2>
         <div class="fx" id="fx"></div>
       </section>
       <section class="panel tracks-panel">
@@ -142,10 +142,12 @@
         <h2>Pads
           <span class="seg small" id="bank-seg">
             <button type="button" data-bank="0">A · Drums</button>
-            <button type="button" data-bank="1">B · Control</button>
+            <button type="button" data-bank="1">B · Ctrl</button>
+            <button type="button" data-bank="grid" title="The APC Key 25 layout — works with the mouse too">Grid</button>
           </span>
         </h2>
         <div class="pads" id="pads"></div>
+        <div class="apc" id="apc" hidden></div>
       </section>
     </aside>
 

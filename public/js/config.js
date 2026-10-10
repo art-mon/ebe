@@ -29,21 +29,21 @@ export const DRUM_VOICES = [
 ];
 
 // ── FX macros ───────────────────────────────────────────────────────────────
-// Eight global performance effects: the Oxygen Pro Mini's 4 knobs (tone) and
-// 4 faders (space). In Built-in mode they drive Lumen's own FX chain; in
+// Eight global performance effects — the Oxygen Pro Mini's 4 knobs (tone) +
+// 4 faders (space), or the APC Key 25's 8 knobs. In Built-in mode they drive Lumen's own FX chain; in
 // Ableton mode each one is sent as CC (FX_CC_BASE + index) on FX_CHANNEL,
 // which you MIDI-map once in Live (Settings → Ableton has a helper).
 export const FX_CHANNEL = 16;
 export const FX_CC_BASE = 20;
 export const FX_MACROS = [
-  { id: 'filter', name: 'Filter', hw: 'Knob 1', def: 1, hint: 'Auto Filter → Frequency' },
-  { id: 'reso', name: 'Reso', hw: 'Knob 2', def: 0.15, hint: 'Auto Filter → Resonance' },
-  { id: 'drive', name: 'Drive', hw: 'Knob 3', def: 0, hint: 'Saturator → Drive' },
-  { id: 'crush', name: 'Crush', hw: 'Knob 4', def: 0, hint: 'Redux → Downsample' },
-  { id: 'echo', name: 'Echo', hw: 'Fader 1', def: 0.15, hint: 'Delay → Dry/Wet' },
-  { id: 'repeats', name: 'Repeats', hw: 'Fader 2', def: 0.35, hint: 'Delay → Feedback' },
-  { id: 'reverb', name: 'Reverb', hw: 'Fader 3', def: 0.25, hint: 'Reverb → Dry/Wet' },
-  { id: 'space', name: 'Space', hw: 'Fader 4', def: 0.5, hint: 'Reverb → Decay Time (tempo-synced via AbletonOSC)' },
+  { id: 'filter', name: 'Filter', def: 1, hint: 'Auto Filter → Frequency' },
+  { id: 'reso', name: 'Reso', def: 0.15, hint: 'Auto Filter → Resonance' },
+  { id: 'drive', name: 'Drive', def: 0, hint: 'Saturator → Drive' },
+  { id: 'crush', name: 'Crush', def: 0, hint: 'Redux → Downsample' },
+  { id: 'echo', name: 'Echo', def: 0.15, hint: 'Delay → Dry/Wet' },
+  { id: 'repeats', name: 'Repeats', def: 0.35, hint: 'Delay → Feedback' },
+  { id: 'reverb', name: 'Reverb', def: 0.25, hint: 'Reverb → Dry/Wet' },
+  { id: 'space', name: 'Space', def: 0.5, hint: 'Reverb → Decay Time (tempo-synced via AbletonOSC)' },
 ];
 
 // The reverb follows the tempo: Space picks how long the tail lasts, as a note
@@ -138,63 +138,14 @@ export const CHORD_MODES = {
   octave: 'Octaves',
 };
 
-// ── Controller (M-Audio Oxygen Pro Mini) ────────────────────────────────────
-// Hardware: 32 keys, 8 pads (2×4, two pad banks = 16 slots), 4 knobs,
-// 4 faders (+4 buttons), pitch & mod wheels, 6 transport buttons.
-//
-// M-Audio doesn't document the factory Preset-mode CCs, so Lumen ships two
-// sets of defaults and a "touch each control" setup wizard for everything else:
-//  • DAW mode (Ableton map) — numbers taken from Live's own Oxygen_Pro script.
-//    These arrive on the controller's "Mackie/HUI" (DAW) port.
-//  • Preset mode — pads on channel 10 from note 36; factory preset 12 knobs
-//    send CC 120-127.
-// Lumen listens to every Oxygen port at once, so either mode works.
+// ── Controllers ─────────────────────────────────────────────────────────────
+// Device profiles (Oxygen Pro Mini, APC Key 25) and their default mappings
+// live in devices.js. These are the shared bits.
 export const CONTROLLER = {
-  inputMatch: /oxygen/i,
-  outputMatch: /iac/i,
-  dawPortMatch: /mackie|hui|daw/i,
-  padChannel: 10, // Preset mode: notes on this channel are pads…
+  outputMatch: /iac/i, // MIDI out to Ableton
+  padChannel: 10, // Oxygen Preset mode: notes on this channel are pads…
   padBase: 36, // …and pad index = note - padBase (0-15)
 };
-
-// Keys look like "<port>|<cc|note>:<channel|*>:<number>", port = daw | main.
-export const DEFAULT_MAPPINGS = (() => {
-  const m = {};
-  const fx = (index) => ({ kind: 'fx', index });
-  const pad = (index) => ({ kind: 'pad', index });
-  const action = (name) => ({ kind: 'action', name });
-  // DAW mode (Ableton map), channel 1 on the DAW port
-  [22, 23, 24, 25].forEach((cc, i) => (m[`daw|cc:1:${cc}`] = fx(i))); // knobs
-  [12, 13, 14, 15].forEach((cc, i) => (m[`daw|cc:1:${cc}`] = fx(4 + i))); // faders
-  [40, 41, 42, 43, 48, 49, 50, 51].forEach((n, i) => (m[`daw|note:1:${n}`] = pad(i)));
-  m['daw|cc:1:114'] = action('stopLoops'); // Loop
-  m['daw|cc:1:115'] = action('vibePrev'); // <<
-  m['daw|cc:1:116'] = action('vibeNext'); // >>
-  m['daw|cc:1:117'] = action('stop'); // Stop
-  m['daw|cc:1:118'] = action('transport'); // Play
-  m['daw|cc:1:119'] = action('record'); // Record
-  // Preset mode, factory preset 12 knobs (banks 1 & 2)
-  [120, 121, 122, 123, 124, 125, 126, 127].forEach((cc, i) => (m[`main|cc:*:${cc}`] = fx(i)));
-  return m;
-})();
-
-// The setup wizard walks through these, one touch each.
-export const WIZARD_STEPS = [
-  ...FX_MACROS.map((f, i) => ({ target: { kind: 'fx', index: i }, prompt: `Move ${f.hw}`, detail: f.name })),
-  ...Array.from({ length: 8 }, (_, i) => ({
-    target: { kind: 'pad', index: i },
-    prompt: `Hit pad ${i + 1}`,
-    detail: `Bank A · ${DRUM_VOICES[i].name}`,
-  })),
-  ...Array.from({ length: 8 }, (_, i) => ({
-    target: { kind: 'pad', index: 8 + i },
-    prompt: `Pad Bank B → hit pad ${i + 1}`,
-    detail: null, // filled from CONTROL_PADS
-  })),
-  { target: { kind: 'action', name: 'transport' }, prompt: 'Press Play', detail: 'Play / Stop' },
-  { target: { kind: 'action', name: 'stop' }, prompt: 'Press Stop', detail: 'Stop' },
-  { target: { kind: 'action', name: 'record' }, prompt: 'Press Record', detail: 'Record next loop' },
-];
 
 // Pads 0-7 = bank A (drums), 8-15 = bank B (controls). Pad 1 is bottom-left.
 export const CONTROL_PADS = [
@@ -210,6 +161,7 @@ export const CONTROL_PADS = [
 
 // Actions any button/pad on the controller can be MIDI-learned to.
 export const ACTIONS = {
+  shift: 'Shift (hold)',
   transport: 'Play / Stop',
   stop: 'Stop',
   record: 'Record next loop',
@@ -222,6 +174,13 @@ export const ACTIONS = {
   octUp: 'Octave up',
   metronome: 'Metronome on/off',
   stage: 'Stage mode',
+  randomVibe: 'Random vibe',
+  layer: 'Layer on/off',
+  quantize: 'Snap loops on/off',
+  loopBars: 'Cycle loop length',
+  tap: 'Tap tempo',
+  nextScale: 'Next scale (Shift: next key)',
+  panic: 'All notes off',
 };
 
 export const LOOP_COUNT = 4;

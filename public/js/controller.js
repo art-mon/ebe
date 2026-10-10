@@ -1,13 +1,16 @@
-// Turns input — the Oxygen Pro Mini, the computer keyboard, or clicks on the
-// screen — into music and actions. Also owns MIDI learn + the setup wizard.
+// Turns input — the Oxygen Pro Mini, the APC Key 25, the computer keyboard,
+// or clicks on the screen — into music and actions. Also owns MIDI learn and
+// the setup wizard.
 import { state, set } from './state.js';
 import {
-  INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, CONTROL_PADS,
-  CONTROLLER, DEFAULT_MAPPINGS,
+  INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, CONTROL_PADS, CONTROLLER,
+  LOOP_BAR_OPTIONS, SCALES, NOTE_NAMES,
 } from './config.js';
+import { DEFAULT_MAPPINGS } from './devices.js';
 import { transform } from './transform.js';
 
 const mod = (n, m) => ((n % m) + m) % m;
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const LOOP_HOLD_MS = 650; // hold a loop pad this long to clear it
 
 // Computer keyboard (physical key codes, so Shift doesn't change them):
@@ -41,6 +44,10 @@ export class Controller {
     this.refs = new Map(); // inst*128+note → how many keys are holding it
     this.loopPadDown = new Map(); // pad index → press time
     this.buttonDown = new Map(); // CC buttons: source key → pressed?
+    this.loopPress = new Map(); // loop buttons (APC): source → press time
+    this.absoluteKnobs = new Set(); // "relative" knobs that turned out to send absolute values
+    this.shift = false;
+    this.taps = [];
     this.learnTarget = null;
     this.wizard = null;
     this.tween = 0;
@@ -85,30 +92,28 @@ export class Controller {
     switch (msg.type) {
       case 'noteon': {
         const t = this.#lookup(msg);
-        if (t?.kind === 'pad') return this.padDown(t.index, msg.velocity / 127);
-        if (t?.kind === 'action') return this.action(t.name, t.arg);
-        if (t?.kind === 'fx' || msg.port === 'daw') return undefined;
+        if (t?.kind === 'fx') return undefined;
+        if (t) return this.press(t, msg.velocity / 127, sourceKey(msg));
+        if (msg.port === 'daw') return undefined;
         return this.keyDown(`${msg.port}:${msg.channel}:${msg.note}`, msg.note, msg.velocity / 127);
       }
       case 'noteoff': {
         const t = this.#lookup(msg);
-        if (t?.kind === 'pad') return this.padUp(t.index);
+        if (t && t.kind !== 'fx') return this.release(t, sourceKey(msg));
         if (t || msg.port === 'daw') return undefined;
         return this.keyUp(`${msg.port}:${msg.channel}:${msg.note}`);
       }
       case 'cc': {
         const t = this.#lookup(msg);
-        if (t?.kind === 'fx') return this.setFx(t.index, msg.value / 127);
+        if (t?.kind === 'fx') return this.#knob(t, msg);
         if (t) {
-          // A button sending CC: act on the press edge only.
+          // A button sending CC: act on the edges only.
           const key = sourceKey(msg);
           const down = msg.value >= 64;
           const was = this.buttonDown.get(key) ?? false;
           this.buttonDown.set(key, down);
           if (down === was) return undefined;
-          if (t.kind === 'action') return down ? this.action(t.name, t.arg) : undefined;
-          if (t.kind === 'pad') return down ? this.padDown(t.index, 1) : this.padUp(t.index);
-          return undefined;
+          return down ? this.press(t, 1, key) : this.release(t, key);
         }
         if (msg.port === 'daw') return undefined;
         if (msg.cc === 1) return this.activeInstruments().forEach((i) => this.engine.mod(i, msg.value / 127));
@@ -120,6 +125,55 @@ export class Controller {
       default:
         return undefined;
     }
+  }
+
+  /** A knob turned. Endless (relative) knobs send small steps: 1…63 up, 127…65 down. */
+  #knob(t, msg) {
+    const key = sourceKey(msg);
+    const v = msg.value;
+    if (!t.relative || this.absoluteKnobs.has(key)) return this.setFx(t.index, v / 127);
+    if (v > 15 && v < 113) {
+      // Relative encoders never jump this far — it's really an absolute knob.
+      this.absoluteKnobs.add(key);
+      return this.setFx(t.index, v / 127);
+    }
+    const delta = v < 64 ? v : v - 128;
+    return this.setFx(t.index, clamp01(state.fx[t.index] + delta * (this.shift ? 0.0025 : 0.01)));
+  }
+
+  // ── buttons (from MIDI notes, CC buttons or the on-screen grid) ──
+  press(t, vel = 1, src = 'ui') {
+    if (t.kind === 'pad') return this.padDown(t.index, vel);
+    if (t.kind !== 'action') return undefined;
+    this.bus.emit('button', { target: t, on: true });
+    if (t.name === 'shift') {
+      this.shift = true;
+      this.bus.emit('shift', true);
+      return undefined;
+    }
+    if (t.name === 'loop') {
+      // Shift + loop clears it straight away; otherwise tap vs hold is decided on release.
+      if (this.shift) return this.looper.clear(t.arg);
+      this.loopPress.set(src, performance.now());
+      return undefined;
+    }
+    return this.action(t.name, t.arg);
+  }
+
+  release(t, src = 'ui') {
+    if (t.kind === 'pad') return this.padUp(t.index);
+    if (t.kind !== 'action') return undefined;
+    this.bus.emit('button', { target: t, on: false });
+    if (t.name === 'shift') {
+      this.shift = false;
+      this.bus.emit('shift', false);
+    } else if (t.name === 'loop' && this.loopPress.has(src)) {
+      const heldFor = performance.now() - this.loopPress.get(src);
+      this.loopPress.delete(src);
+      if (heldFor >= LOOP_HOLD_MS) this.looper.clear(t.arg);
+      else this.looper.tap(t.arg);
+    }
+    return undefined;
   }
 
   activeInstruments() {
@@ -225,7 +279,74 @@ export class Controller {
         lp.tap(arg);
         break;
       case 'stopLoops':
-        lp.stopAll();
+        if (this.shift) lp.loops.forEach((_, i) => lp.clear(i)); // Shift + Stop All = clear everything
+        else lp.stopAll();
+        break;
+      case 'vibe':
+        this.selectVibe(arg);
+        break;
+      case 'randomVibe': {
+        let i = state.vibe;
+        while (i === state.vibe && VIBES.length > 1) i = Math.floor(Math.random() * VIBES.length);
+        this.selectVibe(i);
+        break;
+      }
+      case 'inst':
+        if (this.shift) this.toggleLayer(arg);
+        else this.selectInstrument(arg);
+        break;
+      case 'layer':
+        if (state.layerOn) set({ layerOn: false });
+        else {
+          // Turn the layer back on; if it would double the main instrument, pick the next one.
+          const layer = state.layer !== state.instrument ? state.layer : MELODIC[mod(MELODIC.indexOf(state.instrument) + 1, MELODIC.length)];
+          set({ layer, layerOn: true });
+        }
+        break;
+      case 'visual':
+        set({ visual: arg });
+        break;
+      case 'keyMode':
+        set({ keyMode: arg });
+        break;
+      case 'chord':
+        set({ chord: arg });
+        break;
+      case 'mute': {
+        const mutes = [...state.mutes];
+        mutes[arg] = !mutes[arg];
+        set({ mutes });
+        break;
+      }
+      case 'quantize':
+        set({ quantize: !state.quantize });
+        break;
+      case 'loopBars': {
+        const next = LOOP_BAR_OPTIONS[mod(LOOP_BAR_OPTIONS.indexOf(lp.bars) + 1, LOOP_BAR_OPTIONS.length)];
+        if (lp.setBars(next)) {
+          set({ loopBars: next });
+          this.bus.emit('toast', `Loop length · ${next} bar${next > 1 ? 's' : ''}`);
+        } else this.bus.emit('toast', 'Clear all loops to change the loop length (Shift + Stop All).');
+        break;
+      }
+      case 'tap':
+        this.tapTempo();
+        break;
+      case 'nextScale': {
+        if (this.shift) {
+          set({ root: mod(state.root + 1, 12) });
+        } else {
+          const ids = Object.keys(SCALES).filter((id) => id !== 'chromatic');
+          set({ scale: ids[mod(ids.indexOf(state.scale) + 1, ids.length)] });
+        }
+        this.bus.emit('toast', `Key · ${NOTE_NAMES[state.root]} ${SCALES[state.scale].name}`);
+        break;
+      }
+      case 'panic':
+        this.releaseAll('');
+        this.refs.clear();
+        this.engine.allNotesOff();
+        this.bus.emit('toast', 'All notes off');
         break;
       case 'vibePrev':
         this.selectVibe(mod(state.vibe - 1, VIBES.length));
@@ -252,6 +373,18 @@ export class Controller {
       default:
         break;
     }
+  }
+
+  tapTempo() {
+    const now = performance.now();
+    this.taps = this.taps.filter((t) => now - t < 2500);
+    this.taps.push(now);
+    if (this.taps.length >= 3) {
+      const gaps = this.taps.slice(1).map((t, i) => t - this.taps[i]);
+      const bpm = 60000 / (gaps.reduce((a, b) => a + b, 0) / gaps.length);
+      set({ tempo: this.clock.setBpm(Math.round(bpm)) });
+    }
+    this.bus.emit('tap');
   }
 
   selectInstrument(inst) {

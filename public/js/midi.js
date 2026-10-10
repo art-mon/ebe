@@ -1,7 +1,9 @@
-// Web MIDI: listens to the controller (by default every Oxygen port at once,
-// because keys and DAW-mode controls arrive on different ports), sends to the
-// IAC Driver, survives hot-plugging, and parses raw bytes into messages.
+// Web MIDI: listens to the controllers (by default every port of every known
+// controller at once — the Oxygen sends keys and DAW-mode controls on different
+// ports), sends notes to the IAC Driver, sends light updates back to the APC,
+// survives hot-plugging, and parses raw bytes into messages.
 import { CONTROLLER } from './config.js';
+import { ANY_DEVICE, deviceForPort } from './devices.js';
 
 export const AUTO = 'auto';
 
@@ -12,6 +14,7 @@ export class Midi {
     this.access = null;
     this.inputs = []; // attached input ports
     this.output = null;
+    this.lightOutputs = []; // controller ports that take LED messages (APC Key 25)
     this.error = null;
     this.inputChoice = AUTO; // AUTO | port id | null (none)
     this.outputChoice = null; // port id | null (auto: first IAC)
@@ -48,7 +51,7 @@ export class Midi {
   /** Ports Lumen would listen to in auto mode: the controller, never the IAC bus (feedback). */
   #autoInputs() {
     const ins = this.allInputs.filter((p) => !CONTROLLER.outputMatch.test(p.name));
-    const ctrl = ins.filter((p) => CONTROLLER.inputMatch.test(p.name));
+    const ctrl = ins.filter((p) => ANY_DEVICE.test(p.name));
     return ctrl.length ? ctrl : ins;
   }
 
@@ -66,7 +69,20 @@ export class Midi {
       (this.outputChoice && outs.find((p) => p.id === this.outputChoice)) ||
       outs.find((p) => CONTROLLER.outputMatch.test(p.name)) ||
       null;
+    // Light feedback goes to every connected controller output that has lights
+    // (skipping a separate "Keys" port if the device has one).
+    this.lightOutputs = outs.filter((p) => deviceForPort(p.name)?.hasLights && !/keys/i.test(p.name));
     this.bus.emit('midiPorts');
+  }
+
+  /** Known controllers among the ports we listen to, e.g. [{device, variant, name}]. */
+  get devices() {
+    const seen = new Map();
+    for (const p of this.inputs) {
+      const device = deviceForPort(p.name);
+      if (device && !seen.has(device.id)) seen.set(device.id, { device, variant: device.variant?.(p.name), name: p.name });
+    }
+    return [...seen.values()];
   }
 
   selectInput(choice) {
@@ -94,11 +110,21 @@ export class Midi {
     }
   }
 
+  /** Send to a specific port (used for controller lights). */
+  sendTo(port, data) {
+    try {
+      port.send(data);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   #onMessage(e, port) {
     const msg = parse(e.data);
     if (!msg) return;
     msg.portName = port.name;
-    msg.port = CONTROLLER.dawPortMatch.test(port.name) ? 'daw' : 'main';
+    msg.port = deviceForPort(port.name)?.portClass(port.name) ?? 'main';
     this.bus.emit('midi', msg);
   }
 }
@@ -136,7 +162,7 @@ export function parse(data) {
 
 /** Human-readable one-liner for the MIDI monitor. */
 export function describe(msg) {
-  const where = msg.port === 'daw' ? ' · DAW port' : '';
+  const where = msg.port === 'daw' ? ' · DAW port' : msg.port?.startsWith('apc') ? ' · APC' : '';
   switch (msg.type) {
     case 'noteon': return `Note on · ch ${msg.channel} · note ${msg.note} · vel ${msg.velocity}${where}`;
     case 'noteoff': return `Note off · ch ${msg.channel} · note ${msg.note}${where}`;

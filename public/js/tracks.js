@@ -41,21 +41,21 @@ export class Tracks {
       const mute = el('button', 'track-mute', 'M');
       mute.type = 'button';
       mute.title = `Mute ${inst.name}`;
-      mute.addEventListener('click', () => {
-        r.muted = !r.muted;
-        mute.classList.toggle('on', r.muted);
-        engine.mute(i, r.muted);
-      });
+      mute.addEventListener('click', () => controller.action('mute', i));
       row.append(head, canvas, meter, mute);
       root.append(row);
       const r = {
-        row, sub, canvas, fill, g: canvas.getContext('2d'), color: inst.color,
+        row, sub, canvas, fill, mute, g: canvas.getContext('2d'), color: inst.color,
         levels: new Float32Array(COLS), notes: new Int16Array(COLS).fill(-1),
-        activity: 0, display: 0, pendingNote: -1, muted: false,
+        activity: 0, display: 0, pendingNote: -1,
       };
       return r;
     });
 
+    // Mutes live in state, so the APC's track buttons and these M buttons stay in sync.
+    bus.on('state', (patch) => {
+      if ('mutes' in patch) this.rows.forEach((r, i) => r.mute.classList.toggle('on', state.mutes[i]));
+    });
     bus.on('voice', ({ inst, note, vel, on }) => {
       if (!on) return;
       const r = this.rows[inst];
