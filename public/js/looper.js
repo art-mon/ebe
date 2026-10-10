@@ -16,7 +16,7 @@ export class Looper {
     this.loops = Array.from({ length: LOOP_COUNT }, (_, index) => ({
       index,
       bars: 2,
-      events: [], // { pos, dur, inst, note, vel, recordedAt }
+      events: [], // { pos, dur, inst, note, vel, style, recordedAt } — style = the sound it was played with
       playing: false,
       playFrom: 0,
       stopAt: Infinity, // a beat where a playing loop will stop (the song schedules these)
@@ -193,8 +193,13 @@ export class Looper {
     loop.stopAt = Infinity;
     loop.playFrom = 0;
     if (LOOP_BAR_OPTIONS.includes(bars)) loop.bars = bars;
-    loop.events = events.map((e) => ({ pos: e.pos, dur: e.dur, inst: e.inst, note: e.note, vel: e.vel, recordedAt: -Infinity }));
+    loop.events = events.map((e) => ({ pos: e.pos, dur: e.dur, inst: e.inst, note: e.note, vel: e.vel, style: e.style, recordedAt: -Infinity }));
     loop.insts = new Set(loop.events.map((e) => e.inst));
+    // Get every sound this loop uses ready before it plays (sampled ones load once).
+    for (const key of new Set(loop.events.map((e) => `${e.inst}|${e.style ?? ''}`))) {
+      const [inst, style] = key.split('|');
+      if (style) this.engine.preloadStyle?.(Number(inst), style);
+    }
     this.#changed();
   }
 
@@ -206,7 +211,7 @@ export class Looper {
   }
 
   /** Feed every played note here (after transform). */
-  input({ inst, note, vel, on }) {
+  input({ inst, note, vel, on, style }) {
     if (!this.clock.running) return;
     const b = this.clock.beat;
     for (const loop of this.loops) {
@@ -214,7 +219,7 @@ export class Looper {
       if (!r || b < r.start - EARLY_GRACE || b >= r.end) continue;
       const key = inst * 128 + note;
       if (on) {
-        const p = { beat: Math.max(b, r.start), inst, note, vel };
+        const p = { beat: Math.max(b, r.start), inst, note, vel, style };
         if (inst === DRUMS_INDEX) this.#commit(loop, p, 0.1);
         else loop.pending.set(key, p);
       } else {
@@ -237,6 +242,7 @@ export class Looper {
       inst: p.inst,
       note: p.note,
       vel: p.vel,
+      style: p.style,
       recordedAt: p.beat,
     });
     loop.insts.add(p.inst);
@@ -279,7 +285,7 @@ export class Looper {
           if (abs < 0 || abs < loop.playFrom || abs >= loop.stopAt || abs < ev.recordedAt + L / 2) continue;
           const start = this.clock.timeAt(abs);
           const end = this.clock.timeAt(abs + ev.dur);
-          const h = this.engine.playNote(ev.inst, ev.note, ev.vel, start, end);
+          const h = this.engine.playNote(ev.inst, ev.note, ev.vel, start, end, ev.style);
           loop.handles.push({ ...h, end });
         }
       }

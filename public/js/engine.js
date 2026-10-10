@@ -72,10 +72,15 @@ export class Engine {
   }
 
   // ── scheduled playing (looper) ──
-  playNote(inst, note, vel, start, end) {
+  /**
+   * `style` is the sound the note was recorded with: the built-in engine plays it
+   * with that sound whatever the instrument is set to now. (In Live a track plays
+   * one Rack chain at a time, so there the note uses the track's current sound.)
+   */
+  playNote(inst, note, vel, start, end, style) {
     this.#visual(inst, note, vel, true, start);
     this.#visual(inst, note, 0, false, end);
-    if (!this.toAbleton) return this.synth.playNote(inst, note, vel, start, end);
+    if (!this.toAbleton) return this.synth.playNote(inst, note, vel, start, end, style);
     this.#sendNote(inst, note, vel, true, this.#perf(start));
     this.#sendNote(inst, note, 0, false, this.#perf(end));
     return {
@@ -146,6 +151,11 @@ export class Engine {
     const loading = this.synth.setStyle(inst, styleId);
     if (this.toAbleton && !INSTRUMENTS[inst].isDrums) this.sendStyle(inst, styleId);
     return loading; // a promise while a sampled instrument loads, else null
+  }
+
+  /** Load a sampled sound ahead of time (a loop that uses it is about to play). */
+  preloadStyle(inst, styleId) {
+    this.synth.preload(inst, styleId);
   }
 
   /** Send the style CC (also used by the MIDI-mapping helper in Settings). */

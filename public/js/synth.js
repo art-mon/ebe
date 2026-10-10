@@ -253,14 +253,9 @@ export class Synth {
       return { gain: g, level, meter, data: new Float32Array(meter.fftSize), muted: false };
     });
 
-    // Sampled kits play through their own tone + saturation (dusty trip-hop, warm downtempo…).
-    this.kitTone = ctx.createBiquadFilter();
-    this.kitTone.type = 'lowpass';
-    this.kitTone.frequency.value = 20000;
-    this.kitTone.Q.value = 0.5;
-    this.kitDrive = ctx.createWaveShaper();
-    this.kitDrive.oversample = '2x';
-    this.kitTone.connect(this.kitDrive).connect(this.buses[DRUMS_INDEX].gain);
+    // Sampled kits play through their own tone + saturation (dusty trip-hop, warm downtempo…),
+    // one chain per kit so loops recorded with different kits each keep theirs.
+    this.kitChains = new Map();
 
     // Each instrument plays one of its styles (styles.js); sampled ones load on demand.
     this.samples = new SampleBank(ctx);
@@ -346,8 +341,19 @@ export class Synth {
   }
 
   // ── voices ──
-  #voice(inst, note, vel, t) {
-    const style = this.styles[inst];
+  /** A style by id (a loop's recorded sound) or the instrument's current one; starts loading samples it needs. */
+  #styleOf(inst, styleId) {
+    const style = styleId ? styleFor(INSTRUMENTS[inst].id, styleId) : this.styles[inst];
+    if (style.sample && !this.samples.get(style.sample)) this.samples.load(style.sample, style).catch(() => {});
+    return style;
+  }
+
+  preload(inst, styleId) {
+    this.#styleOf(inst, styleId);
+  }
+
+  #voice(inst, note, vel, t, styleId) {
+    const style = this.#styleOf(inst, styleId);
     const set = style.sample ? this.samples.get(style.sample) : null;
     const v = set
       ? buildSampleVoice(this, style, set, note, vel, t)
@@ -402,13 +408,13 @@ export class Synth {
     else v.release(time);
   }
 
-  /** Schedules a complete note (used by the looper). Returns a cancel handle. */
-  playNote(inst, note, vel, start, end) {
+  /** Schedules a complete note (used by the looper), with the sound it was recorded with. Returns a cancel handle. */
+  playNote(inst, note, vel, start, end, styleId) {
     if (inst === DRUMS_INDEX) {
-      this.drum(note, vel, start);
+      this.drum(note, vel, start, styleId);
       return { cancel() {} };
     }
-    const v = this.#voice(inst, note, vel, start);
+    const v = this.#voice(inst, note, vel, start, styleId);
     v.release(end);
     return { cancel: (now) => v.release(Math.max(now, start), true) };
   }
@@ -477,13 +483,30 @@ export class Synth {
       }
       this.openHat = voice === 'openhat' ? g : null;
     }
-    src.connect(g).connect(this.kitTone);
+    src.connect(g).connect(this.#kitChain(style));
     src.onended = () => g.disconnect();
     src.start(t);
   }
 
-  drum(note, vel, t = this.ctx.currentTime) {
-    const kitStyle = this.styles[DRUMS_INDEX];
+  /** The kit's tone + saturation, made the first time the kit plays. */
+  #kitChain(style) {
+    let input = this.kitChains.get(style.id);
+    if (!input) {
+      input = this.ctx.createBiquadFilter();
+      input.type = 'lowpass';
+      input.frequency.value = style.tone ?? 20000;
+      input.Q.value = 0.5;
+      const drive = this.ctx.createWaveShaper();
+      drive.oversample = '2x';
+      drive.curve = kitCurve(style.drive ?? 0);
+      input.connect(drive).connect(this.buses[DRUMS_INDEX].gain);
+      this.kitChains.set(style.id, input);
+    }
+    return input;
+  }
+
+  drum(note, vel, t = this.ctx.currentTime, kitId) {
+    const kitStyle = this.#styleOf(DRUMS_INDEX, kitId);
     const kit = kitStyle.sample ? this.samples.get(kitStyle.sample) : null;
     if (kit) return this.#sampleDrum(kit, kitStyle, note, vel, t);
     const { ctx } = this;
@@ -624,11 +647,6 @@ export class Synth {
   setStyle(inst, styleId) {
     const style = styleFor(INSTRUMENTS[inst].id, styleId);
     this.styles[inst] = style;
-    if (inst === DRUMS_INDEX) {
-      const now = this.ctx.currentTime;
-      this.kitTone.frequency.setTargetAtTime(style.tone ?? 20000, now, 0.02);
-      this.kitDrive.curve = kitCurve(style.drive ?? 0);
-    }
     if (!style.sample || this.samples.get(style.sample)) return null;
     return this.samples.load(style.sample, style);
   }

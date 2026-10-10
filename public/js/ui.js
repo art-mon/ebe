@@ -520,7 +520,12 @@ export class UI {
       const s = this.looper.status(i);
       e.card.dataset.state = s;
       e.stateEl.textContent = labels[s];
-      e.dots.replaceChildren(...[...loop.insts].map((inst) => h('i', { style: `background:${INSTRUMENTS[inst].color}` })));
+      // One dot per instrument; hover it to see the sounds the loop was recorded with.
+      e.dots.replaceChildren(...[...loop.insts].map((inst) => {
+        const id = INSTRUMENTS[inst].id;
+        const sounds = [...new Set(loop.events.filter((ev) => ev.inst === inst).map((ev) => styleFor(id, ev.style ?? state.styles[id]).name))];
+        return h('i', { style: `background:${INSTRUMENTS[inst].color}`, title: `${INSTRUMENTS[inst].name}: ${sounds.join(', ')}` });
+      }));
       e.play.textContent = s === 'playing' ? '■' : '▶';
       e.play.disabled = !(s === 'playing' || s === 'stopped');
       e.clear.disabled = s === 'empty';

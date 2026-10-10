@@ -4,7 +4,7 @@
 // is also autosaved, so a reload never loses your loops.
 import { state, set } from './state.js';
 import { DEFAULT_STYLES } from './styles.js';
-import { vibeSetOf } from './config.js';
+import { vibeSetOf, INSTRUMENTS } from './config.js';
 
 // Settings that belong to a track (personal preferences like the MIDI ports,
 // controller mappings or the metronome sound don't travel with it).
@@ -35,7 +35,7 @@ export function snapshot(looper) {
     song: clone(state.song),
     loops: looper.loops.map((l) => ({
       bars: l.bars,
-      events: l.events.map(({ pos, dur, inst, note, vel }) => ({ pos, dur, inst, note, vel })),
+      events: l.events.map(({ pos, dur, inst, note, vel, style }) => ({ pos, dur, inst, note, vel, style })),
     })),
   };
 }
@@ -137,10 +137,13 @@ export class Library {
     try {
       if (this.clock.running) this.clock.stop();
       const s = track.settings ?? {};
-      track.loops?.forEach((l, i) => i < this.looper.loops.length && this.looper.load(i, l));
+      // Notes saved before each kept its own sound play with the sound the track was saved with.
+      const styles = trackStyles(track);
+      const soundOf = (e) => e.style ?? styles[INSTRUMENTS[e.inst]?.id];
+      track.loops?.forEach((l, i) => i < this.looper.loops.length && this.looper.load(i, { ...l, events: (l.events ?? []).map((e) => ({ ...e, style: soundOf(e) })) }));
       const patch = {};
       for (const k of SETTINGS) if (k in s && k !== 'fx' && k !== 'tempo') patch[k] = clone(s[k]);
-      patch.styles = trackStyles(track);
+      patch.styles = styles;
       if (typeof s.vibe === 'number') patch.vibeSet = vibeSetOf(s.vibe);
       if (track.song) patch.song = clone(track.song);
       patch.loopBars = this.looper.loops.map((l) => l.bars);

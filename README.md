@@ -266,7 +266,7 @@ The Lumen server relays between the browser and AbletonOSC on UDP ports 11000 an
 | Stop / clear a loop | Tap it to stop it. Hold its pad, or press **✕**, to clear it. |
 | Go full-screen visuals | **Stage** button or **`** (Esc exits) |
 
-Loops store **notes**, not audio. They replay through whichever engine is active, on the instrument they were recorded with. You can record a bass line, switch to Lead and solo over it.
+Loops store **notes**, not audio. They replay through whichever engine is active, on the instrument **and sound** they were recorded with. You can record a bass line, switch to Lead and solo over it; or record Keys as Glass Bells, switch Keys to Grand Piano and play piano over the bells. Drum loops keep their kit too. Hover a loop's coloured dots to see which sounds it uses. (In Ableton mode, Live plays each track's current sound, since a track plays one Rack chain at a time.)
 
 ### Where tracks are kept
 

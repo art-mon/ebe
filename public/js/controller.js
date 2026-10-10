@@ -211,7 +211,7 @@ export class Controller {
         const k = inst * 128 + n;
         this.refs.set(k, (this.refs.get(k) ?? 0) + 1);
         this.engine.noteOn(inst, n, vel);
-        this.looper.input({ inst, note: n, vel, on: true });
+        this.looper.input({ inst, note: n, vel, on: true, style: state.styles[INSTRUMENTS[inst].id] });
         played.push({ inst, note: n });
       }
     }
@@ -248,7 +248,7 @@ export class Controller {
     if (index < 8) {
       const { note } = DRUM_VOICES[index];
       this.engine.noteOn(DRUMS_INDEX, note, vel);
-      this.looper.input({ inst: DRUMS_INDEX, note, vel, on: true });
+      this.looper.input({ inst: DRUMS_INDEX, note, vel, on: true, style: state.styles.drums });
       return;
     }
     const cp = CONTROL_PADS[index - 8];

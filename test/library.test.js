@@ -18,7 +18,8 @@ function setup() {
   return { clock, looper, controller };
 }
 
-const notes = (inst, ...ns) => ns.map((note, i) => ({ pos: i, dur: 0.5, inst, note, vel: 100 }));
+const SOUND = ['grand', 'ensemble', 'finger', 'sax', 'acoustic']; // a recorded note carries its sound
+const notes = (inst, ...ns) => ns.map((note, i) => ({ pos: i, dur: 0.5, inst, note, vel: 100, style: SOUND[inst] }));
 
 test('a track is the loops, the song and the sound — and comes back exactly', () => {
   const { clock, looper, controller } = setup();
@@ -91,4 +92,18 @@ test('tracks from before real instruments open with them, keeping sounds picked 
   assert.deepEqual(trackStyles(old), { keys: 'grand', pad: 'shimmer', bass: 'acid', lead: 'sax', drums: DEFAULT_STYLES.drums });
   const now = { version: 2, settings: { styles: { keys: 'epiano', pad: 'warm', bass: 'sub', lead: 'saw', drums: 'tr808' } } };
   assert.deepEqual(trackStyles(now), now.settings.styles); // a current track is opened as saved
+});
+
+test('saved notes keep their sound; older tracks use the sound they were saved with', () => {
+  const { clock, looper, controller } = setup();
+  const lib = new Library({ bus, looper, clock, controller });
+  const old = {
+    version: 2,
+    settings: { styles: { keys: 'glass', pad: 'ensemble', bass: 'finger', lead: 'sax', drums: 'tr808' } },
+    loops: [{ bars: 1, events: [{ pos: 0, dur: 1, inst: 0, note: 60, vel: 0.8 }, { pos: 1, dur: 0.1, inst: 4, note: 36, vel: 1 }] }],
+  };
+  lib.apply(old);
+  assert.deepEqual(looper.loops[0].events.map((e) => e.style), ['glass', 'tr808']);
+  set({ styles: { ...state.styles, keys: 'grand' } }); // changing the sound now…
+  assert.equal(snapshot(looper).loops[0].events[0].style, 'glass'); // …doesn't touch the recording
 });

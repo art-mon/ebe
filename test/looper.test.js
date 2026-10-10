@@ -47,3 +47,31 @@ test('progress rings use each loop’s own length', () => {
   assert.equal(looper.phase(0), 0.5); // 6 mod 4 / 4
   assert.equal(looper.phase(1), 0.75); // 6 mod 8 / 8
 });
+
+test('a loop keeps the sound it was recorded with', () => {
+  const clock = fakeClock();
+  const played = [];
+  const preloaded = [];
+  const engine = {
+    playNote: (inst, note, vel, start, end, style) => (played.push({ inst, note, style }), { cancel() {} }),
+    preloadStyle: (inst, style) => preloaded.push(`${inst}:${style}`),
+  };
+  const looper = new Looper({ clock, engine, bus: new Bus() });
+  looper.setLoopBars(0, 1);
+  looper.record(0);
+  clock.beat = 0.5;
+  looper.input({ inst: 0, note: 60, vel: 0.8, on: true, style: 'glass' });
+  clock.beat = 1;
+  looper.input({ inst: 0, note: 60, vel: 0, on: false });
+  clock.beat = 1.5;
+  looper.input({ inst: 0, note: 64, vel: 0.8, on: true, style: 'grand' }); // switched sound mid-loop
+  clock.beat = 2;
+  looper.input({ inst: 0, note: 64, vel: 0, on: false });
+  assert.deepEqual(looper.loops[0].events.map((e) => e.style), ['glass', 'grand']);
+  clock.beat = 4;
+  clock.ticks[0](4, 8); // second pass: plays back
+  assert.deepEqual(played.map((p) => `${p.note}:${p.style}`), ['60:glass', '64:grand']);
+  // A loaded loop gets its sounds ready before it plays.
+  looper.load(1, { bars: 2, events: [{ pos: 0, dur: 1, inst: 1, note: 60, vel: 0.7, style: 'ensemble' }, { pos: 1, dur: 0.1, inst: 4, note: 36, vel: 1, style: 'triphop' }] });
+  assert.deepEqual(preloaded.sort(), ['1:ensemble', '4:triphop']);
+});
