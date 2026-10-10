@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lumen</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%239d8cff'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Shown until the AudioContext is allowed to start (browsers need a click first). -->
+  <div id="gate" class="gate">
+    <div class="gate-card">
+      <div class="brand big"><span class="brand-orb"></span>Lumen</div>
+      <p>Play your Oxygen Pro Mini with one-tap vibes, eight FX on the knobs and faders, a 4-track looper and visuals that dance with you.</p>
+      <button id="gate-start" class="btn primary big" type="button">Start playing</button>
+      <p class="muted small">No controller handy? Play the computer keyboard: <kbd>A</kbd>–<kbd>;</kbd> are keys, <kbd>1</kbd>–<kbd>8</kbd> are drum pads.</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-orb"></span>Lumen</div>
+
+    <div class="seg" id="engine-seg" role="radiogroup" aria-label="Sound engine">
+      <button type="button" data-engine="builtin" role="radio">Built-in sound</button>
+      <button type="button" data-engine="ableton" role="radio">Ableton Live</button>
+    </div>
+
+    <div class="status" id="status">
+      <span class="chip" id="chip-in" title="Controller input"><i></i><b>Controller</b></span>
+      <span class="chip" id="chip-out" title="MIDI out to Ableton (IAC Driver)"><i></i><b>IAC out</b></span>
+      <span class="chip" id="chip-live" title="AbletonOSC connection"><i></i><b>Live</b></span>
+    </div>
+
+    <div class="transport">
+      <button type="button" class="icon-btn" id="btn-play" title="Play / stop (Space)" aria-label="Play or stop">
+        <svg viewBox="0 0 24 24" class="i-play"><path d="M7 5l12 7-12 7z"/></svg>
+        <svg viewBox="0 0 24 24" class="i-stop"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      </button>
+      <div class="beat-dots" id="beat-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="tempo">
+        <button type="button" class="mini" id="tempo-down" aria-label="Slower">−</button>
+        <input id="tempo" type="number" min="40" max="220" step="1" aria-label="Tempo (BPM)">
+        <button type="button" class="mini" id="tempo-up" aria-label="Faster">+</button>
+        <span class="unit">BPM</span>
+      </div>
+      <button type="button" class="pill" id="btn-tap" title="Tap tempo">Tap</button>
+      <button type="button" class="pill toggle" id="btn-metro" title="Metronome">Click</button>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" class="pill" id="btn-wizard">Controller setup</button>
+      <button type="button" class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.4-2.5a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.3 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1c.5.4 1.1.7 1.7 1L11 21h4l.3-2.5c.6-.3 1.2-.6 1.7-1l2.4 1 2-3.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: vibes, instruments, playing aids -->
+    <aside class="col left">
+      <section class="panel">
+        <h2>Vibes <span class="hint">◀ ▶ or &lt;&lt; &gt;&gt;</span></h2>
+        <div class="vibes" id="vibes"></div>
+      </section>
+      <section class="panel">
+        <h2>Instrument <span class="hint">+ layers a second one</span></h2>
+        <div class="insts" id="insts"></div>
+      </section>
+      <section class="panel">
+        <h2>Play helpers</h2>
+        <div class="field">
+          <label for="key-root">Key</label>
+          <div class="row">
+            <select id="key-root"></select>
+            <select id="key-scale"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <div class="seg small" id="keymode-seg"></div>
+        </div>
+        <div class="field">
+          <label>Chords</label>
+          <div class="seg small wrap" id="chord-seg"></div>
+        </div>
+        <div class="field">
+          <label>Octave</label>
+          <div class="row">
+            <button type="button" class="mini" id="oct-down" aria-label="Octave down">−</button>
+            <output id="oct" class="oct">0</output>
+            <button type="button" class="mini" id="oct-up" aria-label="Octave up">+</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- CENTER: stage + FX -->
+    <section class="col center">
+      <div class="stage" id="stage">
+        <canvas id="visuals"></canvas>
+        <div class="hud">
+          <div class="hud-top">
+            <div>
+              <div class="hud-vibe" id="hud-vibe">Dreamy</div>
+              <div class="hud-sub" id="hud-sub">Pad + Keys · D minor</div>
+            </div>
+            <div class="hud-loop" id="hud-loop"></div>
+          </div>
+          <div class="hud-chord" id="hud-chord"></div>
+          <div class="hud-bottom">
+            <div class="seg glass" id="visual-seg"></div>
+            <button type="button" class="icon-btn glass" id="btn-stage" title="Stage mode (`)" aria-label="Stage mode">
+              <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <section class="panel fx-panel">
+        <h2>FX <span class="hint">knobs = tone · faders = space</span></h2>
+        <div class="fx" id="fx"></div>
+      </section>
+      <section class="panel tracks-panel">
+        <h2>Tracks <span class="hint">live level per instrument · click to play it</span></h2>
+        <div class="tracks" id="tracks"></div>
+      </section>
+    </section>
+
+    <!-- RIGHT: looper + pads -->
+    <aside class="col right">
+      <section class="panel">
+        <h2>Looper
+          <span class="loop-opts">
+            <select id="loop-bars" aria-label="Loop length"></select>
+            <button type="button" class="pill toggle small" id="btn-quant" title="Snap recorded notes to 16ths">Snap</button>
+          </span>
+        </h2>
+        <div class="loops" id="loops"></div>
+        <button type="button" class="btn ghost wide" id="btn-stop-loops">Stop all loops</button>
+      </section>
+      <section class="panel">
+        <h2>Pads
+          <span class="seg small" id="bank-seg">
+            <button type="button" data-bank="0">A · Drums</button>
+            <button type="button" data-bank="1">B · Control</button>
+          </span>
+        </h2>
+        <div class="pads" id="pads"></div>
+      </section>
+    </aside>
+
+    <!-- BOTTOM: keyboard -->
+    <section class="keyboard" id="keyboard" aria-label="On-screen keyboard"></section>
+  </main>
+
+  <!-- Settings drawer -->
+  <div class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-scrim" data-close></div>
+    <div class="drawer-panel" role="dialog" aria-label="Settings">
+      <header class="drawer-head">
+        <h2>Settings</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close settings">✕</button>
+      </header>
+      <div class="drawer-body" id="drawer-body"></div>
+    </div>
+  </div>
+
+  <!-- Controller setup wizard -->
+  <div class="modal" id="wizard" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-label="Controller setup">
+      <div class="wiz-progress"><i id="wiz-bar"></i></div>
+      <p class="muted small" id="wiz-count"></p>
+      <h3 id="wiz-prompt">Move Knob 1</h3>
+      <p id="wiz-detail" class="wiz-detail"></p>
+      <p id="wiz-got" class="wiz-got"></p>
+      <div class="row end">
+        <button type="button" class="btn ghost" id="wiz-skip">Skip</button>
+        <button type="button" class="btn" id="wiz-done">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

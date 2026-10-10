@@ -1,0 +1,17 @@
+{
+  "name": "lumen",
+  "version": "0.1.0",
+  "description": "A playful performance UI for the M-Audio Oxygen Pro Mini + Ableton Live: vibes, FX macros, a MIDI looper and reactive visuals.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
