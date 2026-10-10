@@ -110,10 +110,10 @@ export class Midi {
     }
   }
 
-  /** Send to a specific port (used for controller lights). */
-  sendTo(port, data) {
+  /** Send to a specific port (used for controller lights and their clock). */
+  sendTo(port, data, timestamp) {
     try {
-      port.send(data);
+      port.send(data, timestamp);
       return true;
     } catch {
       return false;

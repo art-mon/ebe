@@ -84,7 +84,13 @@ Loop pads change colour with their state:
 
 The mk2 shows Lumen's exact colours using its 128-colour palette. The mk1 does green, red and amber.
 
-In **Live's MIDI settings**, turn *Track* and *Remote* **off** for the APC's ports, and set its Control Surface slot to **None**. Otherwise Live and Lumen fight over the grid lights and you hear notes twice.
+In **Live's MIDI settings**, turn *Track* and *Remote* **off** for the APC's ports, and set its Control Surface slot to **None**. Otherwise Live and Lumen fight over the grid lights and you hear notes twice. Live **switches the APC Key 25 surface back on by itself** when you plug the APC in, so check again after reconnecting.
+
+Good to know:
+- The mk2 has two ports, *Keys* and *Control*. Lumen uses both. The mk1 has one port, with the keys on MIDI channel 2.
+- The APC's own Octave buttons transpose the keyboard inside the APC. Lumen's Octave buttons (under the grid) stack on top of that.
+- The mk1 knobs are ordinary knobs, so after a vibe changes the FX, a knob jumps to its own position the moment you touch it. The mk2's endless knobs don't jump.
+- Lumen sends a MIDI clock to the APC at its own tempo. Pulsing and blinking pads need one, and with Lumen's clock they blink in time with your music.
 
 ### M-Audio Oxygen Pro Mini (2 minutes, once)
 
@@ -235,6 +241,7 @@ public/js/
   config.js          instruments, vibes, FX, scales
   devices.js         controller profiles: Oxygen Pro Mini, APC Key 25 (+ default mappings)
   lights.js          APC Key 25 grid lights (also colours the on-screen grid)
+  ticker.js          a timer that keeps running when the tab is in the background
   controller.js      MIDI/keyboard input → notes & actions, MIDI learn, setup wizard
   transform.js       octave / scale snap / easy mode / chords
   engine.js          routes notes to the built-in synth or to Live over MIDI

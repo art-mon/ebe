@@ -29,6 +29,19 @@ const digit = (code) => (/^Digit[1-8]$/.test(code) ? Number(code[5]) - 1 : -1);
 const sameTarget = (a, b) =>
   a && b && a.kind === b.kind && a.index === b.index && a.name === b.name && a.arg === b.arg;
 
+/**
+ * Decode one step from an endless knob. Akai/Ableton/Bitwig say the APC Key 25
+ * mk2 uses two's complement (1…15 up, 127…113 down); one source says sign-bit
+ * (65…79 down), so both are accepted. Anything else means it's not relative → null.
+ */
+export function relativeDelta(v) {
+  if (v === 0 || v === 64) return 0;
+  if (v <= 15) return v;
+  if (v >= 113) return v - 128;
+  if (v >= 65 && v <= 79) return -(v - 64);
+  return null;
+}
+
 export function sourceKey(msg) {
   const kind = msg.type === 'cc' ? 'cc' : 'note';
   return `${msg.port}|${kind}:${msg.channel}:${kind === 'cc' ? msg.cc : msg.note}`;
@@ -127,17 +140,17 @@ export class Controller {
     }
   }
 
-  /** A knob turned. Endless (relative) knobs send small steps: 1…63 up, 127…65 down. */
+  /** A knob turned. Endless (relative) knobs send small steps instead of positions. */
   #knob(t, msg) {
     const key = sourceKey(msg);
     const v = msg.value;
     if (!t.relative || this.absoluteKnobs.has(key)) return this.setFx(t.index, v / 127);
-    if (v > 15 && v < 113) {
+    const delta = relativeDelta(v);
+    if (delta === null) {
       // Relative encoders never jump this far — it's really an absolute knob.
       this.absoluteKnobs.add(key);
       return this.setFx(t.index, v / 127);
     }
-    const delta = v < 64 ? v : v - 128;
     return this.setFx(t.index, clamp01(state.fx[t.index] + delta * (this.shift ? 0.0025 : 0.01)));
   }
 

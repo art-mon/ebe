@@ -3,6 +3,8 @@
 // AudioContext clock. Beat 0 is the first downbeat; a count-in runs at
 // negative beats.
 
+import { every } from './ticker.js';
+
 const mod = (n, m) => ((n % m) + m) % m;
 
 export class Clock {
@@ -17,7 +19,7 @@ export class Clock {
     this.metronome = true;
     this.onClick = null; // (time, accent) => void
     this.tickers = new Set();
-    this.timer = 0;
+    this.stopTimer = null;
   }
 
   get spb() {
@@ -47,14 +49,15 @@ export class Clock {
     this.startTime = this.ctx.currentTime + 0.06 + countInBeats * this.spb;
     this.scheduledUntil = -countInBeats;
     this.running = true;
-    this.timer = setInterval(() => this.#tick(), 25);
+    this.stopTimer = every(25, () => this.#tick());
     this.#tick();
     this.bus.emit('transport', { running: true, countIn: countInBeats });
   }
 
   stop() {
     if (!this.running) return;
-    clearInterval(this.timer);
+    this.stopTimer?.();
+    this.stopTimer = null;
     this.running = false;
     this.bus.emit('transport', { running: false });
   }

@@ -3,6 +3,7 @@
 import { state } from './state.js';
 import { VIBES, INSTRUMENTS, DRUM_VOICES, NOTE_NAMES, SCALES } from './config.js';
 import { APC, APC_GRID, APC_SCENES, APC_TRACKS, apcNote } from './devices.js';
+import { every } from './ticker.js';
 
 // Ableton's standard 128-colour palette: on the APC Key 25 mk2 the note
 // velocity picks one of these. Copied from Live 12's ableton.v3 framework.
@@ -161,7 +162,7 @@ export class Lights {
     this.hits = new Set();
     this.beat = false;
     this.stage = false;
-    this.timer = 0;
+    this.pending = false;
     const later = () => this.schedule();
     for (const ev of ['state', 'looper', 'transport', 'shift']) bus.on(ev, later);
     bus.on('midiPorts', () => {
@@ -198,19 +199,40 @@ export class Lights {
       this.schedule();
     });
     addEventListener('pagehide', () => this.allOff());
+    // The mk2 syncs pulsing/blinking pads to an incoming MIDI clock (Live normally
+    // sends one), so Lumen sends its own — which also makes the blinks land on the beat.
+    this.nextTick = 0;
+    every(50, () => this.#clock());
+  }
+
+  #clock() {
+    const ports = this.midi.lightOutputs;
+    const now = performance.now();
+    if (!ports.length) {
+      this.nextTick = 0;
+      return;
+    }
+    const interval = 60000 / (state.tempo * 24); // 24 clocks per beat
+    if (this.nextTick < now) this.nextTick = now;
+    // Schedule ~150 ms ahead with timestamps, so timer jitter never reaches the clock.
+    while (this.nextTick < now + 150) {
+      for (const port of ports) this.midi.sendTo(port, [0xf8], this.nextTick);
+      this.nextTick += interval;
+    }
   }
 
   get ctx() {
     return { looper: this.looper, held: this.held, hits: this.hits, beat: this.beat, stage: this.stage };
   }
 
-  /** Coalesce bursts of changes into one update (timers keep running in background tabs). */
+  /** Coalesce a burst of changes into one update (a microtask isn't throttled in background tabs). */
   schedule() {
-    if (this.timer) return;
-    this.timer = setTimeout(() => {
-      this.timer = 0;
+    if (this.pending) return;
+    this.pending = true;
+    queueMicrotask(() => {
+      this.pending = false;
       this.render();
-    }, 12);
+    });
   }
 
   render() {

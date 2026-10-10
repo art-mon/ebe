@@ -54,3 +54,15 @@ test('mk1 maps looks onto green / red / amber', () => {
   assert.equal(mk1Value({ color: '#ff0000', level: 'dim', keep: true }), MK1.amber);
   assert.equal(mk1Value({ color: '#000', level: 'full', mk1: 3 }), 3);
 });
+
+test('endless knob steps decode both ways, absolute values are rejected', async () => {
+  const { relativeDelta } = await import('../public/js/controller.js');
+  assert.equal(relativeDelta(1), 1);
+  assert.equal(relativeDelta(3), 3); // accelerated
+  assert.equal(relativeDelta(127), -1); // two's complement
+  assert.equal(relativeDelta(125), -3);
+  assert.equal(relativeDelta(65), -1); // sign-bit style
+  assert.equal(relativeDelta(64), 0);
+  assert.equal(relativeDelta(40), null); // looks like an absolute knob
+  assert.equal(relativeDelta(100), null);
+});
