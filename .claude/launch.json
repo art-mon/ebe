@@ -4,8 +4,22 @@
     {
       "name": "lumen",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["server/index.js"],
+      "runtimeArgs": [
+        "server/index.js"
+      ],
       "port": 5173
+    },
+    {
+      "name": "lumen-test",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "PORT=5180",
+        "LIVE_PORT=11090",
+        "REPLY_PORT=11091",
+        "node",
+        "server/index.js"
+      ],
+      "port": 5180
     }
   ]
 }

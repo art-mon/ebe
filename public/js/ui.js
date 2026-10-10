@@ -3,7 +3,7 @@
 import { state, set, resetSettings } from './state.js';
 import {
   INSTRUMENTS, MELODIC, DRUM_VOICES, VIBES, FX_MACROS, FX_CHANNEL, FX_CC_BASE, SCALES, NOTE_NAMES,
-  KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, WIZARD_STEPS, CONTROLLER,
+  KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, WIZARD_STEPS, CONTROLLER, reverbDivision,
 } from './config.js';
 import { isKeyInScale, chordName } from './transform.js';
 import { describe, AUTO } from './midi.js';
@@ -350,7 +350,16 @@ export class UI {
         f.control.querySelector('.tick').setAttribute('transform', `rotate(${-135 + v * 270} 29 29)`);
       }
       f.control.setAttribute('aria-valuenow', String(Math.round(v * 100)));
-      f.val.textContent = String(Math.round(v * 100));
+      if (FX_MACROS[i].id === 'space') {
+        // Space is a note length: the reverb tail follows the tempo.
+        const div = reverbDivision(v);
+        const secs = (div.beats * 60) / state.tempo;
+        f.val.textContent = div.label;
+        f.control.setAttribute('aria-valuetext', `${div.label} reverb`);
+        f.wrap.title = `${FX_MACROS[i].hw} · reverb tail = ${div.label} → ${secs.toFixed(2)} s at ${Math.round(state.tempo)} BPM`;
+      } else {
+        f.val.textContent = String(Math.round(v * 100));
+      }
     });
     if (touched !== undefined) {
       const w = this.fxEls[touched]?.wrap;
@@ -658,11 +667,26 @@ export class UI {
       h('span', { class: 'src' }, ab.live ? (ab.trackOf[i] >= 0 ? `Live track ${ab.trackOf[i] + 1} “${ab.trackNames[ab.trackOf[i]]}”` : 'no track with this name') : '—'),
       h('span'),
     ]);
+    const synced = (m) => m.id === 'space' && ab.reverbSynced;
     const fxRows = FX_MACROS.flatMap((m, i) => [
       h('span', {}, m.name),
-      h('span', { class: 'src' }, `CC ${FX_CC_BASE + i} → ${m.hint}`),
-      h('button', { type: 'button', class: 'pill', onclick: () => this.engine.wiggleFx(i) }, 'Send'),
+      h('span', { class: 'src' }, synced(m) ? 'set by Lumen in time with the tempo — no mapping needed' : `CC ${FX_CC_BASE + i} → ${m.hint}`),
+      synced(m) ? h('span') : h('button', { type: 'button', class: 'pill', onclick: () => this.engine.wiggleFx(i) }, 'Send'),
     ]);
+    let verb = null;
+    if (ab.live) {
+      const r = ab.reverb;
+      const div = reverbDivision(state.fx[FX_MACROS.findIndex((m) => m.id === 'space')]);
+      if (r?.decay) {
+        const where = `track ${r.track + 1} “${ab.trackNames[r.track] ?? ''}”`;
+        const now = r.readout || (r.decayMs ? `${(r.decayMs / 1000).toFixed(2)} s` : '');
+        verb = h('p', {}, `✓ Reverb sync: Lumen times the Reverb on ${where} to the tempo — tail ${div.label}${now ? ` (${now})` : ''}, pre-delay 1/64.`);
+      } else if (r?.foundDecay) {
+        verb = h('div', { class: 'warnbox' }, 'Found a Reverb but couldn’t read its Decay Time in milliseconds, so it isn’t tempo-synced. Space falls back to its CC mapping.');
+      } else {
+        verb = h('p', { class: 'muted' }, 'Reverb sync: put Live’s Reverb on a group track (select your instrument tracks, ⌘G, name it “FX”) — AbletonOSC can’t reach the Master track. Lumen then sets its decay to match the tempo.');
+      }
+    }
     sections.push(h('section', {},
       h('h3', {}, 'Ableton Live'),
       h('p', {}, ab.live
@@ -673,6 +697,7 @@ export class UI {
       h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: state.syncTempo, onchange: (e) => set({ syncTempo: e.target.checked }) }), 'Keep Live’s tempo in sync with Lumen'),
       h('div', { class: 'kv', style: 'margin:10px 0' }, trackRows),
       ab.live ? h('button', { type: 'button', class: 'pill', onclick: () => ab.refreshTracks() }, 'Re-scan tracks') : null,
+      verb,
       h('p', { style: 'margin-top:14px' }, `FX mapping (one time): in Live press ⌘M, click a parameter, then press Send here. Lumen sends these on MIDI channel ${FX_CHANNEL}.`),
       h('div', { class: 'kv' }, fxRows)));
 
@@ -749,6 +774,7 @@ export class UI {
       if (['vibe', 'instrument', 'layer', 'layerOn', 'root', 'scale', 'keyMode', 'chord', 'octave', 'visual'].some((k) => k in patch)) this.#renderHud();
       if ('fx' in patch) this.#renderFx();
       if ('tempo' in patch || 'metronome' in patch) this.#renderTransport();
+      if ('tempo' in patch) this.#renderFx(); // Space shows seconds at the current tempo
       if ('quantize' in patch) this.#renderLoops();
       if ('mappings' in patch && this.drawerOpen) this.renderDrawer();
     });

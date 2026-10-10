@@ -4,6 +4,7 @@ A playful performance screen for the **M-Audio Oxygen Pro Mini** and **Ableton L
 
 - **Vibes:** one tap changes the instrument (or a layered pair), all eight effects, the colours and the visuals.
 - **Eight FX macros** on the 4 knobs and 4 faders: Filter, Reso, Drive and Crush; Echo, Repeats, Reverb and Space. Switching vibes glides the effects smoothly instead of jumping.
+- **Effects that follow the tempo.** The echo is a dotted 1/8. **Space** picks how long the reverb lasts as a note length (1/8, 1/4, 1/2, 1 bar, 2 bars, 4 bars), so the tail dies away on the beat. The reverb's pre-delay is a 1/64 note. All of it re-times when you change the BPM, including on Live's Reverb when AbletonOSC is installed.
 - **Play helpers** so wrong notes are hard to hit:
   - *Snap to scale*.
   - *Easy mode*: the white keys play the scale, and middle C is the key's root.
@@ -102,8 +103,15 @@ Live 12 Lite allows 8 tracks, which is plenty. Create these MIDI tracks. Lumen f
 
 Setting Monitor to **In** means each track plays whenever its channel receives notes, with no arming needed. Changing instrument in Lumen just changes the channel it sends on. That's also how layering works: Lumen sends on two channels at once.
 
-### d) FX on the Master track
-Put these on the **Master** track: **Auto Filter → Saturator → Redux → Delay → Reverb**. All of them are in Lite. Then map Lumen's FX to them, once:
+### d) FX on a group track
+1. Select the five instrument tracks and press **⌘G** to group them. Rename the group **FX**. Group tracks are included in Lite.
+2. Put these on the **FX** group track: **Auto Filter → Saturator → Redux → Delay → Reverb**. All of them are in Lite.
+
+Why a group and not Master? Lumen can only reach devices on normal or group tracks through AbletonOSC, and that's what lets it time the Reverb to the tempo (step e).
+
+On Live's **Delay**, turn on **Sync** and set both sides to **3** (sixteenths), which is a dotted 1/8. That matches Lumen's built-in echo, and Live keeps it in time by itself.
+
+Then map Lumen's FX to them, once:
 
 1. In Lumen, switch to **Ableton Live** in the top bar and open **Settings → Ableton Live**.
 2. In Live, press **⌘M** to enter MIDI Map mode.
@@ -119,7 +127,7 @@ Put these on the **Master** track: **Auto Filter → Saturator → Redux → Del
 | Echo | 24 | Delay → Dry/Wet |
 | Repeats | 25 | Delay → Feedback |
 | Reverb | 26 | Reverb → Dry/Wet |
-| Space | 27 | Reverb → Decay Time |
+| Space | 27 | Reverb → Decay Time. Skip this one if you install AbletonOSC: Lumen then sets the decay itself, in time with the tempo. |
 
 Save the set (for example, as `Lumen.als`). The mappings are stored in it.
 
@@ -129,6 +137,7 @@ Save the set (for example, as `Lumen.als`). The mappings are stored in it.
 - The Tracks panel shows Live's real levels.
 - Lumen and Live share one tempo.
 - The track **M** buttons mute the Live tracks.
+- **Live's Reverb follows the tempo.** Lumen finds the Reverb on your FX group track and sets its *Decay Time* to the Space note length and its *Predelay* to a 1/64 note. It re-times both whenever the BPM changes. Settings → Ableton Live shows what Live reports back, for example "1 bar (2.40 s)".
 
 1. Download AbletonOSC into Live's Remote Scripts folder:
 

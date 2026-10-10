@@ -106,6 +106,8 @@ bus.on('ableton', ({ live }) => {
     if (state.syncTempo) ableton.setTempo(state.tempo);
   }
 });
+// A Reverb just got linked in Live: time it to the current tempo straight away.
+bus.on('abletonReverb', () => engine.resyncReverb());
 bus.on('voice', (v) => {
   visuals.onVoice(v);
   if (v.on) feed.onNote(v.note, v.vel);

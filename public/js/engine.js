@@ -2,7 +2,9 @@
 //   'builtin' → the Web Audio synth in this page
 //   'ableton' → MIDI out (IAC Driver) on each instrument's channel
 // and tells the visuals about every note, at the moment it is heard.
-import { INSTRUMENTS, FX_CHANNEL, FX_CC_BASE } from './config.js';
+import { INSTRUMENTS, FX_CHANNEL, FX_CC_BASE, FX_MACROS, reverbDivision } from './config.js';
+
+const SPACE = FX_MACROS.findIndex((m) => m.id === 'space');
 
 export class Engine {
   constructor({ ctx, synth, midi, ableton, bus }) {
@@ -14,6 +16,8 @@ export class Engine {
     this.mode = 'builtin';
     this.sounding = new Map(); // "ch:note" → count, for clean all-notes-off in Ableton mode
     this.lastFxCc = [];
+    this.bpm = 100;
+    this.reverbBeats = reverbDivision(FX_MACROS[SPACE].def).beats;
   }
 
   setMode(mode) {
@@ -100,7 +104,14 @@ export class Engine {
   // ── FX / mix ──
   fx(index, value01) {
     this.synth.setFx(index, value01); // keep the built-in chain in sync either way
+    if (index === SPACE) this.reverbBeats = reverbDivision(value01).beats;
     if (!this.toAbleton) return;
+    // With AbletonOSC linked to Live's Reverb, Space sets its decay in time with the
+    // tempo instead of sending a CC (which can't know the tempo).
+    if (index === SPACE && this.ableton.reverbSynced) {
+      this.ableton.syncReverb(this.reverbBeats, this.bpm);
+      return;
+    }
     const v = Math.round(value01 * 127);
     if (this.lastFxCc[index] === v) return; // morphs call this every frame; only send real changes
     this.lastFxCc[index] = v;
@@ -120,7 +131,14 @@ export class Engine {
   }
 
   tempo(bpm) {
+    this.bpm = bpm;
     this.synth.setTempo(bpm);
+    this.resyncReverb();
+  }
+
+  /** Re-time Live's Reverb (no-op unless in Ableton mode with the reverb linked). */
+  resyncReverb() {
+    if (this.toAbleton && this.ableton.reverbSynced) this.ableton.syncReverb(this.reverbBeats, this.bpm);
   }
 
   mute(inst, muted) {

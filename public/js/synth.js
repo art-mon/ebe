@@ -4,7 +4,7 @@
 //   voices ─▶ instrument bus (gain ─▶ meter) ─▶ drive ─▶ crush ─▶ filter ─┬─▶ dry ──────┐
 //                                                                         ├─▶ echo ─────┤─▶ limiter ─▶ out
 //                                                                         └─▶ reverb ───┘
-import { INSTRUMENTS, DRUMS_INDEX, FX_MACROS } from './config.js';
+import { INSTRUMENTS, DRUMS_INDEX, FX_MACROS, PREDELAY_BEATS, reverbDivision } from './config.js';
 
 const mtof = (n) => 440 * 2 ** ((n - 69) / 12);
 const MAX_VOICES = 12;
@@ -169,11 +169,24 @@ export class Synth {
     this.echoTone.connect(this.feedback).connect(this.delay);
     this.echoTone.connect(this.limiter);
 
+    // Reverb: send → tempo-synced pre-delay → one of two convolvers. When the tempo
+    // or length changes, the new tail loads into the idle convolver and crossfades
+    // in, so there's no click mid-performance.
+    this.bpm = 100;
+    this.reverbBeats = reverbDivision(0.5).beats;
     this.reverbSend = this.gain(0);
-    this.convolver = ctx.createConvolver();
+    this.preDelay = ctx.createDelay(1);
     this.reverbReturn = this.gain(0.7);
-    this.filter.connect(this.reverbSend).connect(this.convolver).connect(this.reverbReturn).connect(this.limiter);
-    this.#buildImpulse(0.5);
+    this.verbs = [0, 1].map(() => {
+      const conv = ctx.createConvolver();
+      const level = this.gain(0);
+      this.preDelay.connect(conv).connect(level).connect(this.reverbReturn);
+      return { conv, level };
+    });
+    this.activeVerb = 0;
+    this.filter.connect(this.reverbSend).connect(this.preDelay);
+    this.reverbReturn.connect(this.limiter);
+    this.#loadReverb();
 
     // Per-instrument buses (+ meters for the track view)
     this.buses = INSTRUMENTS.map((inst) => {
@@ -230,19 +243,38 @@ export class Synth {
     return buf;
   }
 
-  #buildImpulse(space) {
-    const { sampleRate } = this.ctx;
-    const seconds = 0.6 + space * 5.4;
+  /** Reverb tail length in seconds for the current tempo and Space setting. */
+  get reverbSeconds() {
+    return Math.min(12, Math.max(0.15, (this.reverbBeats * 60) / this.bpm));
+  }
+
+  #loadReverb() {
+    const { sampleRate, currentTime: now } = this.ctx;
+    const seconds = this.reverbSeconds;
     const len = Math.floor(sampleRate * seconds);
     const ir = this.ctx.createBuffer(2, len, sampleRate);
     for (let ch = 0; ch < 2; ch++) {
       const d = ir.getChannelData(ch);
       for (let i = 0; i < len; i++) {
         const t = i / sampleRate;
-        d[i] = (Math.random() * 2 - 1) * Math.exp((-t * 6.5) / seconds) * Math.min(1, t * 200);
+        // -60 dB exactly at the end, so the tail is gone right on the beat.
+        d[i] = (Math.random() * 2 - 1) * Math.exp((-t * 6.9) / seconds) * Math.min(1, t * 200);
       }
     }
-    this.convolver.buffer = ir;
+    const from = this.verbs[this.activeVerb];
+    this.activeVerb = 1 - this.activeVerb;
+    const to = this.verbs[this.activeVerb];
+    to.conv.buffer = ir;
+    to.level.gain.cancelScheduledValues(now);
+    to.level.gain.setTargetAtTime(1, now, 0.08);
+    from.level.gain.cancelScheduledValues(now);
+    from.level.gain.setTargetAtTime(0, now, 0.08);
+    this.preDelay.delayTime.setTargetAtTime((60 / this.bpm) * PREDELAY_BEATS, now, 0.05);
+  }
+
+  #scheduleReverb() {
+    clearTimeout(this.reverbTimer);
+    this.reverbTimer = setTimeout(() => this.#loadReverb(), 150);
   }
 
   // ── voices ──
@@ -472,10 +504,14 @@ export class Synth {
       case 'reverb':
         this.reverbSend.gain.setTargetAtTime(v * 0.95, now, 0.03);
         break;
-      case 'space':
-        clearTimeout(this.spaceTimer);
-        this.spaceTimer = setTimeout(() => this.#buildImpulse(v), 120);
+      case 'space': {
+        const beats = reverbDivision(v).beats;
+        if (beats !== this.reverbBeats) {
+          this.reverbBeats = beats;
+          this.#scheduleReverb();
+        }
         break;
+      }
       default:
         break;
     }
@@ -484,6 +520,10 @@ export class Synth {
   setTempo(bpm) {
     // Dotted eighth echoes always sit nicely in the groove.
     this.delay.delayTime.setTargetAtTime(Math.min(1.9, (60 / bpm) * 0.75), this.ctx.currentTime, 0.05);
+    if (Math.abs(bpm - this.bpm) > 0.01) {
+      this.bpm = bpm;
+      this.#scheduleReverb(); // the reverb tail is measured in beats too
+    }
   }
 
   setMute(inst, muted) {

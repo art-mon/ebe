@@ -43,8 +43,25 @@ export const FX_MACROS = [
   { id: 'echo', name: 'Echo', hw: 'Fader 1', def: 0.15, hint: 'Delay → Dry/Wet' },
   { id: 'repeats', name: 'Repeats', hw: 'Fader 2', def: 0.35, hint: 'Delay → Feedback' },
   { id: 'reverb', name: 'Reverb', hw: 'Fader 3', def: 0.25, hint: 'Reverb → Dry/Wet' },
-  { id: 'space', name: 'Space', hw: 'Fader 4', def: 0.5, hint: 'Reverb → Decay Time' },
+  { id: 'space', name: 'Space', hw: 'Fader 4', def: 0.5, hint: 'Reverb → Decay Time (tempo-synced via AbletonOSC)' },
 ];
+
+// The reverb follows the tempo: Space picks how long the tail lasts, as a note
+// length, so it dies away on the beat instead of smearing across it.
+export const REVERB_DIVISIONS = [
+  { beats: 0.5, label: '1/8' },
+  { beats: 1, label: '1/4' },
+  { beats: 2, label: '1/2' },
+  { beats: 4, label: '1 bar' },
+  { beats: 8, label: '2 bars' },
+  { beats: 16, label: '4 bars' },
+];
+export const PREDELAY_BEATS = 1 / 16; // a 1/64 note: keeps the dry hit clear of the tail
+
+export function reverbDivision(space01) {
+  const i = Math.round(Math.max(0, Math.min(1, space01)) * (REVERB_DIVISIONS.length - 1));
+  return REVERB_DIVISIONS[i];
+}
 
 // ── Vibes ───────────────────────────────────────────────────────────────────
 // One tap = instrument (+ optional layer) + all eight FX + colours + visuals.
