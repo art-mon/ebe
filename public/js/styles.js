@@ -19,7 +19,7 @@
 //   amp      { a, r }      attack and release in seconds
 //   gain     level trim, measured so each sits with its instrument's synth sounds
 //   maxSec   how much of each recording to keep
-//   loop     [startSec, endSec] for sustained sounds (held notes keep going)
+//   loop     [startSec, endSec] for sustained sounds (held notes keep going); loopFade = seam length
 //   tone     soft notes sound darker, like the real instrument
 //   fallback the synth style that plays until the samples have loaded
 
@@ -69,11 +69,14 @@ export const STYLES = {
     },
   ],
   pad: [
-    real('ensemble', 'Strings', 'strings', { amp: { a: 0.15, r: 0.8 }, loop: LOOP, gain: 1.05, fallback: 'strings' }),
+    // Real string sections (VSCO 2): cellos low, violas in the middle, violins on top.
+    real('ensemble', 'Strings', 'vsco-strings', { amp: { a: 0.02, r: 0.9 }, loop: [2.2, 6.6], loopFade: 0.8, gain: 0.7, fallback: 'strings' }),
+    real('tremolo', 'Tremolo Strings', 'vsco-tremolo', { amp: { a: 0.02, r: 0.7 }, loop: [1.8, 6.6], loopFade: 0.6, gain: 1.5, fallback: 'strings' }),
+    real('spiccato', 'Spiccato', 'vsco-spiccato', { amp: { a: 0.002, r: 0.12 }, maxSec: 1.6, gain: 1.3, fallback: 'strings' }),
+    real('pizz', 'Pizzicato', 'vsco-pizz', { amp: { a: 0.002, r: 0.3 }, maxSec: 3, gain: 1, fallback: 'strings' }),
     real('voices', 'Choir', 'choir', { amp: { a: 0.2, r: 0.9 }, loop: LOOP, gain: 0.95, fallback: 'choir' }),
     real('warmpad', 'Warm Pad', 'warmpad', { amp: { a: 0.25, r: 1.2 }, loop: LOOP, gain: 0.65, fallback: 'warm' }),
     real('harp', 'Harp', 'harp', { amp: { a: 0.002, r: 1 }, gain: 1.1, fallback: 'warm' }),
-    real('pizz', 'Pizzicato', 'pizzicato', { amp: { a: 0.002, r: 0.25 }, gain: 1.15, fallback: 'strings' }),
     {
       id: 'warm', name: 'Synth Pad',
       osc: [...[-11, -3, 4, 12].map((detune) => ({ type: 'sawtooth', detune })), { type: 'sine', ratio: 0.5, gain: 0.5 }],

@@ -15,7 +15,7 @@ A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai A
   - Octave shift.
 - **Real instruments:** every instrument has 5 sampled sounds (recordings of real instruments) and 5 synth sounds:
   - *Keys*: Grand Piano, E-Piano, Vibraphone, Clavinet, Organ · synth: FM Piano, Felt Piano, Synth Organ, Glass Bells, Synth Clav.
-  - *Pad*: Strings, Choir, Warm Pad, Harp, Pizzicato · synth: Synth Pad, Synth Strings, Synth Choir, Shimmer, Dark Drone.
+  - *Pad*: Strings, Tremolo Strings, Spiccato, Pizzicato (real violin, viola and cello sections, played soft or loud by how hard you play), Choir, Warm Pad, Harp · synth: Synth Pad, Synth Strings, Synth Choir, Shimmer, Dark Drone.
   - *Bass*: Finger Bass, Upright Bass, Fretless, Synth Bass, Picked Bass · synth: Sub, Acid, Reese, Synth Pluck, Wobble.
   - *Lead*: Sax, Flute, Violin, Electric Guitar, Nylon Guitar · synth: Saw, Square, Supersaw, Synth Flute, Chiptune.
   - *Drums*: choose **Real** or **Electronic** on the Drums row, then a kit:
@@ -24,6 +24,12 @@ A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai A
     - Pad names follow the kit: on Trip-Hop the Clap pad is a finger **Snap** and the Crash pad a vinyl **Scratch**.
   - Pick one from the menu on each instrument card. Some vibes pick sounds for you. Sampled sounds load the first time you pick them, in about a second; a similar synth sound plays until then.
 - **8-track looper:** each loop has its own length (1, 2, 4 or 8 bars), and they all stay in sync. One bar of count-in, records on the bar, snaps to 16ths if you want, overdubs. You can drive it from the pads.
+- **Note editor** (bottom right, ⤢ for a big view): a piano roll for any loop and instrument, like a MIDI clip in Ableton.
+  - Pick a loop (1–8) and an instrument tab. Other instruments' notes show faintly behind.
+  - Click to add a note and drag to set its length. Drag a note to move it, drag its right edge to resize, double-click or right-click to delete, ⌥-drag to change how hard it's played.
+  - **Snap** sets the grid (1/16 up to 1 bar), and **Chord** places a whole chord in your key with one click.
+  - You can write straight into an empty loop: no recording needed. New notes use the instrument's current sound, and each keeps it.
+  - ⌘Z / ⇧⌘Z undo and redo, ⌘D duplicates the selection, arrow keys nudge it (⇧↑/↓ by an octave), ⌘A selects all.
 - **Song grid:** turn your loops into an arrangement.
   - Every loop row has 8 cells to its right, one per song section.
   - The button above each column sets how many bars that section lasts.
@@ -218,7 +224,7 @@ Then map Lumen's FX to them, once:
 | Space | 27 | Reverb → Decay Time. Skip this one if you install AbletonOSC: Lumen then sets the decay itself, in time with the tempo. |
 
 **Optional: instrument styles in Live.** Lumen's style menu can switch Live's sounds too:
-1. On an instrument's track, put an **Instrument Rack** with **10 chains**, one sound per style, in the same order as Lumen's menu (the 5 real instruments, then the 5 synth sounds).
+1. On an instrument's track, put an **Instrument Rack** with one chain per sound, in the same order as Lumen's menu (the real instruments, then the synth sounds).
 2. Right-click the chains and choose **Distribute Ranges Equally**.
 3. Press ⌘M and click the **Chain Selector**.
 4. In Lumen, open Settings → Ableton Live and press **Send** next to that instrument. Lumen sends CC 3 on the instrument's channel.
@@ -262,7 +268,8 @@ The Lumen server relays between the browser and AbletonOSC on UDP ports 11000 an
 | Save what you made | **Save** in the top bar (or *⌘S*) and give it a name. *⌘⇧S* saves a copy under a new name. |
 | Open a saved track | Click the track name (or *⌘O*) and pick a card. **+ New track** starts with empty loops and keeps your sound. |
 | Change an instrument's sound | Pick a style on its card, or **Style ◀ / ▶** on the APC |
-| Add to a loop | **●** on a loop that's playing (overdubs one pass) |
+| Add to a loop | **●** on a loop that's playing (overdubs one pass), or draw notes in the **Editor** |
+| Write a part note by note | In the **Editor**, pick the loop and instrument, set **Snap** (1 bar for one chord per bar) and click the notes in. **⤢** gives a big view. |
 | Stop / clear a loop | Tap it to stop it. Hold its pad, or press **✕**, to clear it. |
 | Go full-screen visuals | **Stage** button or **`** (Esc exits) |
 
@@ -297,7 +304,7 @@ Changing code? Run `npm test` to check the scale/chord logic and the OSC codec.
 
 ## Credits
 
-The sampled instruments are free recordings by other people, used under their licences: the Salamander Grand Piano (Alexander Holm), VSCO 2 and VCSL (Versilian Studios), the FluidR3 General MIDI set (Frank Wen), basses by D. Smolken, the Sonic Pi and TidalCycles drum samples and Michael Fischer's TR-808 set. Details and licences are in [`public/samples/CREDITS.md`](public/samples/CREDITS.md).
+The sampled instruments are free recordings by other people, used under their licences: the Salamander Grand Piano (Alexander Holm), VSCO 2, VSCO 2 Community Edition and VCSL (Versilian Studios), the FluidR3 General MIDI set (Frank Wen), basses by D. Smolken, the Sonic Pi and TidalCycles drum samples and Michael Fischer's TR-808 set. Details and licences are in [`public/samples/CREDITS.md`](public/samples/CREDITS.md).
 
 ## Project layout
 
@@ -323,6 +330,7 @@ public/js/
   clock.js           look-ahead transport + metronome
   looper.js          8-track MIDI looper (each loop has its own length)
   song.js            song mode: plays the looper as an arrangement of sections
+  editor.js          the note editor: a piano roll for a loop's notes
   library.js         tracks: snapshot / open the session, unsaved changes, autosave
   library-ui.js      the track name + Save, and the Your tracks cards
   ableton.js         AbletonOSC client (meters, tempo, mute)

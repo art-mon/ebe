@@ -138,34 +138,6 @@
    "96": "96.mp3"
   }
  },
- "strings": {
-  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
-  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/string_ensemble_1-mp3/",
-  "loop": true,
-  "notes": {
-   "36": "36.mp3",
-   "39": "39.mp3",
-   "42": "42.mp3",
-   "45": "45.mp3",
-   "48": "48.mp3",
-   "51": "51.mp3",
-   "54": "54.mp3",
-   "57": "57.mp3",
-   "60": "60.mp3",
-   "63": "63.mp3",
-   "66": "66.mp3",
-   "69": "69.mp3",
-   "72": "72.mp3",
-   "75": "75.mp3",
-   "78": "78.mp3",
-   "81": "81.mp3",
-   "84": "84.mp3",
-   "87": "87.mp3",
-   "90": "90.mp3",
-   "93": "93.mp3",
-   "96": "96.mp3"
-  }
- },
  "choir": {
   "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
   "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/choir_aahs-mp3/",
@@ -225,34 +197,6 @@
  "harp": {
   "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
   "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/orchestral_harp-mp3/",
-  "loop": false,
-  "notes": {
-   "36": "36.mp3",
-   "39": "39.mp3",
-   "42": "42.mp3",
-   "45": "45.mp3",
-   "48": "48.mp3",
-   "51": "51.mp3",
-   "54": "54.mp3",
-   "57": "57.mp3",
-   "60": "60.mp3",
-   "63": "63.mp3",
-   "66": "66.mp3",
-   "69": "69.mp3",
-   "72": "72.mp3",
-   "75": "75.mp3",
-   "78": "78.mp3",
-   "81": "81.mp3",
-   "84": "84.mp3",
-   "87": "87.mp3",
-   "90": "90.mp3",
-   "93": "93.mp3",
-   "96": "96.mp3"
-  }
- },
- "pizzicato": {
-  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
-  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/pizzicato_strings-mp3/",
   "loop": false,
   "notes": {
    "36": "36.mp3",
@@ -987,6 +931,802 @@
     "license": "CC0",
     "sonicPi": "drum_splash_soft"
    }
+  }
+ },
+ "vsco-strings": {
+  "license": "CC0",
+  "source": "https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings",
+  "loop": true,
+  "layered": true,
+  "notes": {
+   "36": [
+    [
+     "36-p1.m4a"
+    ],
+    [
+     "36-f1.m4a"
+    ]
+   ],
+   "40": [
+    [
+     "40-p1.m4a"
+    ],
+    [
+     "40-f1.m4a"
+    ]
+   ],
+   "43": [
+    [
+     "43-p1.m4a"
+    ],
+    [
+     "43-f1.m4a"
+    ]
+   ],
+   "47": [
+    [
+     "47-p1.m4a"
+    ],
+    [
+     "47-f1.m4a"
+    ]
+   ],
+   "50": [
+    [
+     "50-p1.m4a"
+    ],
+    [
+     "50-f1.m4a"
+    ]
+   ],
+   "52": [
+    [
+     "52-p1.m4a"
+    ],
+    [
+     "52-f1.m4a"
+    ]
+   ],
+   "55": [
+    [
+     "55-p1.m4a"
+    ],
+    [
+     "55-f1.m4a"
+    ]
+   ],
+   "59": [
+    [
+     "59-p1.m4a"
+    ],
+    [
+     "59-f1.m4a"
+    ]
+   ],
+   "62": [
+    [
+     "62-p1.m4a"
+    ],
+    [
+     "62-f1.m4a"
+    ]
+   ],
+   "66": [
+    [
+     "66-p1.m4a"
+    ],
+    [
+     "66-f1.m4a"
+    ]
+   ],
+   "69": [
+    [
+     "69-p1.m4a"
+    ],
+    [
+     "69-f1.m4a"
+    ]
+   ],
+   "72": [
+    [
+     "72-p1.m4a"
+    ],
+    [
+     "72-f1.m4a"
+    ]
+   ],
+   "76": [
+    [
+     "76-p1.m4a"
+    ],
+    [
+     "76-f1.m4a"
+    ]
+   ],
+   "79": [
+    [
+     "79-p1.m4a"
+    ],
+    [
+     "79-f1.m4a"
+    ]
+   ],
+   "83": [
+    [
+     "83-p1.m4a"
+    ],
+    [
+     "83-f1.m4a"
+    ]
+   ],
+   "86": [
+    [
+     "86-p1.m4a"
+    ],
+    [
+     "86-f1.m4a"
+    ]
+   ]
+  },
+  "sources": {
+   "47-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_B1_v1_1.wav",
+   "47-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_B1_v3_1.wav",
+   "36-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_C1_v1_1.wav",
+   "36-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_C1_v3_1.wav",
+   "50-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_D2_v1_1.wav",
+   "50-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_D2_v3_1.wav",
+   "40-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_E1_v1_1.wav",
+   "40-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_E1_v3_1.wav",
+   "43-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_G1_v1_1.wav",
+   "43-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_G1_v3_1.wav",
+   "59-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_B2_v1_1.wav",
+   "59-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_B2_v2_1.wav",
+   "62-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+   "62-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_D3_v2_1.wav",
+   "52-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_E2_v1_1.wav",
+   "52-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_E2_v2_1.wav",
+   "55-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+   "55-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_G2_v2_1.wav",
+   "69-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_A3_v1.wav",
+   "69-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_A3_v2.wav",
+   "83-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_B4_v1.wav",
+   "83-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_B4_v2.wav",
+   "72-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_C4_v1.wav",
+   "72-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_C4_v2.wav",
+   "86-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_D5_v1.wav",
+   "86-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_D5_v2.wav",
+   "76-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_E4_v1.wav",
+   "76-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_E4_v2.wav",
+   "66-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_F%233_v1.wav",
+   "66-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_F%233_v2.wav",
+   "79-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_G4_v1.wav",
+   "79-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_G4_v2.wav"
+  }
+ },
+ "vsco-tremolo": {
+  "license": "CC0",
+  "source": "https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings",
+  "loop": true,
+  "layered": true,
+  "notes": {
+   "36": [
+    [
+     "36-x1.m4a"
+    ]
+   ],
+   "40": [
+    [
+     "40-p1.m4a"
+    ],
+    [
+     "40-f1.m4a"
+    ]
+   ],
+   "43": [
+    [
+     "43-p1.m4a"
+    ],
+    [
+     "43-f1.m4a"
+    ]
+   ],
+   "47": [
+    [
+     "47-x1.m4a"
+    ]
+   ],
+   "50": [
+    [
+     "50-p1.m4a"
+    ],
+    [
+     "50-f1.m4a"
+    ]
+   ],
+   "52": [
+    [
+     "52-p1.m4a"
+    ],
+    [
+     "52-f1.m4a"
+    ]
+   ],
+   "55": [
+    [
+     "55-p1.m4a"
+    ],
+    [
+     "55-f1.m4a"
+    ]
+   ],
+   "59": [
+    [
+     "59-p1.m4a"
+    ],
+    [
+     "59-f1.m4a"
+    ]
+   ],
+   "62": [
+    [
+     "62-p1.m4a"
+    ],
+    [
+     "62-f1.m4a"
+    ]
+   ],
+   "66": [
+    [
+     "66-x1.m4a"
+    ]
+   ],
+   "69": [
+    [
+     "69-p1.m4a"
+    ],
+    [
+     "69-f1.m4a"
+    ]
+   ],
+   "72": [
+    [
+     "72-p1.m4a"
+    ],
+    [
+     "72-f1.m4a"
+    ]
+   ],
+   "76": [
+    [
+     "76-p1.m4a"
+    ],
+    [
+     "76-f1.m4a"
+    ]
+   ],
+   "79": [
+    [
+     "79-p1.m4a"
+    ],
+    [
+     "79-f1.m4a"
+    ]
+   ],
+   "83": [
+    [
+     "83-p1.m4a"
+    ],
+    [
+     "83-f1.m4a"
+    ]
+   ],
+   "86": [
+    [
+     "86-p1.m4a"
+    ],
+    [
+     "86-f1.m4a"
+    ]
+   ]
+  },
+  "sources": {
+   "47-x1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_B1_v1_1.wav",
+   "36-x1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_C1_v2_1.wav",
+   "50-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_D2_v1_1.wav",
+   "50-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_D2_v2_1.wav",
+   "40-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_E1_v1_1.wav",
+   "40-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_E1_v2_1.wav",
+   "43-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_G1_v1_1.wav",
+   "43-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/trem/trem_G1_v2_1.wav",
+   "59-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_B2_v1_rr1.wav",
+   "59-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_B2_v2_rr1.wav",
+   "62-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_D3_v1_rr1.wav",
+   "62-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_D3_v2_rr1.wav",
+   "52-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_E2_v1_rr1.wav",
+   "52-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_E2_v2_rr1.wav",
+   "55-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_G2_v1_rr1.wav",
+   "55-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/trem/Violas_trem_G2_v2_rr1.wav",
+   "69-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_A3_v1.wav",
+   "69-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_A3_v2.wav",
+   "83-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_B4_v1.wav",
+   "83-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_B4_v2.wav",
+   "72-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_C4_v1.wav",
+   "72-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_C4_v2.wav",
+   "86-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_D5_v1.wav",
+   "86-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_D5_v2.wav",
+   "76-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_E4_v1.wav",
+   "76-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_E4_v2.wav",
+   "66-x1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_F%233_v1.wav",
+   "79-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_G4_v1.wav",
+   "79-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Trem/VlnEns_Trem_G4_v2.wav"
+  }
+ },
+ "vsco-spiccato": {
+  "license": "CC0",
+  "source": "https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings",
+  "loop": false,
+  "layered": true,
+  "notes": {
+   "36": [
+    [
+     "36-p1.m4a",
+     "36-p2.m4a"
+    ],
+    [
+     "36-f1.m4a",
+     "36-f2.m4a"
+    ]
+   ],
+   "40": [
+    [
+     "40-p1.m4a",
+     "40-p2.m4a"
+    ],
+    [
+     "40-f1.m4a",
+     "40-f2.m4a"
+    ]
+   ],
+   "43": [
+    [
+     "43-p1.m4a",
+     "43-p2.m4a"
+    ],
+    [
+     "43-f1.m4a",
+     "43-f2.m4a"
+    ]
+   ],
+   "47": [
+    [
+     "47-p1.m4a",
+     "47-p2.m4a"
+    ],
+    [
+     "47-f1.m4a",
+     "47-f2.m4a"
+    ]
+   ],
+   "50": [
+    [
+     "50-p1.m4a",
+     "50-p2.m4a"
+    ],
+    [
+     "50-f1.m4a",
+     "50-f2.m4a"
+    ]
+   ],
+   "52": [
+    [
+     "52-p1.m4a",
+     "52-p2.m4a"
+    ],
+    [
+     "52-f1.m4a",
+     "52-f2.m4a"
+    ]
+   ],
+   "55": [
+    [
+     "55-p1.m4a",
+     "55-p2.m4a"
+    ],
+    [
+     "55-f1.m4a",
+     "55-f2.m4a"
+    ]
+   ],
+   "59": [
+    [
+     "59-p1.m4a",
+     "59-p2.m4a"
+    ],
+    [
+     "59-f1.m4a",
+     "59-f2.m4a"
+    ]
+   ],
+   "62": [
+    [
+     "62-p1.m4a",
+     "62-p2.m4a"
+    ],
+    [
+     "62-f1.m4a",
+     "62-f2.m4a"
+    ]
+   ],
+   "66": [
+    [
+     "66-p1.m4a",
+     "66-p2.m4a"
+    ],
+    [
+     "66-f1.m4a",
+     "66-f2.m4a"
+    ]
+   ],
+   "69": [
+    [
+     "69-p1.m4a",
+     "69-p2.m4a"
+    ],
+    [
+     "69-f1.m4a",
+     "69-f2.m4a"
+    ]
+   ],
+   "72": [
+    [
+     "72-p1.m4a",
+     "72-p2.m4a"
+    ],
+    [
+     "72-f1.m4a",
+     "72-f2.m4a"
+    ]
+   ],
+   "76": [
+    [
+     "76-p1.m4a",
+     "76-p2.m4a"
+    ],
+    [
+     "76-f1.m4a",
+     "76-f2.m4a"
+    ]
+   ],
+   "79": [
+    [
+     "79-p1.m4a",
+     "79-p2.m4a"
+    ],
+    [
+     "79-f1.m4a",
+     "79-f2.m4a"
+    ]
+   ],
+   "83": [
+    [
+     "83-p1.m4a",
+     "83-p2.m4a"
+    ],
+    [
+     "83-f1.m4a",
+     "83-f2.m4a"
+    ]
+   ],
+   "86": [
+    [
+     "86-p1.m4a",
+     "86-p2.m4a"
+    ],
+    [
+     "86-f1.m4a",
+     "86-f2.m4a"
+    ]
+   ]
+  },
+  "sources": {
+   "47-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_B1_v1_RR1.wav",
+   "47-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_B1_v1_RR2.wav",
+   "47-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_B1_v2_RR1.wav",
+   "47-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_B1_v2_RR2.wav",
+   "36-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_C1_v1_RR1.wav",
+   "36-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_C1_v1_RR2.wav",
+   "36-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_C1_v2_RR1.wav",
+   "36-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_C1_v2_RR2.wav",
+   "50-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_D2_v1_RR1.wav",
+   "50-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_D2_v1_RR2.wav",
+   "50-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_D2_v2_RR1.wav",
+   "50-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_D2_v2_RR2.wav",
+   "40-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_E1_v1_RR1.wav",
+   "40-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_E1_v1_RR2.wav",
+   "40-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_E1_v2_RR1.wav",
+   "40-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_E1_v2_RR2.wav",
+   "43-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_G1_v1_RR1.wav",
+   "43-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_G1_v1_RR2.wav",
+   "43-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_G1_v2_RR1.wav",
+   "43-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_G1_v2_RR2.wav",
+   "59-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_B2_v1_rr1.wav",
+   "59-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_B2_v1_rr2.wav",
+   "59-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_B2_v2_rr1.wav",
+   "59-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_B2_v2_rr2.wav",
+   "62-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_D3_v1_rr1.wav",
+   "62-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_D3_v1_rr2.wav",
+   "62-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_D3_v2_rr1.wav",
+   "62-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_D3_v2_rr2.wav",
+   "52-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_E2_v1_rr1.wav",
+   "52-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_E2_v1_rr2.wav",
+   "52-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_E2_v2_rr1.wav",
+   "52-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_E2_v2_rr2.wav",
+   "55-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_G2_v1_rr1.wav",
+   "55-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_G2_v1_rr2.wav",
+   "55-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_G2_v2_rr1.wav",
+   "55-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/spic/Violas_spic_G2_v2_rr2.wav",
+   "69-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_A3_v1_rr1.wav",
+   "69-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_A3_v1_rr2.wav",
+   "69-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_A3_v2_rr1.wav",
+   "69-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_A3_v2_rr2.wav",
+   "83-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_B4_v1_rr1.wav",
+   "83-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_B4_v1_rr2.wav",
+   "83-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_B4_v2_rr1.wav",
+   "83-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_B4_v2_rr2.wav",
+   "72-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_C4_v1_rr1.wav",
+   "72-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_C4_v1_rr2.wav",
+   "72-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_C4_v2_rr1.wav",
+   "72-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_C4_v2_rr2.wav",
+   "86-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_D5_v1_rr1.wav",
+   "86-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_D5_v1_rr2.wav",
+   "86-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_D5_v2_rr1.wav",
+   "86-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_D5_v2_rr2.wav",
+   "76-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_E4_v1_rr1.wav",
+   "76-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_E4_v1_rr2.wav",
+   "76-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_E4_v2_rr1.wav",
+   "76-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_E4_v2_rr2.wav",
+   "66-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_F%233_v1_rr1.wav",
+   "66-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_F%233_v1_rr2.wav",
+   "66-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_F%233_v2_rr1.wav",
+   "66-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_F%233_v2_rr2.wav",
+   "79-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_G4_v1_rr1.wav",
+   "79-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_G4_v1_rr2.wav",
+   "79-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_G4_v2_rr1.wav",
+   "79-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Spic/VlnEns_Spic_G4_v2_rr2.wav"
+  }
+ },
+ "vsco-pizz": {
+  "license": "CC0",
+  "source": "https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings",
+  "loop": false,
+  "layered": true,
+  "notes": {
+   "36": [
+    [
+     "36-p1.m4a",
+     "36-p2.m4a"
+    ],
+    [
+     "36-f1.m4a",
+     "36-f2.m4a"
+    ]
+   ],
+   "40": [
+    [
+     "40-p1.m4a",
+     "40-p2.m4a"
+    ],
+    [
+     "40-f1.m4a",
+     "40-f2.m4a"
+    ]
+   ],
+   "43": [
+    [
+     "43-p1.m4a",
+     "43-p2.m4a"
+    ],
+    [
+     "43-f1.m4a",
+     "43-f2.m4a"
+    ]
+   ],
+   "47": [
+    [
+     "47-p1.m4a",
+     "47-p2.m4a"
+    ],
+    [
+     "47-f1.m4a",
+     "47-f2.m4a"
+    ]
+   ],
+   "50": [
+    [
+     "50-p1.m4a",
+     "50-p2.m4a"
+    ],
+    [
+     "50-f1.m4a",
+     "50-f2.m4a"
+    ]
+   ],
+   "52": [
+    [
+     "52-p1.m4a",
+     "52-p2.m4a"
+    ],
+    [
+     "52-f1.m4a",
+     "52-f2.m4a"
+    ]
+   ],
+   "55": [
+    [
+     "55-p1.m4a",
+     "55-p2.m4a"
+    ],
+    [
+     "55-f1.m4a",
+     "55-f2.m4a"
+    ]
+   ],
+   "59": [
+    [
+     "59-p1.m4a",
+     "59-p2.m4a"
+    ],
+    [
+     "59-f1.m4a",
+     "59-f2.m4a"
+    ]
+   ],
+   "62": [
+    [
+     "62-p1.m4a",
+     "62-p2.m4a"
+    ],
+    [
+     "62-f1.m4a",
+     "62-f2.m4a"
+    ]
+   ],
+   "66": [
+    [
+     "66-p1.m4a",
+     "66-p2.m4a"
+    ],
+    [
+     "66-f1.m4a",
+     "66-f2.m4a"
+    ]
+   ],
+   "69": [
+    [
+     "69-p1.m4a",
+     "69-p2.m4a"
+    ],
+    [
+     "69-f1.m4a",
+     "69-f2.m4a"
+    ]
+   ],
+   "72": [
+    [
+     "72-p1.m4a",
+     "72-p2.m4a"
+    ],
+    [
+     "72-f1.m4a",
+     "72-f2.m4a"
+    ]
+   ],
+   "76": [
+    [
+     "76-p1.m4a",
+     "76-p2.m4a"
+    ],
+    [
+     "76-f1.m4a",
+     "76-f2.m4a"
+    ]
+   ],
+   "79": [
+    [
+     "79-p1.m4a",
+     "79-p2.m4a"
+    ],
+    [
+     "79-f1.m4a",
+     "79-f2.m4a"
+    ]
+   ],
+   "83": [
+    [
+     "83-p1.m4a",
+     "83-p2.m4a"
+    ],
+    [
+     "83-f1.m4a",
+     "83-f2.m4a"
+    ]
+   ],
+   "86": [
+    [
+     "86-p1.m4a",
+     "86-p2.m4a"
+    ],
+    [
+     "86-f1.m4a",
+     "86-f2.m4a"
+    ]
+   ]
+  },
+  "sources": {
+   "47-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_B1_v1_RR1.wav",
+   "47-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_B1_v1_RR2.wav",
+   "47-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_B1_v2_RR1.wav",
+   "47-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_B1_v2_RR2.wav",
+   "36-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_C1_v1_RR1.wav",
+   "36-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_C1_v1_RR2.wav",
+   "36-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_C1_v2_RR1.wav",
+   "36-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_C1_v2_RR2.wav",
+   "50-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_D2_v1_RR1.wav",
+   "50-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_D2_v1_RR2.wav",
+   "50-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_D2_v2_RR1.wav",
+   "50-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_D2_v2_RR2.wav",
+   "40-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_E1_v1_RR1.wav",
+   "40-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_E1_v1_RR2.wav",
+   "40-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_E1_v2_RR1.wav",
+   "40-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_E1_v2_RR2.wav",
+   "43-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_G1_v1_RR1.wav",
+   "43-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_G1_v1_RR2.wav",
+   "43-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_G1_v2_RR1.wav",
+   "43-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/pizzT/pizzT_G1_v2_RR2.wav",
+   "59-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_B2_v1_rr1.wav",
+   "59-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_B2_v1_rr2.wav",
+   "59-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_B2_v2_rr1.wav",
+   "59-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_B2_v2_rr2.wav",
+   "62-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_D3_v1_rr1.wav",
+   "62-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_D3_v1_rr2.wav",
+   "62-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_D3_v2_rr1.wav",
+   "62-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_D3_v2_rr2.wav",
+   "52-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_E2_v1_rr1.wav",
+   "52-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_E2_v1_rr2.wav",
+   "52-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_E2_v2_rr1.wav",
+   "52-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_E2_v2_rr2.wav",
+   "55-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_G2_v1_rr1.wav",
+   "55-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_G2_v1_rr2.wav",
+   "55-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_G2_v2_rr1.wav",
+   "55-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/pizz/ViolaEns_pizz_G2_v2_rr2.wav",
+   "69-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_A3_v1_rr1.wav",
+   "69-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_A3_v1_rr2.wav",
+   "69-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_A3_v2_rr1.wav",
+   "69-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_A3_v2_rr2.wav",
+   "83-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_B4_v1_rr1.wav",
+   "83-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_B4_v1_rr2.wav",
+   "83-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_B4_v2_rr1.wav",
+   "83-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_B4_v2_rr2.wav",
+   "72-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_C4_v1_rr1.wav",
+   "72-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_C4_v1_rr2.wav",
+   "72-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_C4_v2_rr1.wav",
+   "72-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_C4_v2_rr2.wav",
+   "86-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_D5_v1_rr1.wav",
+   "86-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_D5_v1_rr2.wav",
+   "86-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_D5_v2_rr1.wav",
+   "86-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_D5_v2_rr2.wav",
+   "76-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_E4_v1_rr1.wav",
+   "76-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_E4_v1_rr2.wav",
+   "76-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_E4_v2_rr1.wav",
+   "76-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_E4_v2_rr2.wav",
+   "66-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_F%233_v1_rr1.wav",
+   "66-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_F%233_v1_rr2.wav",
+   "66-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_F%233_v2_rr1.wav",
+   "66-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_F%233_v2_rr2.wav",
+   "79-p1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_G4_v1_rr1.wav",
+   "79-p2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_G4_v1_rr2.wav",
+   "79-f1.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_G4_v2_rr1.wav",
+   "79-f2.m4a": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/Pizz/VlnEns_Pizz_G4_v2_rr2.wav"
   }
  }
 }

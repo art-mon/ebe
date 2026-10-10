@@ -260,6 +260,6 @@ export const VISUALS = { nebula: 'Nebula', rings: 'Rings', horizon: 'Horizon', o
 export const CLICK_SOUNDS = { soft: 'Soft knock', wood: 'Woodblock', shaker: 'Shaker', cowbell: 'Cowbell', beep: 'Beep' };
 
 // Instrument styles in Ableton mode: Lumen sends this CC on the instrument's channel,
-// with a value in the middle of the style's fifth of 0-127. MIDI-map it to an
-// Instrument Rack's Chain Selector (5 chains, "Distribute Ranges Equally").
+// with a value in the middle of the style's share of 0-127. MIDI-map it to an
+// Instrument Rack's Chain Selector (one chain per sound, "Distribute Ranges Equally").
 export const STYLE_CC = 3;

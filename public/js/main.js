@@ -15,6 +15,7 @@ import { UI } from './ui.js';
 import { Lights } from './lights.js';
 import { Library } from './library.js';
 import { LibraryView } from './library-ui.js';
+import { Editor } from './editor.js';
 import { INSTRUMENTS } from './config.js';
 import { styleFor } from './styles.js';
 import { deviceForPort } from './devices.js';
@@ -76,6 +77,7 @@ ui.tracks = tracks;
 tracks.updateLabels();
 const library = new Library({ bus, looper, clock, controller });
 const libraryView = new LibraryView({ library, looper, bus, toast: (t, ms) => ui.toast(t, ms) });
+const editor = new Editor({ looper, engine, controller, clock, bus });
 
 // ── UI callbacks ──
 ui.onEngine = (mode) => set({ engine: mode });
@@ -215,6 +217,7 @@ function frame(now) {
   visuals.frame(dt);
   tracks.frame(dt);
   ui.frame();
+  editor.frame();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -244,4 +247,4 @@ if (new URLSearchParams(location.search).has('debug')) {
 }
 
 // Handy for poking around in the console.
-window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, song, controller, feed, visuals, lights, library, libraryView, state };
+window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, song, controller, feed, visuals, lights, library, libraryView, editor, state };

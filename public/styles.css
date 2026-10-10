@@ -512,3 +512,26 @@ body.stage-mode .stage { position: fixed; inset: 0; z-index: 20; border-radius: 
 .song-ctl { display: flex; gap: 6px; align-items: center; }
 #btn-song.playing { border-color: var(--ok); color: var(--ok); }
 .apc { max-width: 380px; margin: 0 auto; }
+
+/* ── note editor (bottom right; ⤢ makes it big) ──────────────────────── */
+.editor-panel { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 240px; }
+.editor-panel h2 { margin-bottom: 6px; }
+.ed-tools { display: flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: 0; font-weight: 500; }
+.ed-sound { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; margin-left: auto; }
+.ed-select { padding: 2px 6px; font-size: 11px; border-radius: 999px; }
+.ed-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.ed-bar .mini { width: 24px; height: 24px; font-size: 10px; }
+.ed-bar .mini:disabled { opacity: .35; }
+.ed-loops button { padding: 2px 7px; font-size: 11px; color: #5c5a73; }
+.ed-loops button.has-notes { color: var(--text); }
+.ed-loops button.playing { box-shadow: inset 0 -2px 0 var(--ok); }
+.ed-insts button { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; font-size: 11px; }
+.ed-insts button i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.ed-insts button.on { background: color-mix(in srgb, var(--c) 25%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 60%, transparent); }
+.ed-roll { position: relative; flex: 1 1 auto; min-height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+.ed-roll canvas { position: absolute; inset: 0; display: block; touch-action: none; outline: none; }
+.ed-roll:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.ed-hint { margin: 6px 0 0; font-size: 10px; color: #625f7a; display: none; }
+.editor-panel.big .ed-hint { display: block; }
+.editor-panel.big { position: fixed; inset: 5vh 3vw; z-index: 35; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .65), 0 20px 60px rgba(0,0,0,.6); background: var(--panel); }
+.editor-panel.big .ed-sound { max-width: 260px; }

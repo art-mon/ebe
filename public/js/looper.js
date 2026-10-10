@@ -203,6 +203,20 @@ export class Looper {
     this.#changed();
   }
 
+  /** The editor changed a loop's notes in place: refresh what depends on them. */
+  touch(i) {
+    const loop = this.loops[i];
+    loop.insts = new Set(loop.events.map((e) => e.inst));
+    if (!loop.events.length && !loop.rec) loop.playing = false;
+    this.#changed();
+  }
+
+  /** Replace a loop's notes (the editor's undo / redo). A playing loop picks them up on its next notes. */
+  setEvents(i, events) {
+    this.loops[i].events = events.map((e) => ({ ...e, recordedAt: -Infinity }));
+    this.touch(i);
+  }
+
   stopAll() {
     this.loops.forEach((l, i) => {
       if (l.rec) this.cancel(i);
@@ -264,6 +278,11 @@ export class Looper {
   #updateRecording() {
     const b = this.clock.beat;
     for (const loop of this.loops) {
+      // "Get ready" → "recording" happens on the bar: say so, or the loop card keeps waiting.
+      if (loop.rec && !loop.rec.started && b >= loop.rec.start) {
+        loop.rec.started = true;
+        this.#changed();
+      }
       if (loop.rec && b >= loop.rec.end) this.#finish(loop);
       if (loop.playing && b >= loop.stopAt) {
         loop.playing = false;

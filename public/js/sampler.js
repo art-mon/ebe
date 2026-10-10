@@ -84,7 +84,7 @@ export class SampleBank {
     return this.#sets.get(id)?.ready ?? null;
   }
 
-  /** Load a set once. `opts` (from the style): maxSec, loop [startSec, endSec]. */
+  /** Load a set once. `opts` (from the style): maxSec, loop [startSec, endSec], loopFade (s). */
   load(id, opts = {}) {
     let s = this.#sets.get(id);
     if (!s) {
@@ -120,7 +120,7 @@ export class SampleBank {
     return this.#slice(buf, start, Math.min(buf.length - start, Math.round(maxSec * sr)));
   }
 
-  async #load(id, { maxSec = 8, loop = null }) {
+  async #load(id, { maxSec = 8, loop = null, loopFade = 0.3 }) {
     const entry = (await this.#loadIndex())[id];
     if (!entry) throw new Error(`no sample set "${id}"`);
     const url = (f) => `${this.base}${id}/${f}`;
@@ -141,31 +141,40 @@ export class SampleBank {
       return { kit: true, voices };
     }
 
-    const zones = await Promise.all(Object.entries(entry.notes).map(async ([note, f]) => {
-      const raw = await this.#decode(url(f));
-      return { note: Number(note), buffer: this.#trim(raw, loop ? loop[1] + 0.05 : maxSec) };
-    }));
+    // Each note is one file, or [layers soft → loud][takes] for instruments recorded
+    // at several loudnesses (short notes also have alternate takes).
+    const asLayers = (v) => (Array.isArray(v) ? v.map((layer) => (Array.isArray(layer) ? layer : [layer])) : [[v]]);
+    const keep = loop ? loop[1] + 0.05 : maxSec;
+    const zones = await Promise.all(Object.entries(entry.notes).map(async ([note, v]) => ({
+      note: Number(note),
+      layers: await Promise.all(asLayers(v).map((takes) => Promise.all(takes.map(async (f) => ({
+        buffer: this.#trim(await this.#decode(url(f)), keep),
+      }))))),
+    })));
     zones.sort((a, b) => a.note - b.note);
 
-    // Level the set: each recording moves halfway (in dB) from its own loudness to
-    // the set's typical one, which evens out uneven recordings but keeps some of
-    // the instrument's natural balance across its range.
-    const sr = zones[0].buffer.sampleRate;
-    const level = (z) => rms(this.#chs(z.buffer), 0, Math.round(sr * 0.5)) || 1e-4;
+    // Level the set: each note moves halfway (in dB) from its own loudness to the
+    // set's typical one, which evens out uneven recordings but keeps some of the
+    // instrument's natural balance across its range. A note's loudness is its
+    // loudest recording; softer layers keep their natural difference.
+    const sr = zones[0].layers[0][0].buffer.sampleRate;
+    const level = (z) => rms(this.#chs(z.layers.at(-1)[0].buffer), 0, Math.round(sr * 0.5)) || 1e-4;
     const sorted = zones.map(level).sort((a, b) => a - b);
     const typical = sorted[Math.floor(sorted.length / 2)];
 
     for (const z of zones) {
-      const chs = this.#chs(z.buffer);
       const gain = TARGET_RMS / Math.sqrt(typical * level(z));
-      for (const d of chs) for (let i = 0; i < d.length; i++) d[i] *= gain;
-      if (loop) {
-        const start = Math.round(loop[0] * sr);
-        const end = Math.min(z.buffer.length - 1, Math.round(loop[1] * sr));
-        crossfadeLoop(chs, start, end, Math.round(sr * 0.3));
-        z.loop = { start: start / sr, end: end / sr };
-      } else {
-        fadeOut(chs, Math.round(sr * 0.08)); // many recordings stop abruptly
+      for (const take of z.layers.flat()) {
+        const chs = this.#chs(take.buffer);
+        for (const d of chs) for (let i = 0; i < d.length; i++) d[i] *= gain;
+        if (loop) {
+          const start = Math.round(loop[0] * sr);
+          const end = Math.min(take.buffer.length - 1, Math.round(loop[1] * sr));
+          crossfadeLoop(chs, start, end, Math.round(sr * loopFade));
+          take.loop = { start: start / sr, end: end / sr };
+        } else {
+          fadeOut(chs, Math.round(sr * 0.08)); // many recordings stop abruptly
+        }
       }
     }
     return { zones };

@@ -153,33 +153,47 @@ function buildVoice(s, style, f, vel, t) {
 }
 
 // A note from a sampled instrument: the nearest recording, re-tuned, through an
-// attack/release envelope. Velocity sets the level and, with style.tone, the
-// brightness (a real piano struck softly is darker, not just quieter).
+// attack/release envelope. Velocity sets the level and the colour: instruments
+// recorded at several loudnesses blend the two nearest recordings (a soft bow
+// stroke sounds soft, not just quieter); with style.tone, soft notes are darker.
+// Alternate takes take turns so repeated notes don't sound identical.
 function buildSampleVoice(s, style, set, note, vel, t) {
   const { ctx } = s;
   const zone = nearestZone(set.zones, note);
-  const src = ctx.createBufferSource();
-  src.buffer = zone.buffer;
-  src.playbackRate.value = 2 ** ((note - zone.note) / 12);
-  if (zone.loop) {
-    src.loop = true;
-    src.loopStart = zone.loop.start;
-    src.loopEnd = zone.loop.end;
-  }
   const amp = ctx.createGain();
+  let dest = amp;
   if (style.tone) {
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
     lp.frequency.value = Math.min(20000, 700 * 2 ** (vel * 5));
     lp.Q.value = 0.5;
-    src.connect(lp).connect(amp);
-  } else {
-    src.connect(amp);
+    lp.connect(amp);
+    dest = lp;
   }
-  const level = style.gain * (0.12 + 0.88 * vel ** 1.3);
+  const { layers } = zone;
+  const pos = layers.length > 1 ? Math.max(0, Math.min(1, (vel - 0.15) / 0.75)) * (layers.length - 1) : 0;
+  const lo = Math.min(Math.floor(pos), layers.length - 1);
+  const frac = pos - lo;
+  const parts = [[layers[lo], Math.cos((frac * Math.PI) / 2)], [layers[lo + 1], Math.sin((frac * Math.PI) / 2)]].filter(([l, w]) => l && w > 0.01);
+  zone.turn = (zone.turn ?? -1) + 1;
+  const srcs = parts.map(([takes, w]) => {
+    const take = takes[zone.turn % takes.length];
+    const src = ctx.createBufferSource();
+    src.buffer = take.buffer;
+    src.playbackRate.value = 2 ** ((note - zone.note) / 12);
+    if (take.loop) {
+      src.loop = true;
+      src.loopStart = take.loop.start;
+      src.loopEnd = take.loop.end;
+    }
+    src.connect(s.gain(w)).connect(dest);
+    return src;
+  });
+  srcs.sort((a, b) => b.buffer.duration - a.buffer.duration); // the voice ends with its longest recording
+  const level = style.gain * (layers.length > 1 ? 0.3 + 0.7 * vel : 0.12 + 0.88 * vel ** 1.3);
   amp.gain.setValueAtTime(0, t);
   amp.gain.linearRampToValueAtTime(level, t + style.amp.a);
-  return { out: amp, oscs: [src], extras: [], release: style.amp.r };
+  return { out: amp, oscs: srcs, extras: [], release: style.amp.r };
 }
 
 const DRUM_VOICE_BY_NOTE = new Map(DRUM_VOICES.map((v) => [v.note, v.id]));

@@ -168,6 +168,24 @@
         <div class="pads" id="pads"></div>
         <div class="apc" id="apc" hidden></div>
       </section>
+      <section class="panel editor-panel" id="editor">
+        <h2>Editor
+          <span class="ed-tools">
+            <select id="ed-snap" class="ed-select" title="Notes snap to" aria-label="Snap"></select>
+            <button type="button" class="pill toggle small" id="ed-chord" title="A click places a chord in the key (the Chords setting, or triads)">Chord</button>
+            <button type="button" class="pill small" id="ed-big" title="Bigger editor">⤢</button>
+          </span>
+        </h2>
+        <div class="ed-bar">
+          <span class="seg small ed-loops" id="ed-loops" role="group" aria-label="Loop to edit"></span>
+          <button type="button" class="mini" id="ed-play" title="Play / stop this loop">▶</button>
+          <select id="ed-bars" class="ed-select" aria-label="Loop length"></select>
+          <span class="seg small ed-insts" id="ed-insts" role="group" aria-label="Instrument"></span>
+          <span class="ed-sound" id="ed-sound"></span>
+        </div>
+        <div class="ed-roll"><canvas id="editor-canvas" tabindex="0" aria-label="Note editor: click to add notes"></canvas></div>
+        <p class="ed-hint">click: add · drag: length · drag a note: move · its edge: resize · double-click: delete · ⌥ drag: loudness · ⌘Z undo · ⌘D duplicate</p>
+      </section>
     </aside>
 
     <!-- BOTTOM: keyboard -->

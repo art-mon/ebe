@@ -75,3 +75,24 @@ test('a loop keeps the sound it was recorded with', () => {
   looper.load(1, { bars: 2, events: [{ pos: 0, dur: 1, inst: 1, note: 60, vel: 0.7, style: 'ensemble' }, { pos: 1, dur: 0.1, inst: 4, note: 36, vel: 1, style: 'triphop' }] });
   assert.deepEqual(preloaded.sort(), ['1:ensemble', '4:triphop']);
 });
+
+test('the moment a waiting loop starts recording is announced (the card left "get ready")', () => {
+  const clock = fakeClock();
+  const bus = new Bus();
+  const looper = new Looper({ clock, engine: { playNote: () => ({ cancel() {} }) }, bus });
+  looper.setLoopBars(1, 4);
+  clock.beat = 1.5; // mid-bar while other loops play: recording waits for the next bar
+  looper.record(1);
+  assert.equal(looper.status(1), 'armed');
+  let changes = 0;
+  bus.on('looper', () => changes++);
+  clock.beat = 3.9;
+  clock.ticks[0](3.9, 4);
+  assert.equal(changes, 0); // still waiting
+  clock.beat = 4.02;
+  clock.ticks[0](4.02, 4.1);
+  assert.equal(looper.status(1), 'recording');
+  assert.equal(changes, 1);
+  clock.ticks[0](4.1, 4.2);
+  assert.equal(changes, 1); // only once
+});

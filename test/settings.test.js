@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { migrate } from '../public/js/state.js';
 import { STYLES, DEFAULT_STYLES, styleFor } from '../public/js/styles.js';
 import { DEFAULT_MAPPINGS, OXYGEN } from '../public/js/devices.js';
@@ -37,15 +37,18 @@ test('every instrument has five real and five synth styles, all well-formed', ()
     assert.equal(new Set(list.map((s) => s.id)).size, list.length, `${inst} ids unique`);
     const real = list.filter((s) => s.sample);
     const synth = list.filter((s) => !s.sample);
-    assert.equal(real.length, 5, `${inst} real`);
+    assert.ok(real.length >= 5, `${inst} real`);
     assert.equal(synth.length, 5, `${inst} synth`);
-    assert.ok(list.indexOf(real[4]) < list.indexOf(synth[0]), `${inst}: real instruments come first`);
+    assert.ok(list.indexOf(real.at(-1)) < list.indexOf(synth[0]), `${inst}: real instruments come first`);
     for (const st of synth) {
       assert.ok(st.osc.length > 0, `${inst}/${st.id} has oscillators`);
       for (const k of ['a', 'd', 's', 'r', 'peak']) assert.equal(typeof st.amp[k], 'number', `${inst}/${st.id} amp.${k}`);
     }
     for (const st of real) {
       assert.ok(samples[st.sample]?.notes, `${inst}/${st.id}: sample set "${st.sample}" exists`);
+      for (const v of Object.values(samples[st.sample].notes)) {
+        for (const f of [v].flat(2)) assert.ok(existsSync(new URL(`../public/samples/${st.sample}/${f}`, import.meta.url)), `${st.sample}/${f}`);
+      }
       assert.ok(synth.some((x) => x.id === st.fallback), `${inst}/${st.id}: fallback is one of its synth styles`);
       for (const k of ['a', 'r']) assert.equal(typeof st.amp[k], 'number', `${inst}/${st.id} amp.${k}`);
     }
