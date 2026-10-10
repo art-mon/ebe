@@ -140,6 +140,17 @@ setInterval(() => {
   }
 }, 1500);
 
+// `ws` re-emits the HTTP server's errors, so this one handler covers both.
+wss.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n  Port ${PORT} is already in use — Lumen is probably running already (check your other terminals).`);
+    console.error(`  Stop it first, or use another port:  PORT=5174 npm start\n`);
+  } else {
+    console.error(`[server] ${err.message}`);
+  }
+  process.exit(1);
+});
+
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n  ✦ Lumen is running → http://localhost:${PORT}`);
   console.log('    Open it in Chrome or Edge (Safari has no Web MIDI).\n');
