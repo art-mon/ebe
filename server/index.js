@@ -14,6 +14,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import { encodeMessage, decode } from './osc.js';
+import { createTrackStore, handleApi } from './tracks.js';
 
 const PORT = Number(process.env.PORT ?? 5173);
 const LIVE_HOST = process.env.LIVE_HOST ?? '127.0.0.1';
@@ -29,10 +30,18 @@ const MIME = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
+  '.mp3': 'audio/mpeg',
+  '.m4a': 'audio/mp4',
+  '.wav': 'audio/wav',
+  '.md': 'text/markdown; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
-// ── Static files ────────────────────────────────────────────────────────────
+const store = createTrackStore();
+
+// ── Static files (and the small track API) ──────────────────────────────────
 const server = http.createServer(async (req, res) => {
+  if (await handleApi(req, res, store)) return;
   let rel;
   try {
     rel = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
@@ -153,5 +162,6 @@ wss.on('error', (err) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n  ✦ Lumen is running → http://localhost:${PORT}`);
+  console.log(`    Tracks are saved in ${store.dir}`);
   console.log('    Open it in Chrome or Edge (Safari has no Web MIDI).\n');
 });

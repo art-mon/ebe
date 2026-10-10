@@ -1,0 +1,992 @@
+{
+ "piano": {
+  "license": "CC BY 3.0",
+  "source": "https://raw.githubusercontent.com/Tonejs/audio/efd8296360f9526e379bfbe5c1698ff54d6a1d34/salamander/",
+  "loop": false,
+  "notes": {
+   "21": "21.mp3",
+   "24": "24.mp3",
+   "27": "27.mp3",
+   "30": "30.mp3",
+   "33": "33.mp3",
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3",
+   "99": "99.mp3",
+   "102": "102.mp3",
+   "105": "105.mp3",
+   "108": "108.mp3"
+  }
+ },
+ "epiano": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/electric_piano_1-mp3/",
+  "loop": false,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "vibraphone": {
+  "license": "CC0",
+  "source": "https://raw.githubusercontent.com/danigb/samples/eae8c5c7a10f4b0e06281211e704c36c30e25342/audio/vcsl/Struck%20Idiophones/Vibraphone/Soft%20Mallets/",
+  "loop": false,
+  "notes": {
+   "53": "53.m4a",
+   "57": "57.m4a",
+   "60": "60.m4a",
+   "64": "64.m4a",
+   "67": "67.m4a",
+   "71": "71.m4a",
+   "74": "74.m4a",
+   "77": "77.m4a",
+   "81": "81.m4a",
+   "84": "84.m4a",
+   "88": "88.m4a"
+  }
+ },
+ "clavinet": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/clavinet-mp3/",
+  "loop": false,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "organ": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/drawbar_organ-mp3/",
+  "loop": true,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "strings": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/string_ensemble_1-mp3/",
+  "loop": true,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "choir": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/choir_aahs-mp3/",
+  "loop": true,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "warmpad": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/pad_2_warm-mp3/",
+  "loop": true,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "harp": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/orchestral_harp-mp3/",
+  "loop": false,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "pizzicato": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/pizzicato_strings-mp3/",
+  "loop": false,
+  "notes": {
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "87": "87.mp3",
+   "90": "90.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "bass-finger": {
+  "license": "CC0",
+  "source": "https://raw.githubusercontent.com/danigb/samples/eae8c5c7a10f4b0e06281211e704c36c30e25342/audio/dsmolken/glowlybass/sustain/",
+  "loop": false,
+  "notes": {
+   "25": "25.m4a",
+   "28": "28.m4a",
+   "30": "30.m4a",
+   "33": "33.m4a",
+   "36": "36.m4a",
+   "39": "39.m4a",
+   "42": "42.m4a",
+   "45": "45.m4a",
+   "48": "48.m4a",
+   "51": "51.m4a",
+   "54": "54.m4a",
+   "57": "57.m4a",
+   "60": "60.m4a"
+  }
+ },
+ "bass-upright": {
+  "license": "CC0",
+  "source": "https://raw.githubusercontent.com/danigb/samples/eae8c5c7a10f4b0e06281211e704c36c30e25342/audio/dsmolken/double-bass/pizz/",
+  "loop": false,
+  "notes": {
+   "24": "24.m4a",
+   "27": "27.m4a",
+   "31": "31.m4a",
+   "34": "34.m4a",
+   "38": "38.m4a",
+   "41": "41.m4a",
+   "45": "45.m4a",
+   "48": "48.m4a",
+   "52": "52.m4a",
+   "55": "55.m4a",
+   "57": "57.m4a"
+  }
+ },
+ "bass-fretless": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/fretless_bass-mp3/",
+  "loop": false,
+  "notes": {
+   "24": "24.mp3",
+   "27": "27.mp3",
+   "30": "30.mp3",
+   "33": "33.mp3",
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3"
+  }
+ },
+ "bass-synth": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/synth_bass_1-mp3/",
+  "loop": false,
+  "notes": {
+   "24": "24.mp3",
+   "27": "27.mp3",
+   "30": "30.mp3",
+   "33": "33.mp3",
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3"
+  }
+ },
+ "bass-picked": {
+  "license": "MIT (FluidR3_GM, Frank Wen) / renders labelled CC BY 3.0 by gleitz",
+  "source": "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/044fab8e1456bfafc5776e86dfd6bb8697149aef/FluidR3_GM/electric_bass_pick-mp3/",
+  "loop": false,
+  "notes": {
+   "24": "24.mp3",
+   "27": "27.mp3",
+   "30": "30.mp3",
+   "33": "33.mp3",
+   "36": "36.mp3",
+   "39": "39.mp3",
+   "42": "42.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3"
+  }
+ },
+ "guitar-nylon": {
+  "license": "CC BY 3.0",
+  "source": "https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/guitar-nylon/",
+  "loop": false,
+  "notes": {
+   "40": "40.mp3",
+   "44": "44.mp3",
+   "47": "47.mp3",
+   "50": "50.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "61": "61.mp3",
+   "64": "64.mp3",
+   "68": "68.mp3",
+   "71": "71.mp3",
+   "74": "74.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3"
+  }
+ },
+ "guitar-electric": {
+  "license": "CC BY 3.0",
+  "source": "https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/guitar-electric/",
+  "loop": false,
+  "notes": {
+   "40": "40.mp3",
+   "45": "45.mp3",
+   "48": "48.mp3",
+   "51": "51.mp3",
+   "54": "54.mp3",
+   "57": "57.mp3",
+   "60": "60.mp3",
+   "63": "63.mp3",
+   "66": "66.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "75": "75.mp3",
+   "78": "78.mp3",
+   "81": "81.mp3"
+  }
+ },
+ "flute": {
+  "license": "CC BY 3.0",
+  "source": "https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/flute/",
+  "loop": false,
+  "notes": {
+   "60": "60.mp3",
+   "64": "64.mp3",
+   "69": "69.mp3",
+   "72": "72.mp3",
+   "76": "76.mp3",
+   "81": "81.mp3",
+   "84": "84.mp3",
+   "88": "88.mp3",
+   "93": "93.mp3",
+   "96": "96.mp3"
+  }
+ },
+ "sax": {
+  "license": "CC BY 3.0",
+  "source": "https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/saxophone/",
+  "loop": false,
+  "notes": {
+   "49": "49.mp3",
+   "52": "52.mp3",
+   "55": "55.mp3",
+   "58": "58.mp3",
+   "61": "61.mp3",
+   "64": "64.mp3",
+   "67": "67.mp3",
+   "70": "70.mp3",
+   "73": "73.mp3",
+   "76": "76.mp3",
+   "79": "79.mp3"
+  }
+ },
+ "violin": {
+  "license": "CC BY 3.0",
+  "source": "https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/violin/",
+  "loop": false,
+  "notes": {
+   "55": "55.mp3",
+   "60": "60.mp3",
+   "67": "67.mp3",
+   "72": "72.mp3",
+   "79": "79.mp3",
+   "84": "84.mp3"
+  }
+ },
+ "kit-acoustic": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "clap-1.m4a",
+    "clap-2.m4a"
+   ],
+   "hat": [
+    "hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_bass_hard.m4a",
+    "license": "CC0"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_snare_hard.m4a",
+    "license": "CC0"
+   },
+   "clap-1.m4a": {
+    "url": "https://raw.githubusercontent.com/danigb/samples/eae8c5c7a10f4b0e06281211e704c36c30e25342/audio/vcsl/Struck%20Idiophones/Claps/Clap_rr1.m4a",
+    "license": "CC0"
+   },
+   "clap-2.m4a": {
+    "url": "https://raw.githubusercontent.com/danigb/samples/eae8c5c7a10f4b0e06281211e704c36c30e25342/audio/vcsl/Struck%20Idiophones/Claps/Clap_rr2.m4a",
+    "license": "CC0"
+   },
+   "hat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_cymbal_closed.m4a",
+    "license": "CC0"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_cymbal_open.m4a",
+    "license": "CC0"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_tom_mid_hard.m4a",
+    "license": "CC0"
+   },
+   "rim.m4a": {
+    "url": "https://raw.githubusercontent.com/danigb/samples/eae8c5c7a10f4b0e06281211e704c36c30e25342/audio/vcsl/Struck%20Membranophones/Snare%20Drum%2C%20Modern%201/Snare2_stick_v1_rr1_Mid.m4a",
+    "license": "CC0"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_cymbal_hard.m4a",
+    "license": "CC0"
+   }
+  }
+ },
+ "kit-808": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "clap.m4a"
+   ],
+   "hat": [
+    "hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/kick/bd2550.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/snare/sd5050.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "clap.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/clap/cp.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "hat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/hihat-close/ch.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/hihat-open/oh25.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/mid-tom/mt50.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "rim.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/rimshot/rs.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/drum-machines/a894cb8c72abe15b05e7b4fd4b8ee561c0f9e960/TR-808/cymbal/cy5050.m4a",
+    "license": "Freeware (Michael Fischer 1994 \"absolutely free\"; no formal licence)"
+   }
+  }
+ },
+ "kit-electro": {
+  "voices": {
+   "kick": [
+    "kick.wav"
+   ],
+   "snare": [
+    "snare.wav"
+   ],
+   "clap": [
+    "clap.wav"
+   ],
+   "hat": [
+    "hat.wav"
+   ],
+   "openhat": [
+    "openhat.wav"
+   ],
+   "tom": [
+    "tom.wav"
+   ],
+   "rim": [
+    "rim.wav"
+   ],
+   "crash": [
+    "crash.wav"
+   ]
+  },
+  "sources": {
+   "kick.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/bd/11_bd_mot4i.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "snare.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/sd/11_sd_switchangel_3.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "clap.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/cp/11_cp_mot4i.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "hat.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/hh/11_hh_mot4i.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "openhat.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/oh/12_oh_switchangel.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "tom.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/mt/10_mt_mot4i.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "rim.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/rim/10_rim_switchangel.wav",
+    "license": "Unlicense (public domain)"
+   },
+   "crash.wav": {
+    "url": "https://raw.githubusercontent.com/tidalcycles/uzu-drumkit/2f3e05c70ab4d73ad053a1467adec89bd27377a0/cr/10_cr_switchangel.wav",
+    "license": "Unlicense (public domain)"
+   }
+  }
+ },
+ "kit-triphop": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "clap.m4a"
+   ],
+   "hat": [
+    "../kit-acoustic/hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_heavy_kick.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_heavy_kick"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/sn_zome.m4a",
+    "license": "CC0",
+    "sonicPi": "sn_zome"
+   },
+   "clap.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/perc_snap.m4a",
+    "license": "CC0",
+    "sonicPi": "perc_snap"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_gump.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_gump"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_tom_lo_soft.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_tom_lo_soft"
+   },
+   "rim.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_wood.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_wood"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/vinyl_scratch.m4a",
+    "license": "CC0",
+    "sonicPi": "vinyl_scratch"
+   }
+  }
+ },
+ "kit-downtempo": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "clap.m4a"
+   ],
+   "hat": [
+    "hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "../kit-acoustic/rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/bd_pure.m4a",
+    "license": "CC0",
+    "sonicPi": "bd_pure"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/sn_generic.m4a",
+    "license": "CC0",
+    "sonicPi": "sn_generic"
+   },
+   "clap.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/perc_snap2.m4a",
+    "license": "CC0",
+    "sonicPi": "perc_snap2"
+   },
+   "hat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_tap.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_tap"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_zan.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_zan"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/tabla_na.m4a",
+    "license": "CC0",
+    "sonicPi": "tabla_na"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/perc_bell.m4a",
+    "license": "CC0",
+    "sonicPi": "perc_bell"
+   }
+  }
+ },
+ "kit-garage": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "../kit-808/clap.m4a"
+   ],
+   "hat": [
+    "hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/bd_fat.m4a",
+    "license": "CC0",
+    "sonicPi": "bd_fat"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/sn_dolf.m4a",
+    "license": "CC0",
+    "sonicPi": "sn_dolf"
+   },
+   "hat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_raw.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_raw"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_cats.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_cats"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_ping.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_ping"
+   },
+   "rim.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_pop.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_pop"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_cymbal.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_cymbal"
+   }
+  }
+ },
+ "kit-deephouse": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "../kit-electro/clap.wav"
+   ],
+   "hat": [
+    "hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/bd_klub.m4a",
+    "license": "CC0",
+    "sonicPi": "bd_klub"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_snare.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_snare"
+   },
+   "hat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_snap.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_snap"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/hat_psych.m4a",
+    "license": "CC0",
+    "sonicPi": "hat_psych"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_bong.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_bong"
+   },
+   "rim.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/tabla_ke1.m4a",
+    "license": "CC0",
+    "sonicPi": "tabla_ke1"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/elec_chime.m4a",
+    "license": "CC0",
+    "sonicPi": "elec_chime"
+   }
+  }
+ },
+ "kit-soft": {
+  "voices": {
+   "kick": [
+    "kick.m4a"
+   ],
+   "snare": [
+    "snare.m4a"
+   ],
+   "clap": [
+    "../kit-acoustic/clap-1.m4a",
+    "../kit-acoustic/clap-2.m4a"
+   ],
+   "hat": [
+    "hat.m4a"
+   ],
+   "openhat": [
+    "openhat.m4a"
+   ],
+   "tom": [
+    "tom.m4a"
+   ],
+   "rim": [
+    "../kit-acoustic/rim.m4a"
+   ],
+   "crash": [
+    "crash.m4a"
+   ]
+  },
+  "sources": {
+   "kick.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_bass_soft.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_bass_soft"
+   },
+   "snare.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_snare_soft.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_snare_soft"
+   },
+   "hat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_cymbal_pedal.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_cymbal_pedal"
+   },
+   "openhat.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_cymbal_soft.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_cymbal_soft"
+   },
+   "tom.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_tom_mid_soft.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_tom_mid_soft"
+   },
+   "crash.m4a": {
+    "url": "https://raw.githubusercontent.com/smpldsnds/sonic-pi-samples/b39c72bd79024e6eec58c4f55c333ede79b700b6/samples/drum_splash_soft.m4a",
+    "license": "CC0",
+    "sonicPi": "drum_splash_soft"
+   }
+  }
+ }
+}

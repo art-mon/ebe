@@ -138,13 +138,14 @@ export class Engine {
   }
 
   /**
-   * Switch an instrument's sound style. Built-in: swap the synth patch (new notes use it).
+   * Switch an instrument's sound style. Built-in: swap the patch or sampled instrument (new notes use it).
    * Ableton: send STYLE_CC on the instrument's channel — the middle of the style's fifth
    * of 0-127, so a 5-chain Instrument Rack with evenly split zones picks the right chain.
    */
   style(inst, styleId) {
-    this.synth.setStyle(inst, styleId);
-    if (this.toAbleton) this.sendStyle(inst, styleId);
+    const loading = this.synth.setStyle(inst, styleId);
+    if (this.toAbleton && !INSTRUMENTS[inst].isDrums) this.sendStyle(inst, styleId);
+    return loading; // a promise while a sampled instrument loads, else null
   }
 
   /** Send the style CC (also used by the MIDI-mapping helper in Settings). */

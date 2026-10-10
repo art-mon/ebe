@@ -2,7 +2,10 @@
 
 A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai APC Key 25** (mk1 and mk2), with **Ableton Live 12 Lite**.
 
-- **Vibes:** one tap changes the instrument (or a layered pair), all eight effects, the colours and the visuals.
+- **Vibes:** one tap changes the instrument (or a layered pair), the sounds, all eight effects, the colours and the visuals. There are two sets of 8:
+  - *Electronic*: Dreamy, Lo-Fi, Club, Cosmic, Sunset, Glitch, Deep Sea, Raw.
+  - *Acoustic*, each a small band of real instruments: Jazz Club (grand piano, upright bass), Bossa Nova (nylon guitar), Cinematic (strings + piano, violin lead), Neo Soul (e-piano + warm pad, 808 drums), Funk (clavinet, electric guitar), Gospel (organ + choir), Enchanted (harp + flute), Late Night (sax).
+  - Switch sets with **Electronic / Acoustic** above the vibes, or *Shift + Random vibe* on the APC.
 - **Eight FX macros:** on the Oxygen, the 4 faders control Filter, Reso, Drive and Crush and the 4 knobs control Echo, Repeats, Reverb and Space. On the APC, the 8 knobs control all eight. Switching vibes glides the effects smoothly instead of jumping.
 - **Effects that follow the tempo.** The echo is a dotted 1/8. **Space** picks how long the reverb lasts as a note length (1/8, 1/4, 1/2, 1 bar, 2 bars, 4 bars), so the tail dies away on the beat. The reverb's pre-delay is a 1/64 note. All of it re-times when you change the BPM, including on Live's Reverb when AbletonOSC is installed.
 - **Play helpers** so wrong notes are hard to hit:
@@ -10,17 +13,26 @@ A playful performance screen for the **M-Audio Oxygen Pro Mini** or the **Akai A
   - *Easy mode*: the white keys play the scale, and middle C is the key's root.
   - One-finger *chords* (triads, 7ths, power chords, octaves).
   - Octave shift.
-- **5 sound styles per instrument:**
-  - *Keys*: E-Piano, Felt Piano, Organ, Glass Bells, Clav.
-  - *Pad*: Warm, Strings, Choir, Shimmer, Dark Drone.
-  - *Bass*: Sub, Acid, Reese, Pluck, Wobble.
-  - *Lead*: Saw, Square, Supersaw, Soft Flute, Chiptune.
-  - Pick one from the menu on each instrument card. Some vibes pick styles for you.
+- **Real instruments:** every instrument has 5 sampled sounds (recordings of real instruments) and 5 synth sounds:
+  - *Keys*: Grand Piano, E-Piano, Vibraphone, Clavinet, Organ · synth: FM Piano, Felt Piano, Synth Organ, Glass Bells, Synth Clav.
+  - *Pad*: Strings, Choir, Warm Pad, Harp, Pizzicato · synth: Synth Pad, Synth Strings, Synth Choir, Shimmer, Dark Drone.
+  - *Bass*: Finger Bass, Upright Bass, Fretless, Synth Bass, Picked Bass · synth: Sub, Acid, Reese, Synth Pluck, Wobble.
+  - *Lead*: Sax, Flute, Violin, Electric Guitar, Nylon Guitar · synth: Saw, Square, Supersaw, Synth Flute, Chiptune.
+  - *Drums*: choose **Real** or **Electronic** on the Drums row, then a kit:
+    - Electronic: Synth Kit (the default), **Trip-Hop** (heavy, pitched-down, dusty, in the spirit of Massive Attack and Portishead), **Downtempo** (warm kick, snaps, tabla and bell, like Bonobo), **UK Garage** (punchy and crisp with electronic pings, like Jamie xx), **Deep House** (round club kick, claps, chimes, like Four Tet), 808 Kit, Electro Kit.
+    - Real: Acoustic Kit, Soft Acoustic.
+    - Pad names follow the kit: on Trip-Hop the Clap pad is a finger **Snap** and the Crash pad a vinyl **Scratch**.
+  - Pick one from the menu on each instrument card. Some vibes pick sounds for you. Sampled sounds load the first time you pick them, in about a second; a similar synth sound plays until then.
 - **8-track looper:** each loop has its own length (1, 2, 4 or 8 bars), and they all stay in sync. One bar of count-in, records on the bar, snaps to 16ths if you want, overdubs. You can drive it from the pads.
 - **Song grid:** turn your loops into an arrangement.
   - Every loop row has 8 cells to its right, one per song section.
   - The button above each column sets how many bars that section lasts.
   - Tick which loops play in each section, then press **▶ Song**. Sections change on the bar, and the song can repeat.
+- **Your tracks:** save a session as a named track and come back to it later.
+  - A track holds your loops, the song grid, tempo, key, vibe, instrument styles and FX.
+  - The track name sits in the top bar, with a dot when there are unsaved changes. **Save** or *⌘S* saves it.
+  - Click the name, or press *⌘O*, to open **Your tracks**: one card per track, with a mini piano roll of its loops in instrument colours, its tempo and key, and when you last changed it. Click a card to open it, or rename, duplicate or delete it from the card.
+  - What you're playing is also autosaved, so a reload or a closed tab never loses your loops.
 - **Metronome sounds:** Soft knock (the default), Woodblock, Shaker, Cowbell or Beep, chosen next to the **Click** button.
 - **Visuals:**
   - *Nebula*: particles.
@@ -74,7 +86,7 @@ Plug it in. Lumen maps every control and lights up the grid. The **Pads** panel 
 
 | Grid row | The 8 pads |
 |---|---|
-| **5** (top) | The 8 **vibes**, in each vibe's colour. The active one is bright. |
+| **5** (top) | The 8 **vibes** of the set on show (Electronic or Acoustic), in each vibe's colour. The active one is bright. |
 | **4** | **Keys, Pad, Bass, Lead** (*Shift + pad* layers it) · **Style ◀ / ▶** (changes the current instrument's style) · **Visuals ▶** (*Shift*: ◀) · **Stage** mode |
 | **3** | **Loops 1–8**: tap to record, play or stop; *hold* to clear; *Shift + tap* to change the length of an empty loop |
 | **2** | Notes: **Free, Snap, Easy** · Chords: **Off, Triad, 7th, Power, Octave** |
@@ -91,7 +103,7 @@ Loop pads change colour with their state:
 | Other controls | Do |
 |---|---|
 | **8 knobs** | FX 1–8 (Filter … Space). On the mk2 the knobs are endless; hold **Shift** for fine steps. |
-| **Scene buttons** (right, top→bottom) | Random vibe · Layer on/off · Record next loop (*Shift*: Snap on/off) · Next scale (*Shift*: next key) · Tap tempo, flashing on the beat (*Shift*: metronome on/off) |
+| **Scene buttons** (right, top→bottom) | Random vibe from the set on show (*Shift*: switch vibe set) · Layer on/off · Record next loop (*Shift*: Snap on/off) · Next scale (*Shift*: next key) · Tap tempo, flashing on the beat (*Shift*: metronome on/off) |
 | **Buttons under the grid** | Mute Keys / Pad / Bass / Lead / Drums (lit = muted) · Octave − · Octave + · **Grid: controls ⇄ drums** (*Shift*: all notes off) |
 | **Play/Pause** · **Record** · **Stop All Clips** | Play/stop · record next loop · stop all loops (*Shift*: clear all loops) |
 | **Sustain** | Sustain pedal |
@@ -206,7 +218,7 @@ Then map Lumen's FX to them, once:
 | Space | 27 | Reverb → Decay Time. Skip this one if you install AbletonOSC: Lumen then sets the decay itself, in time with the tempo. |
 
 **Optional: instrument styles in Live.** Lumen's style menu can switch Live's sounds too:
-1. On an instrument's track, put an **Instrument Rack** with **5 chains**, one sound per style, in the same order as Lumen's menu.
+1. On an instrument's track, put an **Instrument Rack** with **10 chains**, one sound per style, in the same order as Lumen's menu (the 5 real instruments, then the 5 synth sounds).
 2. Right-click the chains and choose **Distribute Ranges Equally**.
 3. Press ⌘M and click the **Chain Selector**.
 4. In Lumen, open Settings → Ableton Live and press **Send** next to that instrument. Lumen sends CC 3 on the instrument's channel.
@@ -239,13 +251,16 @@ The Lumen server relays between the browser and AbletonOSC on UDP ports 11000 an
 
 | Want to… | Do this |
 |---|---|
-| Change the whole sound | Tap a **vibe** (or use << / >>, ← →, or the bank-B pads) |
+| Change the whole sound | Tap a **vibe** (or use << / >>, ← →, or the bank-B pads, which step through both sets) |
+| Switch between Electronic and Acoustic vibes | **Electronic / Acoustic** above the vibes, or *Shift + Random vibe* (top scene button) on the APC |
 | Stack two instruments | Press **+** on an instrument |
 | Never hit a wrong note | **Notes → Snap**, or **Easy** (white keys only) |
 | Play chords with one finger | **Chords → Triad / 7th** |
 | Record a loop | Press **●** on a loop, tap a loop pad, or press **Record** on the controller. You get one bar of count-in, then it records for that loop's length and starts playing. |
 | Set a loop's length | Use the **bars** menu on the loop (while it's empty), or *Shift + loop pad* on the APC |
-| Play an arrangement | In the song grid to the right of the loops, tick which loops play in each section (column). Set each section's length with the number above it (click for more bars, right-click for fewer). Then press **▶ Song**, or *Shift + Space*, or *Shift + Play* on the APC. An empty column is a break. **Repeat** loops the song. The grid is saved; recorded loops are not saved yet, so they reset on reload. |
+| Play an arrangement | In the song grid to the right of the loops, tick which loops play in each section (column). Set each section's length with the number above it (click for more bars, right-click for fewer). Then press **▶ Song**, or *Shift + Space*, or *Shift + Play* on the APC. An empty column is a break. **Repeat** loops the song. |
+| Save what you made | **Save** in the top bar (or *⌘S*) and give it a name. *⌘⇧S* saves a copy under a new name. |
+| Open a saved track | Click the track name (or *⌘O*) and pick a card. **+ New track** starts with empty loops and keeps your sound. |
 | Change an instrument's sound | Pick a style on its card, or **Style ◀ / ▶** on the APC |
 | Add to a loop | **●** on a loop that's playing (overdubs one pass) |
 | Stop / clear a loop | Tap it to stop it. Hold its pad, or press **✕**, to clear it. |
@@ -253,11 +268,15 @@ The Lumen server relays between the browser and AbletonOSC on UDP ports 11000 an
 
 Loops store **notes**, not audio. They replay through whichever engine is active, on the instrument they were recorded with. You can record a bass line, switch to Lead and solo over it.
 
+### Where tracks are kept
+
+Each track is a small JSON file in **`~/Music/Lumen/Tracks`**, so you can back the folder up, sync it, or copy a track to another Mac. Deleted tracks go to `~/Music/Lumen/Tracks/.trash`, so you can still recover them. To keep tracks somewhere else, start the server with `LUMEN_TRACKS_DIR=/path/to/folder npm start`.
+
 ## 5. Make it yours
 
 Everything tweakable is in [`public/js/config.js`](public/js/config.js):
 
-- `VIBES`: name, instrument, layer, the 8 FX values, palette and visual mode.
+- `VIBES`: name, instrument, layer, the 8 FX values, palette, visual mode and sounds (`styles`). They're grouped in sets of 8 (`VIBE_SETS`); add 8 more and a name to make another set.
 - `INSTRUMENTS`: names, MIDI channels and colours. The names must match your Live track names.
 - `DRUM_VOICES`, `CONTROL_PADS`, `SCALES`, `FX_MACROS`.
 - Controller layouts are in [`public/js/devices.js`](public/js/devices.js): for example `APC_GRID`, which decides what each APC pad does.
@@ -276,17 +295,24 @@ Changing code? Run `npm test` to check the scale/chord logic and the OSC codec.
   - Check that Live hasn't grabbed the controller as a Control Surface (see step 2).
 - **Still stuck?** Open **http://localhost:5173/?debug**. Lumen then reports its MIDI ports and every message it receives through its server, which helps pinpoint where input gets lost.
 
+## Credits
+
+The sampled instruments are free recordings by other people, used under their licences: the Salamander Grand Piano (Alexander Holm), VSCO 2 and VCSL (Versilian Studios), the FluidR3 General MIDI set (Frank Wen), basses by D. Smolken, the Sonic Pi and TidalCycles drum samples and Michael Fischer's TR-808 set. Details and licences are in [`public/samples/CREDITS.md`](public/samples/CREDITS.md).
+
 ## Project layout
 
 ```
 server/index.js      static server + WebSocket↔OSC bridge to AbletonOSC
 server/osc.js        tiny OSC encoder/decoder (no dependencies)
+server/tracks.js     saved tracks: JSON files in ~/Music/Lumen/Tracks + the /api/tracks API
 public/index.html    the page
+public/samples/      the sampled instruments (see CREDITS.md there for sources and licences)
 public/js/
   main.js            wires everything together
   config.js          instruments, vibes, FX, scales
   devices.js         controller profiles: Oxygen Pro Mini, APC Key 25 (+ default mappings)
-  styles.js          the 5 sound styles per instrument (plain data the synth builds from)
+  styles.js          the sounds per instrument: sampled + synth (plain data the synth builds from)
+  sampler.js         loads the sampled instruments and kits (trim, level, loop) for synth.js
   scenes.js          the Oil and Stardust visualizers
   lights.js          APC Key 25 grid lights (also colours the on-screen grid)
   ticker.js          a timer that keeps running when the tab is in the background
@@ -297,6 +323,8 @@ public/js/
   clock.js           look-ahead transport + metronome
   looper.js          8-track MIDI looper (each loop has its own length)
   song.js            song mode: plays the looper as an arrangement of sections
+  library.js         tracks: snapshot / open the session, unsaved changes, autosave
+  library-ui.js      the track name + Save, and the Your tracks cards
   ableton.js         AbletonOSC client (meters, tempo, mute)
   feed.js            audio/notes → level + spectrum for the visuals
   visuals.js         Nebula / Rings / Horizon

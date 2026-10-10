@@ -32,6 +32,7 @@ function defaultSong() {
 const DEFAULTS = {
   engine: 'builtin', // 'builtin' | 'ableton'
   vibe: 0,
+  vibeSet: 0, // which set of vibes the panel and the APC's top row show
   instrument: 1,
   layer: 0,
   layerOn: true,
@@ -58,7 +59,7 @@ const DEFAULTS = {
   gridMode: 'controls', // APC Key 25 grid: 'controls' | 'drums'
   padBase: null,
   padChannel: null,
-  version: 2,
+  version: 3,
 };
 
 function load() {
@@ -87,7 +88,9 @@ export function migrate(s) {
       if (t?.kind === 'fx' && /^(main|daw)\|/.test(key)) s.mappings[key] = { ...t, index: (t.index + 4) % 8 };
     }
   }
-  s.version = 2;
+  // v3 added real (sampled) instruments: start everyone on them instead of the old synth defaults.
+  if ((s.version ?? 1) < 3) s.styles = { ...DEFAULT_STYLES };
+  s.version = 3;
   return s;
 }
 

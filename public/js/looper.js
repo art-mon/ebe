@@ -183,6 +183,21 @@ export class Looper {
     this.#changed();
   }
 
+  /** Replace a loop's contents (opening a saved track). It stays stopped until played. */
+  load(i, { bars, events = [] }) {
+    const loop = this.loops[i];
+    this.#cancelHandles(loop);
+    loop.rec = null;
+    loop.pending.clear();
+    loop.playing = false;
+    loop.stopAt = Infinity;
+    loop.playFrom = 0;
+    if (LOOP_BAR_OPTIONS.includes(bars)) loop.bars = bars;
+    loop.events = events.map((e) => ({ pos: e.pos, dur: e.dur, inst: e.inst, note: e.note, vel: e.vel, recordedAt: -Infinity }));
+    loop.insts = new Set(loop.events.map((e) => e.inst));
+    this.#changed();
+  }
+
   stopAll() {
     this.loops.forEach((l, i) => {
       if (l.rec) this.cancel(i);

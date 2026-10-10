@@ -118,3 +118,39 @@ test('choosing one port of a controller listens to all of its ports', async () =
   assert.deepEqual(ids(pickInputs(ports, '')), []);
   assert.deepEqual(ids(pickInputs(ports, 'gone')), []);
 });
+
+test('vibe sets: the top row plays the set on show; Shift + Random flips sets', async () => {
+  globalThis.requestAnimationFrame ??= (f) => setTimeout(f, 16);
+  globalThis.cancelAnimationFrame ??= clearTimeout;
+  const { Bus, state, set } = await import('../public/js/state.js');
+  const { Controller } = await import('../public/js/controller.js');
+  const { VIBES, VIBE_SETS, VIBES_PER_SET } = await import('../public/js/config.js');
+  const { APC_GRID } = await import('../public/js/devices.js');
+  assert.equal(APC_GRID[0].length, 8); // one row, whatever the number of vibes
+  assert.equal(VIBES.length, VIBE_SETS.length * VIBES_PER_SET);
+  const bus = new Bus();
+  const engine = { noteOn() {}, noteOff() {}, fx() {}, style() {} };
+  const controller = new Controller({ engine, looper: { input() {} }, clock: {}, bus });
+  const press = (note) => {
+    bus.emit('midi', { port: 'apc2', type: 'noteon', channel: 1, note, velocity: 127 });
+    bus.emit('midi', { port: 'apc2', type: 'noteoff', channel: 1, note, velocity: 0 });
+  };
+  set({ gridMode: 'controls', vibe: 0, vibeSet: 0 });
+  bus.emit('midi', { port: 'apc2', type: 'noteon', channel: 1, note: 98, velocity: 127 }); // hold Shift…
+  bus.emit('midi', { port: 'apc2', type: 'noteon', channel: 1, note: 82, velocity: 127 }); // …+ Random vibe
+  bus.emit('midi', { port: 'apc2', type: 'noteoff', channel: 1, note: 82, velocity: 0 });
+  bus.emit('midi', { port: 'apc2', type: 'noteoff', channel: 1, note: 98, velocity: 0 });
+  assert.equal(state.vibeSet, 1);
+  assert.equal(state.vibe, 0); // browsing the other set doesn't change the sound
+  press(33); // top row, 2nd pad → 2nd vibe of the Acoustic set
+  assert.equal(state.vibe, VIBES_PER_SET + 1);
+  assert.equal(VIBES[state.vibe].name, 'Bossa Nova');
+  assert.equal(state.styles.lead, 'nylon');
+  for (let k = 0; k < 20; k++) {
+    press(82); // Random vibe stays in the set on show
+    assert.ok(state.vibe >= VIBES_PER_SET && state.vibe < 2 * VIBES_PER_SET, `random vibe ${state.vibe}`);
+  }
+  controller.selectVibe(3); // picking a vibe elsewhere (arrows, << >>) shows its set
+  assert.equal(state.vibeSet, 0);
+  cancelAnimationFrame(controller.tween);
+});

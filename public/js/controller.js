@@ -3,8 +3,8 @@
 // the setup wizard.
 import { state, set } from './state.js';
 import {
-  INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, CONTROL_PADS, CONTROLLER,
-  SCALES, NOTE_NAMES, VISUALS,
+  INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, CONTROL_PADS, CONTROLLER, SCALES, NOTE_NAMES, VISUALS,
+  VIBE_SETS, VIBES_PER_SET, vibeSetOf,
 } from './config.js';
 import { STYLES } from './styles.js';
 import { DEFAULT_MAPPINGS, APC_DRUM_GRID } from './devices.js';
@@ -307,15 +307,23 @@ export class Controller {
         if (this.shift) lp.loops.forEach((_, i) => lp.clear(i)); // Shift + Stop All = clear everything
         else lp.stopAll();
         break;
-      case 'vibe':
-        this.selectVibe(arg);
+      case 'vibe': // slot 1-8 of the set on show
+        this.selectVibe(state.vibeSet * VIBES_PER_SET + arg);
         break;
       case 'randomVibe': {
+        if (this.shift) return this.action('vibeSet'); // Shift + Random = the other set
+        // A surprise from the set on show, so the mood family stays.
+        const first = state.vibeSet * VIBES_PER_SET;
+        const count = Math.min(VIBES_PER_SET, VIBES.length - first);
         let i = state.vibe;
-        while (i === state.vibe && VIBES.length > 1) i = Math.floor(Math.random() * VIBES.length);
+        while (i === state.vibe && count > 1) i = first + Math.floor(Math.random() * count);
         this.selectVibe(i);
         break;
       }
+      case 'vibeSet':
+        this.showVibeSet(mod(state.vibeSet + 1, VIBE_SETS.length));
+        this.bus.emit('toast', `Vibes · ${VIBE_SETS[state.vibeSet]}`);
+        break;
       case 'inst':
         if (this.shift) this.toggleLayer(arg);
         else this.selectInstrument(arg);
@@ -470,11 +478,19 @@ export class Controller {
     set({ layer: inst, layerOn: on });
   }
 
+  /** Show a set of vibes (on screen and on the APC's top row) without changing the sound. */
+  showVibeSet(n) {
+    if (n !== state.vibeSet) set({ vibeSet: n });
+  }
+
   selectVibe(i) {
     const v = VIBES[i];
     const inst = INSTRUMENTS.findIndex((x) => x.id === v.instrument);
     const layer = v.layer ? INSTRUMENTS.findIndex((x) => x.id === v.layer) : state.layer;
-    set({ vibe: i, instrument: inst, layer, layerOn: !!v.layer, visual: v.visual, styles: { ...state.styles, ...v.styles } });
+    set({
+      vibe: i, vibeSet: vibeSetOf(i), instrument: inst, layer, layerOn: !!v.layer, visual: v.visual,
+      styles: { ...state.styles, ...v.styles },
+    });
     this.morphFx(v.fx);
     this.bus.emit('vibe', v);
   }
@@ -490,6 +506,11 @@ export class Controller {
   /** Glide all FX to new values instead of jumping (sounds like a DJ transition). */
   morphFx(target, ms = 450) {
     cancelAnimationFrame(this.tween);
+    if (ms <= 0) {
+      target.forEach((v, i) => this.engine.fx(i, v));
+      set({ fx: [...target] });
+      return;
+    }
     const from = [...state.fx];
     const t0 = performance.now();
     const step = () => {
@@ -566,7 +587,8 @@ export class Controller {
 
   // ── computer keyboard ──
   attachKeyboard() {
-    const typing = (e) => e.target.closest?.('input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey;
+    // Keys typed in a field or inside an open dialog aren't music.
+    const typing = (e) => e.target.closest?.('input, select, textarea, .modal.open') || e.metaKey || e.ctrlKey || e.altKey;
     window.addEventListener('keydown', (e) => {
       if (typing(e)) return;
       const { code } = e;

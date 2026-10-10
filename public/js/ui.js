@@ -2,29 +2,17 @@
 // small render functions subscribed to bus events.
 import { state, set, resetSettings } from './state.js';
 import {
-  INSTRUMENTS, MELODIC, DRUM_VOICES, VIBES, FX_MACROS, FX_CHANNEL, FX_CC_BASE, SCALES, NOTE_NAMES,
-  KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, CONTROLLER, reverbDivision,
+  INSTRUMENTS, MELODIC, DRUMS_INDEX, DRUM_VOICES, VIBES, FX_MACROS, FX_CHANNEL, FX_CC_BASE, SCALES, NOTE_NAMES,
+  KEY_MODES, CHORD_MODES, CONTROL_PADS, ACTIONS, LOOP_BAR_OPTIONS, CONTROLLER, reverbDivision, VIBE_SETS, VIBES_PER_SET, vibeSetOf,
   VISUALS, CLICK_SOUNDS, STYLE_CC,
 } from './config.js';
 import { WIZARD_STEPS, OXYGEN, APC, APC_SCENES, APC_TRACKS, apcGrid, deviceForPort } from './devices.js';
-import { STYLES } from './styles.js';
+import { STYLES, DRUM_KINDS, drumName, styleFor } from './styles.js';
 import { gridLook, buttonLook, describeTarget } from './lights.js';
 import { isKeyInScale, chordName } from './transform.js';
 import { describe, AUTO } from './midi.js';
+import { $, h } from './dom.js';
 
-const $ = (sel, root = document) => root.querySelector(sel);
-const h = (tag, attrs = {}, ...children) => {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') n.className = v;
-    else if (k === 'style') n.style.cssText = v;
-    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
-    else if (v === true) n.setAttribute(k, '');
-    else if (v !== false && v !== undefined && v !== null) n.setAttribute(k, v);
-  }
-  for (const c of children.flat()) if (c !== null && c !== undefined) n.append(c);
-  return n;
-};
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const PAD_ORDER = [4, 5, 6, 7, 0, 1, 2, 3]; // pad 1 is bottom-left, like the hardware
 const KB_LOW = 48;
@@ -185,45 +173,107 @@ export class UI {
 
   // ── vibes ──
   #vibes() {
-    const root = $('#vibes');
-    VIBES.forEach((v, i) => {
-      const inst = INSTRUMENTS.find((x) => x.id === v.instrument);
-      const layer = v.layer ? INSTRUMENTS.find((x) => x.id === v.layer) : null;
-      const b = h('button', {
-        type: 'button', class: 'vibe',
-        style: `--v1:${v.palette[0]};--v2:${v.palette[1]};--v3:${v.palette[2]}`,
-        onclick: () => this.controller.selectVibe(i),
-      },
-      h('span', { class: 'num' }, String(i + 1)),
-      h('span', { class: 'name' }, v.name),
-      h('span', { class: 'meta' }, layer ? `${inst.name} + ${layer.name}` : inst.name));
-      root.append(b);
-    });
+    const seg = $('#vibe-set-seg');
+    VIBE_SETS.forEach((name, n) => seg.append(h('button', { type: 'button', 'data-set': n, onclick: () => this.controller.showVibeSet(n) }, name)));
+    this.vibeCardsSet = -1;
+  }
+
+  /** "Grand Piano + Strings": the sound a vibe gives its instrument (and layer). */
+  #vibeMeta(v) {
+    const sound = (id) => {
+      const inst = INSTRUMENTS.find((x) => x.id === id);
+      const style = v.styles?.[id] && STYLES[id]?.find((st) => st.id === v.styles[id]);
+      return style?.sample ? style.name : inst.name; // real instruments by name, synth patches by instrument
+    };
+    return v.layer ? `${sound(v.instrument)} + ${sound(v.layer)}` : sound(v.instrument);
   }
 
   #renderVibes() {
-    [...$('#vibes').children].forEach((b, i) => b.classList.toggle('on', i === state.vibe));
+    const root = $('#vibes');
+    const first = state.vibeSet * VIBES_PER_SET;
+    if (this.vibeCardsSet !== state.vibeSet) {
+      // One set of 8 at a time, numbered like the APC's top row.
+      this.vibeCardsSet = state.vibeSet;
+      root.replaceChildren(...VIBES.slice(first, first + VIBES_PER_SET).map((v, slot) => h('button', {
+        type: 'button', class: 'vibe', 'data-i': first + slot,
+        style: `--v1:${v.palette[0]};--v2:${v.palette[1]};--v3:${v.palette[2]}`,
+        onclick: () => this.controller.selectVibe(first + slot),
+      },
+      h('span', { class: 'num' }, String(slot + 1)),
+      h('span', { class: 'name' }, v.name),
+      h('span', { class: 'meta' }, this.#vibeMeta(v)))));
+    }
+    for (const b of root.children) b.classList.toggle('on', Number(b.dataset.i) === state.vibe);
+    for (const b of $('#vibe-set-seg').children) {
+      const n = Number(b.dataset.set);
+      b.classList.toggle('on', n === state.vibeSet);
+      // A dot marks the set the playing vibe belongs to, when you're browsing the other one.
+      b.classList.toggle('has-current', n === vibeSetOf(state.vibe) && n !== state.vibeSet);
+    }
   }
 
   // ── instruments ──
   #instruments() {
     const root = $('#insts');
+    // Style menu: real (sampled) sounds first, then the synth patches.
+    const styleMenu = (i, label) => {
+      const inst = INSTRUMENTS[i];
+      const opt = (st) => h('option', { value: st.id }, st.name);
+      const list = STYLES[inst.id];
+      const groups = [
+        h('optgroup', { label: inst.isDrums ? 'Sampled kits' : 'Real instruments' }, list.filter((st) => st.sample).map(opt)),
+        h('optgroup', { label: 'Synth' }, list.filter((st) => !st.sample).map(opt)),
+      ];
+      if (!list[0].sample) groups.reverse(); // whichever the list starts with comes first
+      return h('select', { class: 'style', 'aria-label': `${inst.name} ${label}`, title: `${inst.name} ${label}`,
+        onchange: (e) => this.controller.setStyle(i, e.target.value) }, groups);
+    };
     for (const i of MELODIC) {
       const inst = INSTRUMENTS[i];
-      const style = h('select', { class: 'style', 'aria-label': `${inst.name} style`, title: `${inst.name} sound`,
-        onchange: (e) => this.controller.setStyle(i, e.target.value) },
-      STYLES[inst.id].map((st) => h('option', { value: st.id }, st.name)));
       root.append(h('div', { class: 'inst', style: `--c:${inst.color}`, 'data-i': i },
         h('div', { class: 'inst-row' },
           h('button', { type: 'button', class: 'pick', onclick: () => this.controller.selectInstrument(i) }, h('i'), inst.name),
           h('button', { type: 'button', class: 'layer', title: `Layer ${inst.name} on top`, onclick: () => this.controller.toggleLayer(i) }, '+')),
-        style));
+        styleMenu(i, 'sound')));
     }
+    // Drums are always on (pads, grid, keys 1-8); only the kit is chosen here:
+    // real or electronic, then a kit of that kind.
+    const drums = INSTRUMENTS[DRUMS_INDEX];
+    this.lastKit = {};
+    root.append(h('div', { class: 'inst drums', style: `--c:${drums.color}`, 'data-i': DRUMS_INDEX },
+      h('div', { class: 'inst-row' },
+        h('span', { class: 'pick' }, h('i'), drums.name),
+        h('span', { class: 'seg small kit-kinds', role: 'group', 'aria-label': 'Kind of drums' },
+          Object.entries(DRUM_KINDS).map(([kind, label]) => h('button', { type: 'button', 'data-kind': kind, onclick: () => this.#pickKitKind(kind) }, label)))),
+      h('select', { class: 'style', 'aria-label': 'Drum kit', title: 'Drum kit', onchange: (e) => this.controller.setStyle(DRUMS_INDEX, e.target.value) })));
+  }
+
+  /** Real ⇄ Electronic: back to the last kit used of that kind (or its first). */
+  #pickKitKind(kind) {
+    const kit = styleFor('drums', state.styles.drums);
+    if (kit.kind === kind) return;
+    this.controller.setStyle(DRUMS_INDEX, this.lastKit[kind] ?? STYLES.drums.find((k) => k.kind === kind).id);
+  }
+
+  #renderKit(el) {
+    const kit = styleFor('drums', state.styles.drums);
+    this.lastKit[kit.kind] = kit.id;
+    const select = el.querySelector('.style');
+    if (select.dataset.showing !== kit.kind) {
+      select.dataset.showing = kit.kind;
+      select.replaceChildren(...STYLES.drums.filter((k) => k.kind === kit.kind).map((k) => h('option', { value: k.id }, k.name)));
+    }
+    select.value = kit.id;
+    for (const b of el.querySelectorAll('.kit-kinds [data-kind]')) b.classList.toggle('on', b.dataset.kind === kit.kind);
   }
 
   #renderInstruments() {
     for (const el of $('#insts').children) {
       const i = Number(el.dataset.i);
+      if (i === DRUMS_INDEX) {
+        this.#renderKit(el);
+        continue;
+      }
       el.classList.toggle('on', i === state.instrument);
       el.classList.toggle('layered', state.layerOn && i === state.layer && i !== state.instrument);
       el.querySelector('.style').value = state.styles[INSTRUMENTS[i].id];
@@ -641,7 +691,7 @@ export class UI {
       this.padEls.set(index, pad);
       if (this.bank === 0) {
         pad.style.setProperty('--pc', VIBES[state.vibe].palette[slot % 3]);
-        pad.replaceChildren(h('small', {}, `${slot + 1} · key ${slot + 1}`), DRUM_VOICES[slot].name);
+        pad.replaceChildren(h('small', {}, `${slot + 1} · key ${slot + 1}`), drumName(styleFor('drums', state.styles.drums), slot));
       } else {
         const cp = CONTROL_PADS[slot];
         const loop = cp.action === 'loop';
@@ -877,6 +927,7 @@ export class UI {
       ['1 – 8', 'drum pads'], ['C V B N', 'loops 1–4 (hold to clear)'], ['Shift + C V B N', 'loops 5–8'], ['M', 'stop all loops'],
       ['Space', 'play / stop'], ['Shift + Space', 'song play / stop'], ['Z / X', 'octave down / up'], ['← → or , .', 'previous / next vibe'],
       ['↑ ↓', 'previous / next instrument'], ['`', 'stage mode'],
+      ['⌘ S', 'save the track'], ['⌘ ⇧ S', 'save as a new track'], ['⌘ O', 'your tracks'],
     ];
     sections.push(h('section', {}, h('h3', {}, 'Computer keyboard'),
       h('div', { class: 'shortcuts' }, sc.flatMap(([k, d]) => [h('kbd', {}, k), h('span', {}, d)]))));
@@ -920,14 +971,15 @@ export class UI {
     b.on('state', (patch) => {
       if ('vibe' in patch) {
         this.#applyTheme();
-        this.#renderVibes();
         this.#renderPads();
       }
+      if ('vibe' in patch || 'vibeSet' in patch) this.#renderVibes();
       if ('engine' in patch) {
         this.#renderEngine();
         this.#renderStatus();
       }
       if ('instrument' in patch || 'layer' in patch || 'layerOn' in patch || 'styles' in patch) this.#renderInstruments();
+      if ('styles' in patch) this.#renderPads(); // pad names follow the kit (Snap, Tabla…)
       if (['root', 'scale', 'keyMode', 'chord', 'octave'].some((k) => k in patch)) {
         this.#renderHelpers();
         this.#renderKeyboard();

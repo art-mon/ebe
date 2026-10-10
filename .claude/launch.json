@@ -16,6 +16,7 @@
         "PORT=5180",
         "LIVE_PORT=11090",
         "REPLY_PORT=11091",
+        "LUMEN_TRACKS_DIR=/tmp/lumen-test-tracks",
         "node",
         "server/index.js"
       ],

@@ -65,56 +65,110 @@ export function reverbDivision(space01) {
 
 // ── Vibes ───────────────────────────────────────────────────────────────────
 // One tap = instrument (+ optional layer) + all eight FX + colours + visuals,
-// plus (optionally) a sound style for some instruments.
+// plus sound styles (and a drum kit). Vibes come in sets of 8 — one set at a
+// time fills the vibe panel and the APC's top row.
+export const VIBE_SETS = ['Electronic', 'Acoustic'];
+export const VIBES_PER_SET = 8;
+export const vibeSetOf = (i) => Math.floor(i / VIBES_PER_SET);
 // fx order: filter, reso, drive, crush, echo, repeats, reverb, space
 export const VIBES = [
   {
     id: 'dreamy', name: 'Dreamy', instrument: 'pad', layer: 'keys',
     fx: [0.72, 0.1, 0, 0, 0.35, 0.45, 0.7, 0.85],
     palette: ['#8ec5ff', '#b18cff', '#ff9ad5'], bg: '#0b0a1f', visual: 'nebula',
-    styles: { pad: 'shimmer', keys: 'glass' },
+    styles: { pad: 'shimmer', keys: 'vibes', drums: 'synth' },
   },
   {
     id: 'lofi', name: 'Lo-Fi', instrument: 'keys',
     fx: [0.42, 0.22, 0.25, 0.4, 0.22, 0.3, 0.35, 0.4],
     palette: ['#ffcf8b', '#ff8f6b', '#6bd6c4'], bg: '#140d0a', visual: 'oil',
-    styles: { keys: 'felt' },
+    styles: { keys: 'rhodes', drums: 'synth' },
   },
   {
     id: 'club', name: 'Club', instrument: 'bass',
     fx: [0.85, 0.45, 0.45, 0, 0.1, 0.2, 0.12, 0.3],
     palette: ['#ff2fd0', '#2ff3ff', '#fff36b'], bg: '#07020f', visual: 'horizon',
-    styles: { bass: 'acid' },
+    styles: { bass: 'acid', drums: 'synth' },
   },
   {
     id: 'cosmic', name: 'Cosmic', instrument: 'lead',
     fx: [0.9, 0.3, 0.12, 0, 0.5, 0.65, 0.55, 0.92],
     palette: ['#4f6bff', '#b04fff', '#ffd36b'], bg: '#03041a', visual: 'stardust',
-    styles: { lead: 'super' },
+    styles: { lead: 'super', drums: 'synth' },
   },
   {
     id: 'sunset', name: 'Sunset', instrument: 'keys', layer: 'pad',
     fx: [0.65, 0.18, 0.1, 0, 0.3, 0.4, 0.5, 0.6],
     palette: ['#ff9a3c', '#ff4f8b', '#8a4fff'], bg: '#160716', visual: 'horizon',
-    styles: { keys: 'epiano', pad: 'strings' },
+    styles: { keys: 'grand', pad: 'ensemble', drums: 'synth' },
   },
   {
     id: 'glitch', name: 'Glitch', instrument: 'lead',
     fx: [0.75, 0.5, 0.35, 0.72, 0.3, 0.55, 0.15, 0.25],
     palette: ['#7dff6b', '#e8ff3c', '#3cffd2'], bg: '#020a04', visual: 'rings',
-    styles: { lead: 'chip' },
+    styles: { lead: 'chip', drums: 'synth' },
   },
   {
     id: 'deep', name: 'Deep Sea', instrument: 'pad', layer: 'bass',
     fx: [0.3, 0.5, 0.05, 0, 0.25, 0.5, 0.8, 0.95],
     palette: ['#1fd1c1', '#2b7bff', '#a6fff2'], bg: '#020d14', visual: 'oil',
-    styles: { pad: 'drone', bass: 'sub' },
+    styles: { pad: 'drone', bass: 'sub', drums: 'synth' },
   },
   {
     id: 'raw', name: 'Raw', instrument: 'bass',
     fx: [1, 0.1, 0.2, 0, 0, 0.2, 0.05, 0.2],
     palette: ['#ffffff', '#ff3b3b', '#ffb4b4'], bg: '#0d0607', visual: 'rings',
-    styles: { bass: 'reese' },
+    styles: { bass: 'reese', drums: 'synth' },
+  },
+
+  // ── Acoustic: the real (sampled) instruments, each vibe a small band ──
+  {
+    id: 'jazz', name: 'Jazz Club', instrument: 'keys',
+    fx: [0.82, 0.08, 0.04, 0, 0.06, 0.2, 0.32, 0.5],
+    palette: ['#ffb84d', '#e0703a', '#5b8def'], bg: '#100905', visual: 'nebula',
+    styles: { keys: 'grand', pad: 'warmpad', bass: 'upright', lead: 'sax', drums: 'acoustic' },
+  },
+  {
+    id: 'bossa', name: 'Bossa Nova', instrument: 'lead',
+    fx: [0.8, 0.1, 0, 0, 0.14, 0.28, 0.3, 0.4],
+    palette: ['#ffd166', '#2ec4a6', '#ff7b6b'], bg: '#04120e', visual: 'oil',
+    styles: { lead: 'nylon', keys: 'rhodes', pad: 'voices', bass: 'upright', drums: 'acoustic' },
+  },
+  {
+    id: 'cinematic', name: 'Cinematic', instrument: 'pad', layer: 'keys',
+    fx: [0.74, 0.06, 0, 0, 0.12, 0.35, 0.78, 1],
+    palette: ['#f0c987', '#7f9cf5', '#e8ecf7'], bg: '#04060f', visual: 'stardust',
+    styles: { pad: 'ensemble', keys: 'grand', lead: 'violin', bass: 'upright', drums: 'acoustic' },
+  },
+  {
+    id: 'neosoul', name: 'Neo Soul', instrument: 'keys', layer: 'pad',
+    fx: [0.62, 0.2, 0.15, 0.06, 0.22, 0.32, 0.3, 0.4],
+    palette: ['#c084fc', '#fb9a7a', '#67d4f5'], bg: '#110818', visual: 'rings',
+    styles: { keys: 'rhodes', pad: 'warmpad', bass: 'finger', lead: 'sax', drums: 'tr808' },
+  },
+  {
+    id: 'funk', name: 'Funk', instrument: 'keys',
+    fx: [0.9, 0.3, 0.22, 0, 0.08, 0.15, 0.12, 0.2],
+    palette: ['#ff5e3a', '#ffd23f', '#3ad1ff'], bg: '#140604', visual: 'horizon',
+    styles: { keys: 'clavinet', pad: 'pizz', bass: 'finger', lead: 'eguitar', drums: 'acoustic' },
+  },
+  {
+    id: 'gospel', name: 'Gospel', instrument: 'keys', layer: 'pad',
+    fx: [0.85, 0.1, 0.1, 0, 0.05, 0.2, 0.6, 0.8],
+    palette: ['#ffd86b', '#b36bff', '#ff8fb1'], bg: '#0e0716', visual: 'rings',
+    styles: { keys: 'drawbar', pad: 'voices', bass: 'finger', lead: 'sax', drums: 'acoustic' },
+  },
+  {
+    id: 'enchanted', name: 'Enchanted', instrument: 'pad', layer: 'lead',
+    fx: [0.8, 0.05, 0, 0, 0.3, 0.45, 0.65, 0.9],
+    palette: ['#7dffb3', '#c49bff', '#ffe08a'], bg: '#04100c', visual: 'nebula',
+    styles: { pad: 'harp', lead: 'realflute', keys: 'vibes', bass: 'upright', drums: 'acoustic' },
+  },
+  {
+    id: 'latenight', name: 'Late Night', instrument: 'lead',
+    fx: [0.7, 0.12, 0.08, 0, 0.3, 0.4, 0.5, 0.7],
+    palette: ['#ff6b8a', '#6b8aff', '#ffc46b'], bg: '#070612', visual: 'oil',
+    styles: { lead: 'sax', keys: 'rhodes', pad: 'warmpad', bass: 'upright', drums: 'acoustic' },
   },
 ];
 
@@ -184,7 +238,8 @@ export const ACTIONS = {
   octUp: 'Octave up',
   metronome: 'Metronome on/off',
   stage: 'Stage mode',
-  randomVibe: 'Random vibe',
+  randomVibe: 'Random vibe (Shift: other vibe set)',
+  vibeSet: 'Switch vibe set',
   layer: 'Layer on/off',
   quantize: 'Snap loops on/off',
   stylePrev: 'Previous instrument style',

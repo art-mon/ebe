@@ -13,7 +13,10 @@ import { Visuals } from './visuals.js';
 import { Tracks } from './tracks.js';
 import { UI } from './ui.js';
 import { Lights } from './lights.js';
+import { Library } from './library.js';
+import { LibraryView } from './library-ui.js';
 import { INSTRUMENTS } from './config.js';
+import { styleFor } from './styles.js';
 import { deviceForPort } from './devices.js';
 
 const $ = (s) => document.querySelector(s);
@@ -38,7 +41,28 @@ clock.metronome = state.metronome;
 clock.onClick = (time, accent) => synth.click(time, accent, state.clickSound);
 looper.loops.forEach((l, i) => (l.bars = state.loopBars[i] ?? 2));
 looper.quantize = state.quantize;
-const applyStyles = () => INSTRUMENTS.forEach((inst, i) => !inst.isDrums && engine.style(i, state.styles[inst.id]));
+// Sampled instruments load the first time they're chosen; until then a similar
+// synth sound plays. Say so (once, for everything a vibe loads) only if it takes a moment.
+const applyStyles = (announce = false) => {
+  const loads = INSTRUMENTS.map((inst, i) => {
+    const loading = engine.style(i, state.styles[inst.id]);
+    const name = styleFor(inst.id, state.styles[inst.id]).name;
+    return loading?.catch((err) => {
+      console.warn(`[samples] ${name}`, err);
+      ui.toast(`Couldn’t load ${name} — playing a synth sound instead`, 4000);
+    }).then(() => name);
+  }).filter(Boolean);
+  if (!loads.length || !announce) return;
+  let shown = false;
+  const timer = setTimeout(() => {
+    shown = true;
+    ui.toast('Loading instruments…', 2000);
+  }, 400);
+  Promise.all(loads).then((names) => {
+    clearTimeout(timer);
+    if (shown) ui.toast(`${names.join(', ')} ready ✓`, 1600);
+  });
+};
 engine.setMode(state.engine);
 engine.tempo(state.tempo);
 engine.pushAllFx(state.fx);
@@ -50,6 +74,8 @@ const ui = new UI({ controller, looper, song, clock, engine, midi, ableton, feed
 const tracks = new Tracks($('#tracks'), { synth, ableton, engine, controller, bus });
 ui.tracks = tracks;
 tracks.updateLabels();
+const library = new Library({ bus, looper, clock, controller });
+const libraryView = new LibraryView({ library, looper, bus, toast: (t, ms) => ui.toast(t, ms) });
 
 // ── UI callbacks ──
 ui.onEngine = (mode) => set({ engine: mode });
@@ -99,7 +125,6 @@ bus.on('state', (patch) => {
     if (state.engine === 'ableton') {
       engine.pushAllFx(state.fx);
       applyStyles();
-applyStyles();
       if (!midi.output) ui.toast('No IAC Driver found — see Settings → MIDI to enable it.', 4000);
       else ui.toast(`Sending to Ableton via ${midi.output.name}`);
     }
@@ -111,7 +136,7 @@ applyStyles();
   }
   if ('metronome' in patch) clock.metronome = state.metronome;
   if ('mutes' in patch) state.mutes.forEach((m, i) => engine.mute(i, m));
-  if ('styles' in patch) applyStyles();
+  if ('styles' in patch) applyStyles(true);
   if ('quantize' in patch) looper.quantize = state.quantize;
 });
 
@@ -163,6 +188,11 @@ window.addEventListener('keydown', (e) => {
 controller.attachKeyboard();
 ableton.connect();
 midi.init({ inputId: state.midiInputId, outputId: state.midiOutputId });
+// Bring back last session's loops (they're autosaved as you play).
+library.init().then((hadLoops) => {
+  if (hadLoops) ui.toast(library.current.id ? `Welcome back to “${library.current.name}”` : 'Welcome back — your loops are where you left them', 3000);
+});
+window.addEventListener('pagehide', () => library.flushDraft());
 
 const gate = $('#gate');
 async function start() {
@@ -214,4 +244,4 @@ if (new URLSearchParams(location.search).has('debug')) {
 }
 
 // Handy for poking around in the console.
-window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, song, controller, feed, visuals, lights, state };
+window.lumen = { ctx, synth, midi, ableton, engine, clock, looper, song, controller, feed, visuals, lights, library, libraryView, state };

@@ -1,8 +1,8 @@
 // Light feedback for controllers with LEDs (the APC Key 25). The same "look"
 // drives the on-screen grid, so the screen and the hardware always agree.
 import { state } from './state.js';
-import { VIBES, INSTRUMENTS, DRUM_VOICES, NOTE_NAMES, SCALES, VISUALS } from './config.js';
-import { STYLES } from './styles.js';
+import { VIBES, VIBE_SETS, VIBES_PER_SET, INSTRUMENTS, DRUM_VOICES, NOTE_NAMES, SCALES, VISUALS } from './config.js';
+import { STYLES, drumName, styleFor } from './styles.js';
 import { APC, APC_SCENES, APC_TRACKS, apcNote, apcGrid } from './devices.js';
 import { every } from './ticker.js';
 
@@ -100,7 +100,10 @@ export function gridLook(t, ctx) {
   }
   const a = t.arg;
   switch (t.name) {
-    case 'vibe': return { color: VIBES[a].palette[0], level: state.vibe === a ? 'full' : 'dim' };
+    case 'vibe': {
+      const i = state.vibeSet * VIBES_PER_SET + a;
+      return VIBES[i] ? { color: VIBES[i].palette[0], level: state.vibe === i ? 'full' : 'dim' } : { color: '#000000', level: 'off' };
+    }
     case 'inst': {
       const main = state.instrument === a;
       const layered = state.layerOn && state.layer === a && !main;
@@ -144,11 +147,15 @@ export function buttonLook(t, ctx) {
 /** Label + short tag for the on-screen grid. */
 export function describeTarget(t) {
   const tag = ['K', 'S', 'C', 'H', 'OH', 'T', 'R', 'Cr'][t.index];
-  if (t.kind === 'pad' && t.vel !== undefined) return [`${DRUM_VOICES[t.index].name} · ${LOUDNESS[t.vel] ?? ''}`, tag];
-  if (t.kind === 'pad') return [DRUM_VOICES[t.index].name, tag];
+  const drum = t.kind === 'pad' && t.index < 8 ? drumName(styleFor('drums', state.styles.drums), t.index) : '';
+  if (t.kind === 'pad' && t.vel !== undefined) return [`${drum} · ${LOUDNESS[t.vel] ?? ''}`, drum === DRUM_VOICES[t.index].name ? tag : drum.slice(0, 3)];
+  if (t.kind === 'pad') return [drum, drum === DRUM_VOICES[t.index].name ? tag : drum.slice(0, 3)];
   const a = t.arg;
   switch (t.name) {
-    case 'vibe': return [`Vibe · ${VIBES[a].name}`, VIBES[a].name.slice(0, 3)];
+    case 'vibe': {
+      const v = VIBES[state.vibeSet * VIBES_PER_SET + a];
+      return v ? [`Vibe · ${v.name}`, v.name.slice(0, 3)] : ['', ''];
+    }
     case 'inst': return [`${INSTRUMENTS[a].name} (Shift: layer)`, INSTRUMENTS[a].name.slice(0, 3)];
     case 'visual': return [`Visuals · ${a}`, a.slice(0, 3)];
     case 'stage': return ['Stage mode', '⛶'];
@@ -166,7 +173,8 @@ export function describeTarget(t) {
     case 'metronome': return ['Metronome', '♩'];
     case 'keyMode': return [{ off: 'Notes · Free', snap: 'Notes · Snap to scale', white: 'Notes · Easy (white keys)' }[a], { off: 'Fr', snap: 'Sn', white: 'Ez' }[a]];
     case 'chord': return [`Chords · ${a}`, { off: 'Off', triad: '3', seventh: '7', power: '5', octave: '8' }[a]];
-    case 'randomVibe': return ['Random vibe', '?'];
+    case 'randomVibe': return [`Random vibe (Shift: ${VIBE_SETS[(state.vibeSet + 1) % VIBE_SETS.length]} vibes)`, '?'];
+    case 'vibeSet': return [`Switch vibe set · now ${VIBE_SETS[state.vibeSet]}`, 'Set'];
     case 'layer': return ['Layer on/off', 'L'];
     case 'record': return ['Record next loop (Shift: snap on/off)', '●'];
     case 'nextScale': return [`Next scale (Shift: next key) · ${NOTE_NAMES[state.root]} ${SCALES[state.scale].name}`, '♯'];

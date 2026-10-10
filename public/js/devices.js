@@ -1,7 +1,7 @@
 // Controller profiles. Each profile says how to recognise the device's MIDI
 // ports and what its controls do by default. Mapping keys look like
 // "<port class>|<cc|note>:<channel|*>:<number>", so profiles never collide.
-import { FX_MACROS, DRUM_VOICES, VIBES, INSTRUMENTS, MELODIC } from './config.js';
+import { FX_MACROS, DRUM_VOICES, VIBES_PER_SET, INSTRUMENTS, MELODIC } from './config.js';
 
 const fx = (index, extra = {}) => ({ kind: 'fx', index, ...extra });
 const pad = (index) => ({ kind: 'pad', index });
@@ -46,7 +46,7 @@ const apcVariant = (name) => (/mk ?ii|mk ?2/i.test(name) ? 'mk2' : 'mk1');
 
 // The grid, top row first. Each cell is a target; lights.js decides its colour.
 export const APC_GRID = [
-  VIBES.map((_, i) => action('vibe', i)),
+  Array.from({ length: VIBES_PER_SET }, (_, i) => action('vibe', i)), // the 8 vibes of the set on show
   [...MELODIC.map((i) => action('inst', i)), action('stylePrev'), action('styleNext'), action('visualNext'), action('stage')],
   Array.from({ length: 8 }, (_, i) => action('loop', i)),
   [action('keyMode', 'off'), action('keyMode', 'snap'), action('keyMode', 'white'),

@@ -12,7 +12,7 @@
   <div id="gate" class="gate">
     <div class="gate-card">
       <div class="brand big"><span class="brand-orb"></span>Lumen</div>
-      <p>Play your Oxygen Pro Mini with one-tap vibes, eight FX on the knobs and faders, a 4-track looper and visuals that dance with you.</p>
+      <p>Play your Oxygen Pro Mini with one-tap vibes, eight FX on the knobs and faders, an 8-loop looper and visuals that dance with you.</p>
       <button id="gate-start" class="btn primary big" type="button">Start playing</button>
       <p class="muted small">No controller handy? Play the computer keyboard: <kbd>A</kbd>–<kbd>;</kbd> are keys, <kbd>1</kbd>–<kbd>8</kbd> are drum pads.</p>
     </div>
@@ -20,6 +20,15 @@
 
   <header class="topbar">
     <div class="brand"><span class="brand-orb"></span>Lumen</div>
+
+    <div class="trackbar">
+      <button type="button" class="track-btn" id="btn-library" aria-label="Your tracks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 4h10M9.5 11v5M12.5 10v7M15.5 12v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="track-name" id="track-name">Untitled track</span>
+        <i class="unsaved-dot" title="Unsaved changes"></i>
+      </button>
+      <button type="button" class="pill" id="btn-save">Save</button>
+    </div>
 
     <div class="seg" id="engine-seg" role="radiogroup" aria-label="Sound engine">
       <button type="button" data-engine="builtin" role="radio">Built-in sound</button>
@@ -50,7 +59,7 @@
     </div>
 
     <div class="top-actions">
-      <button type="button" class="pill" id="btn-wizard">Controller setup</button>
+      <button type="button" class="pill" id="btn-wizard" title="Controller setup">Setup</button>
       <button type="button" class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.4-2.5a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.3 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1c.5.4 1.1.7 1.7 1L11 21h4l.3-2.5c.6-.3 1.2-.6 1.7-1l2.4 1 2-3.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
       </button>
@@ -61,7 +70,7 @@
     <!-- LEFT: vibes, instruments, playing aids -->
     <aside class="col left">
       <section class="panel">
-        <h2>Vibes <span class="hint">◀ ▶ or &lt;&lt; &gt;&gt;</span></h2>
+        <h2>Vibes <span class="seg small vibe-sets" id="vibe-set-seg" role="group" aria-label="Vibe set"></span></h2>
         <div class="vibes" id="vibes"></div>
       </section>
       <section class="panel">
@@ -189,6 +198,33 @@
         <button type="button" class="btn ghost" id="wiz-skip">Skip</button>
         <button type="button" class="btn" id="wiz-done">Done</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Your tracks -->
+  <div class="modal" id="library" aria-hidden="true">
+    <div class="modal-card lib-card" role="dialog" aria-labelledby="lib-title">
+      <header class="lib-head">
+        <div>
+          <h3 id="lib-title">Your tracks</h3>
+          <p class="muted small" id="lib-where"></p>
+        </div>
+        <div class="row">
+          <button type="button" class="btn" id="lib-new">+ New track</button>
+          <button type="button" class="icon-btn" data-close aria-label="Close">✕</button>
+        </div>
+      </header>
+      <div class="lib-grid" id="lib-grid"></div>
+    </div>
+  </div>
+
+  <!-- Small dialog: name a track, confirm a delete… -->
+  <div class="modal ask" id="ask" aria-hidden="true">
+    <div class="modal-card ask-card" id="ask-card" role="dialog" aria-labelledby="ask-title">
+      <h3 id="ask-title"></h3>
+      <p class="muted" id="ask-text"></p>
+      <input id="ask-input" class="ask-input" maxlength="60" autocomplete="off" spellcheck="false" aria-label="Track name">
+      <div class="row end" id="ask-btns"></div>
     </div>
   </div>
 

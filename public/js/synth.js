@@ -4,8 +4,9 @@
 //   voices ─▶ instrument bus (gain ─▶ meter) ─▶ drive ─▶ crush ─▶ filter ─┬─▶ dry ──────┐
 //                                                                         ├─▶ echo ─────┤─▶ limiter ─▶ out
 //                                                                         └─▶ reverb ───┘
-import { INSTRUMENTS, DRUMS_INDEX, FX_MACROS, PREDELAY_BEATS, reverbDivision } from './config.js';
+import { INSTRUMENTS, DRUMS_INDEX, DRUM_VOICES, FX_MACROS, PREDELAY_BEATS, reverbDivision } from './config.js';
 import { styleFor } from './styles.js';
+import { SampleBank, nearestZone } from './sampler.js';
 
 const mtof = (n) => 440 * 2 ** ((n - 69) / 12);
 const MAX_VOICES = 12;
@@ -19,6 +20,19 @@ function driveCurve(amount) {
   for (let i = 0; i < n; i++) {
     const x = (i / (n - 1)) * 2 - 1;
     curve[i] = Math.tanh(k * x) / norm;
+  }
+  return curve;
+}
+
+// Gentle tape-style saturation for a drum kit: rounds off peaks, adds a little grit.
+function kitCurve(amount) {
+  if (amount < 0.01) return null;
+  const k = 1 + amount * 2.5;
+  const n = 1024;
+  const curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * 2 - 1;
+    curve[i] = Math.tanh(k * x) / k; // unity gain for small signals, peaks squashed
   }
   return curve;
 }
@@ -138,6 +152,38 @@ function buildVoice(s, style, f, vel, t) {
   return { out: amp, oscs, extras, release: r };
 }
 
+// A note from a sampled instrument: the nearest recording, re-tuned, through an
+// attack/release envelope. Velocity sets the level and, with style.tone, the
+// brightness (a real piano struck softly is darker, not just quieter).
+function buildSampleVoice(s, style, set, note, vel, t) {
+  const { ctx } = s;
+  const zone = nearestZone(set.zones, note);
+  const src = ctx.createBufferSource();
+  src.buffer = zone.buffer;
+  src.playbackRate.value = 2 ** ((note - zone.note) / 12);
+  if (zone.loop) {
+    src.loop = true;
+    src.loopStart = zone.loop.start;
+    src.loopEnd = zone.loop.end;
+  }
+  const amp = ctx.createGain();
+  if (style.tone) {
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = Math.min(20000, 700 * 2 ** (vel * 5));
+    lp.Q.value = 0.5;
+    src.connect(lp).connect(amp);
+  } else {
+    src.connect(amp);
+  }
+  const level = style.gain * (0.12 + 0.88 * vel ** 1.3);
+  amp.gain.setValueAtTime(0, t);
+  amp.gain.linearRampToValueAtTime(level, t + style.amp.a);
+  return { out: amp, oscs: [src], extras: [], release: style.amp.r };
+}
+
+const DRUM_VOICE_BY_NOTE = new Map(DRUM_VOICES.map((v) => [v.note, v.id]));
+
 export class Synth {
   constructor(ctx) {
     this.ctx = ctx;
@@ -207,8 +253,19 @@ export class Synth {
       return { gain: g, level, meter, data: new Float32Array(meter.fftSize), muted: false };
     });
 
-    // Each melodic instrument plays one of its styles (styles.js).
-    this.styles = INSTRUMENTS.map((inst) => (inst.isDrums ? null : styleFor(inst.id)));
+    // Sampled kits play through their own tone + saturation (dusty trip-hop, warm downtempo…).
+    this.kitTone = ctx.createBiquadFilter();
+    this.kitTone.type = 'lowpass';
+    this.kitTone.frequency.value = 20000;
+    this.kitTone.Q.value = 0.5;
+    this.kitDrive = ctx.createWaveShaper();
+    this.kitDrive.oversample = '2x';
+    this.kitTone.connect(this.kitDrive).connect(this.buses[DRUMS_INDEX].gain);
+
+    // Each instrument plays one of its styles (styles.js); sampled ones load on demand.
+    this.samples = new SampleBank(ctx);
+    this.styles = INSTRUMENTS.map((inst) => styleFor(inst.id));
+    this.drumRound = new Map(); // voice → round-robin counter
 
     // Vibrato (mod wheel): one LFO, one depth per instrument
     this.lfo = this.osc('sine', 5.5);
@@ -290,7 +347,11 @@ export class Synth {
 
   // ── voices ──
   #voice(inst, note, vel, t) {
-    const v = buildVoice(this, this.styles[inst], mtof(note), vel, t);
+    const style = this.styles[inst];
+    const set = style.sample ? this.samples.get(style.sample) : null;
+    const v = set
+      ? buildSampleVoice(this, style, set, note, vel, t)
+      : buildVoice(this, style.sample ? styleFor(INSTRUMENTS[inst].id, style.fallback) : style, mtof(note), vel, t);
     const releaseTime = v.release;
     v.out.connect(this.buses[inst].gain);
     v.inst = inst;
@@ -396,7 +457,35 @@ export class Synth {
     return g;
   }
 
+  /** A hit from a sampled kit. Notes outside the 8 voices play the tom, re-pitched. */
+  #sampleDrum(kit, style, note, vel, t) {
+    const voice = DRUM_VOICE_BY_NOTE.get(note) ?? 'tom';
+    const hits = kit.voices[voice];
+    if (!hits?.length) return;
+    const n = (this.drumRound.get(voice) ?? -1) + 1;
+    this.drumRound.set(voice, n);
+    const src = this.ctx.createBufferSource();
+    src.buffer = hits[n % hits.length];
+    const shift = (style.tune?.[voice] ?? 0) + (DRUM_VOICE_BY_NOTE.has(note) ? 0 : Math.max(-12, Math.min(12, note - 45)));
+    if (shift) src.playbackRate.value = 2 ** (shift / 12);
+    const g = this.gain((style.levels?.[voice] ?? 0.8) * (0.12 + vel * 0.88));
+    if (voice === 'hat' || voice === 'openhat') {
+      // A closed hat chokes a ringing open hat, like on a real kit.
+      if (this.openHat) {
+        this.openHat.gain.cancelScheduledValues(t);
+        this.openHat.gain.setTargetAtTime(0, t, 0.01);
+      }
+      this.openHat = voice === 'openhat' ? g : null;
+    }
+    src.connect(g).connect(this.kitTone);
+    src.onended = () => g.disconnect();
+    src.start(t);
+  }
+
   drum(note, vel, t = this.ctx.currentTime) {
+    const kitStyle = this.styles[DRUMS_INDEX];
+    const kit = kitStyle.sample ? this.samples.get(kitStyle.sample) : null;
+    if (kit) return this.#sampleDrum(kit, kitStyle, note, vel, t);
     const { ctx } = this;
     const out = this.buses[DRUMS_INDEX].gain;
     const v = 0.12 + vel * 0.88; // wide range, so soft hits (and the APC's soft rows) really are soft
@@ -531,8 +620,17 @@ export class Synth {
     }
   }
 
+  /** Switch an instrument's style. For a sampled one, returns the loading promise (null when ready). */
   setStyle(inst, styleId) {
-    this.styles[inst] = styleFor(INSTRUMENTS[inst].id, styleId);
+    const style = styleFor(INSTRUMENTS[inst].id, styleId);
+    this.styles[inst] = style;
+    if (inst === DRUMS_INDEX) {
+      const now = this.ctx.currentTime;
+      this.kitTone.frequency.setTargetAtTime(style.tone ?? 20000, now, 0.02);
+      this.kitDrive.curve = kitCurve(style.drive ?? 0);
+    }
+    if (!style.sample || this.samples.get(style.sample)) return null;
+    return this.samples.load(style.sample, style);
   }
 
   // ── FX + mixing ──
